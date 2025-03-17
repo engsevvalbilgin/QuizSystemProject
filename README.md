@@ -12,7 +12,7 @@ This project is an Online Quiz Platform developed using Java Swing and MySQL. Us
 - **Quiz and Exam Creation**: Teachers can create quizzes with multiple-choice and open-ended questions.
 - **Automatic Grading**: An automatic grading system for multiple-choice questions.
 - **Email Notifications**: Students are notified via email about assigned quizzes, exams, and results.
-- **Results Tracking**: Students can view their quiz and exam results, while teachers can manage the results.
+- **Results Tracking**: Students can view their quiz results, while teachers can manage the results.
 
 ---
 
@@ -77,7 +77,6 @@ Every user can change his/her own password, mail address etc.
 
 2. **Teacher**:
    - Can create quizzes.
-   - Can assign quizzes to students.
    - Can view and analyze results.
 3. **Admin**:
    -Can update other users' properties.
