@@ -80,11 +80,11 @@ Every user can change his/her own password, mail address etc.
    - Can assign quizzes to students.
    - Can view and analyze results.
 3. **Admin**:
-   -Can update other users'properties.
+   -Can update other users' properties.
 ---
 
 #### **Contact**
-If you find any bugs or have suggestions for improvement, please email [email@example.com](mailto:email@example.com).
+If you find any bugs or have suggestions for improvement, please email eng.sevval.bilgin@gmail.com.
 
 ---
 
