@@ -70,6 +70,7 @@ This project is an Online Quiz Platform developed using Java Swing and MySQL. Us
 ---
 
 #### **User Roles**
+Every user can change his/her own password, mail address etc.
 1. **Student**:
    - Can participate in quizzes.
    - Can view their results.
@@ -78,7 +79,8 @@ This project is an Online Quiz Platform developed using Java Swing and MySQL. Us
    - Can create quizzes.
    - Can assign quizzes to students.
    - Can view and analyze results.
-
+3. **Admin**:
+   -Can update other users'properties.
 ---
 
 #### **Contact**
