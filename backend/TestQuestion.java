@@ -10,7 +10,7 @@ public class TestQuestion extends Question {
     private List<String> getOptions() { return options; }
     private void setOptions(List<String> options) { this.options = options; }
    
-    }
+    
     public String askAIToAnswerQuestion(String question_sentence, List<String> options) { return ""; }
 
 } 
