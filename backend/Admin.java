@@ -1,13 +1,5 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package backend;
 
-/**
- *
- * @author hakan
- */
 
 import java.util.List;
 
@@ -28,41 +20,31 @@ public class Admin extends User {
         this.announcements = announcements;
     }
     public void addUser(User user){
-        this.announcements.add(user);
+        
     }
     public void updateUser(User user){
-        this.announcements.add(user);
+        
     }
     public void showAllUsers(){
-        for(User user : this.announcements){
-            System.out.println(user);
-        }
+        
     }
     public void showAllStudents(){
-        for(User user : this.announcements){
-            System.out.println(user);
-        }
+        
     }
     public void showAllTeachers(){
-        for(User user : this.announcements){
-            System.out.println(user);
-        }
+        
     }
     public boolean reviewTeacherRequest(){
         return true;
     }
     public void showTeacherRequests(){
-        for(User user : this.announcements){
-            System.out.println(user);
-        }
+        
     }
     public void addAnnouncement(){
         this.announcements.add(new Annoucement());
     }
     public void showProgramStatistics(){
-        for(User user : this.announcements){
-            System.out.println(user);
-        }
+       
     }
 
 
