@@ -15,14 +15,17 @@ public class User {
     private Date createdDate;
     private Date updatedDate;
     private boolean isActive;
+    private List<String> annoucements;
     
     
     
     public User() {
         this.quizzes = new ArrayList<>();
+        this.annoucements = new ArrayList<>();
+        this.isActive = true;
     }
     
-    public User(int id, String name, String surname,int age, String email, String password, String username) {
+    public User(int id, String name, String surname,int age, String email, String password, String username,Date createdate,Date updatedate, Boolean isActive) {
         this.id = id;
         this.name = name;
         this.surname = surname;
@@ -31,8 +34,18 @@ public class User {
         this.password = password;
         
         this.username = username;
-        
+        this.createdDate = createdate;
+        this.updatedDate = updatedate;
+        this.isActive = true;
+        this.annoucements = new ArrayList<>();
+        this.quizzes = new ArrayList<>();
     }
+
+    
+
+        
+    
+    
     
     // Getters and Setters
     public int getId() {
@@ -107,10 +120,10 @@ public class User {
         return username;
     }
     
-    public void setUsername(String username) {
+    private void setUsername(String username) {
         this.username = username;
     }
-    
+   
     public void ChangePassword(String newPassword){
         this.password = newPassword;
     }  
@@ -118,7 +131,7 @@ public class User {
     public void ChangeEmail(String newEmail){
         this.email = newEmail;
     }
-    public void setIsActive(boolean newActivity){
+    private void setIsActive(boolean newActivity){
         this.isActive = newActivity;
     }
     public boolean getIsActive(){
