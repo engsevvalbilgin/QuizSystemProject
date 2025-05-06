@@ -13,8 +13,8 @@ import java.util.Properties;
  * @author hp
  */
 public class MailService {
-    public static String sender_mail_address="bsevval92@gmail.com";
-    public static String sender_password="morphincik527A";
+    public static String sender_mail_address="@gmail.com";
+    public static String sender_password="";
     public void sendMail(String recipient ,String message){
        
     }
