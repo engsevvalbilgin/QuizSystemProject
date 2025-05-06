@@ -1,98 +1,107 @@
-package com.quizsystem.model;
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ */
+package backend;
 
-import java.util.ArrayList;
+/**
+ *
+ * @author hakan
+ */
+
+import java.util.Date;
 import java.util.List;
 
 public class Teacher extends User {
-    private String teacherId;
-    private String department;
-    private List<Course> courses;
+    private List<Quiz> quizzes;
+    private String subject;
+    private String graduateSchool;
+    private String diplomaNumber;
     
     public Teacher() {
         super();
-        this.courses = new ArrayList<>();
+        
     }
     
-    public Teacher(int id, String name, String surname, int age, String email, String password, String username, String teacherId, String department) {
-        super(id, name, surname, age, email, password, username);
-        this.teacherId = teacherId;
-        this.department = department;
-        this.courses = new ArrayList<>();
+    public Teacher(String name, String surname, int age, String email, String password, List<Annoucement> annoucements, String username, Date createdate, Date updatedate,boolean isActive, List<Quiz> quizzes, String subject, String graduateSchool, String diplomaNumber) {
+        super(name, surname, age, email, password, annoucements, username, createdate, updatedate,isActive);
+        this.quizzes = quizzes;
+        this.subject = subject;
+        this.graduateSchool = graduateSchool;
+        this.diplomaNumber = diplomaNumber;
     }
+    public List<Quiz> getQuizzes(){
+        return quizzes;
+    }
+    public String getSubject(){
+        return subject;
+    }
+    public String getGraduateSchool(){
+        return graduateSchool;
+    }
+    public String getDiploma(){
+        return diplomaNumber;
+    }
+    public void setQuizzes(List<Quiz> quizzes){
+        this.quizzes = quizzes;
+    }
+    public void setSubject(String subject){
+        this.subject = subject;
+    }
+    public void setGraduateSchool(String graduateSchool){
+        this.graduateSchool = graduateSchool;
+    }
+    public void setDiploma(String diplomaNumber){
+        this.diplomaNumber = diplomaNumber;
+    }
+    public void createQuiz(Quiz quiz){
+        quizzes.add(quiz);
+    }
+    public void setTime(Duration time){
+        quiz.setTime(time);
+    }
+    public void showQuizzes(){
+        for(Quiz quiz : quizzes){
+            System.out.println(quiz);
+        }
+    }
+    public void showUserDetails(){
+        System.out.println("Name: " + getName());
+        System.out.println("Surname: " + getSurname());
+        System.out.println("Age: " + getAge());
+        System.out.println("Email: " + getEmail());
+        System.out.println("Password: " + getPassword());
+        System.out.println("Username: " + getUsername());
+        System.out.println("Quizzes: " + getQuizzes());
+        System.out.println("Subject: " + getSubject());
+        System.out.println("Graduate School: " + getGraduateSchool());
+        System.out.println("Diploma: " + getDiploma());
+    }
+    public void signIn(User user){
+        this.id = user.getId();
+        this.name = user.getName();
+        this.surname = user.getSurname();
+        this.age = user.getAge();
+        this.email = user.getEmail();
+        this.password = user.getPassword();
+        this.username = user.getUsername();
+        this.createdDate = user.getCreatedDate();
+        this.updatedDate = user.getUpdatedDate();
+    }   
+    public void logIn(User user){
+        this.id = user.getId();
+        this.name = user.getName();
+        this.surname = user.getSurname();
+        this.age = user.getAge();
+        this.email = user.getEmail();
+        this.password = user.getPassword();
+        this.username = user.getUsername();
+        this.createdDate = user.getCreatedDate();
+        this.updatedDate = user.getUpdatedDate();
+    }   
+    public void logOut(User user){
+        //çıkmak istermisin diye kontrol edicek sonra ana sayfaya yönlendiricek
+    }   
+
     
-    // Getters and Setters
-    public String getTeacherId() {
-        return teacherId;
-    }
-    
-    public void setTeacherId(String teacherId) {
-        this.teacherId = teacherId;
-    }
-    
-    public String getDepartment() {
-        return department;
-    }
-    
-    public void setDepartment(String department) {
-        this.department = department;
-    }
-    
-    public List<Course> getCourses() {
-        return courses;
-    }
-    
-    public void setCourses(List<Course> courses) {
-        this.courses = courses;
-    }
-    
-    /**
-     * Adds a course to the teacher's list of courses
-     * @param course The course to be added
-     */
-    public void addCourse(Course course) {
-        this.courses.add(course);
-    }
-    
-    /**
-     * Removes a course from the teacher's list of courses
-     * @param course The course to be removed
-     */
-    public void removeCourse(Course course) {
-        this.courses.remove(course);
-    }
-    
-    /**
-     * Creates a new quiz for a specific course
-     * @param course The course for which the quiz is created
-     * @param quiz The quiz to be created
-     * @return The created quiz
-     */
-    public Quiz createQuiz(Course course, Quiz quiz) {
-        // Add the quiz to the course
-        course.addQuiz(quiz);
-        return quiz;
-    }
-    
-    /**
-     * Grades a student's quiz result
-     * @param quizResult The quiz result to be graded
-     * @param score The score to be assigned
-     */
-    public void gradeQuiz(QuizResult quizResult, double score) {
-        // Set the score for the quiz result
-        quizResult.setScore(score);
-    }
-    
-    @Override
-    public String toString() {
-        return "Teacher{" +
-                "id=" + getId() +
-                ", name='" + getName() + '\'' +
-                ", surname='" + getSurname() + '\'' +
-                ", email='" + getEmail() + '\'' +
-                ", username='" + getUsername() + '\'' +
-                ", teacherId='" + teacherId + '\'' +
-                ", department='" + department + '\'' +
-                '}';
-    }
 }

@@ -1,21 +1,29 @@
-package com.quizsystem.model;
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ */
+package backend;
 
+/**
+ *
+ * @author hakan
+ */
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 public class User {
-    private int id;
-    private String name;
-    private int age;
-    private String surname;
-    private String email;
-    private String password;
-    private String username;
-    private Date createdDate;
-    private Date updatedDate;
-    private boolean isActive;
-    private List<String> annoucements;
+    protected int id;
+    protected String name;
+    protected int age;
+    protected String surname;
+    protected String email;
+    protected String password;
+    protected String username;
+    protected Date createdDate;
+    protected Date updatedDate;
+    protected boolean isActive;
+    protected List<String> annoucements;
     
     
     
@@ -25,8 +33,8 @@ public class User {
         this.isActive = true;
     }
     
-    public User(int id, String name, String surname,int age, String email, String password, String username,Date createdate,Date updatedate, Boolean isActive) {
-        this.id = id;
+    public User( String name, String surname,int age, String email, String password, String username,Date createdate,Date updatedate, Boolean isActive) {
+        
         this.name = name;
         this.surname = surname;
         this.age = age;
@@ -169,3 +177,4 @@ public class User {
     
   
 }
+

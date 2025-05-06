@@ -1,19 +1,32 @@
-package com.quizprojesi2;
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ */
+package backend;
+
+/**
+ *
+ * @author hakan
+ */
 public class QuestionAnswer {
     private int id;
     private int takeQuizId;
     private int questionId;
     private String answer;
     private boolean isCorrect;
+    
 
-    public QuestionAnswer() {}
+    public QuestionAnswer() {
 
-    public QuestionAnswer(int id, int takeQuizId, int questionId, String answer) {
+    }
+
+    public QuestionAnswer(int id, int takeQuizId, int questionId, String answer, boolean isCorrect) {
         this.id = id;
         this.takeQuizId = takeQuizId;
         this.questionId = questionId;
         this.answer = answer;
-        this.isCorrect = checkAnswer();
+        this.isCorrect = isCorrect; 
+
     }
 
     public int getId() {
@@ -50,7 +63,7 @@ public class QuestionAnswer {
 
     public void setAnswer(String answer) {
         this.answer = answer;
-        this.isCorrect = checkAnswer(); // Update correctness on answer set
+        this.isCorrect = checkAnswer(); 
     }
 
     public void setIsCorrect(boolean isCorrect) {
@@ -58,7 +71,6 @@ public class QuestionAnswer {
     }
 
     public boolean checkAnswer() {
-        // For simulation, assume answer ending in "correct" is correct
-        return answer != null && answer.toLowerCase().contains("correct");
+        return this.answer.equals(this.question.getCorrectAnswer());
     }
 }

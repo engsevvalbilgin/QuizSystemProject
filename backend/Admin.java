@@ -1,134 +1,105 @@
-package com.quizsystem.model;
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ */
+package backend;
 
-import java.util.ArrayList;
+/**
+ *
+ * @author hakan
+ */
+
 import java.util.List;
 
 public class Admin extends User {
-    private String adminId;
-    private List<User> managedUsers;
-    private List<Course> managedCourses;
+    private List<Annoucement> announcements;
     
     public Admin() {
         super();
-        this.managedUsers = new ArrayList<>();
-        this.managedCourses = new ArrayList<>();
+        
     }
     
-    public Admin(int id, String name, String surname, int age, String email, String password, String username, String adminId) {
-        super(id, name, surname, age, email, password, username);
-        this.adminId = adminId;
-        this.managedUsers = new ArrayList<>();
-        this.managedCourses = new ArrayList<>();
+    public Admin(String name, String surname, int age, String email, String password, List<Annoucement> announcements, Date createdate, Date updatedate, String username, boolean isActive) {
+        super(name, surname, age, email, password, username, createdate, updatedate, isActive);
+        this.announcements = announcements;
     }
     
-    // Getters and Setters
-    public String getAdminId() {
-        return adminId;
+    public void setAnnouncements(List<Annoucement> announcements){
+        this.announcements = announcements;
     }
-    
-    public void setAdminId(String adminId) {
-        this.adminId = adminId;
+    public void addUser(User user){
+        this.announcements.add(user);
     }
-    
-    public List<User> getManagedUsers() {
-        return managedUsers;
+    public void updateUser(User user){
+        this.announcements.add(user);
     }
-    
-    public void setManagedUsers(List<User> managedUsers) {
-        this.managedUsers = managedUsers;
-    }
-    
-    public List<Course> getManagedCourses() {
-        return managedCourses;
-    }
-    
-    public void setManagedCourses(List<Course> managedCourses) {
-        this.managedCourses = managedCourses;
-    }
-    
-    /**
-     * Creates a new user in the system
-     * @param user The user to be created
-     * @return The created user
-     */
-    public User createUser(User user) {
-        // Add the user to the list of managed users
-        this.managedUsers.add(user);
-        return user;
-    }
-    
-    /**
-     * Updates an existing user's information
-     * @param user The user to be updated
-     * @return The updated user
-     */
-    public User updateUser(User user) {
-        // Find the user in the list and update it
-        // This is a simplified implementation
-        for (int i = 0; i < managedUsers.size(); i++) {
-            if (managedUsers.get(i).getId() == user.getId()) {
-                managedUsers.set(i, user);
-                break;
-            }
+    public void showAllUsers(){
+        for(User user : this.announcements){
+            System.out.println(user);
         }
-        return user;
     }
-    
-    /**
-     * Deletes a user from the system
-     * @param user The user to be deleted
-     */
-    public void deleteUser(User user) {
-        // Remove the user from the list of managed users
-        this.managedUsers.remove(user);
-    }
-    
-    /**
-     * Creates a new course in the system
-     * @param course The course to be created
-     * @return The created course
-     */
-    public Course createCourse(Course course) {
-        // Add the course to the list of managed courses
-        this.managedCourses.add(course);
-        return course;
-    }
-    
-    /**
-     * Updates an existing course's information
-     * @param course The course to be updated
-     * @return The updated course
-     */
-    public Course updateCourse(Course course) {
-        // Find the course in the list and update it
-        // This is a simplified implementation
-        for (int i = 0; i < managedCourses.size(); i++) {
-            if (managedCourses.get(i).getId() == course.getId()) {
-                managedCourses.set(i, course);
-                break;
-            }
+    public void showAllStudents(){
+        for(User user : this.announcements){
+            System.out.println(user);
         }
-        return course;
     }
-    
-    /**
-     * Deletes a course from the system
-     * @param course The course to be deleted
-     */
-    public void deleteCourse(Course course) {
-        // Remove the course from the list of managed courses
-        this.managedCourses.remove(course);
+    public void showAllTeachers(){
+        for(User user : this.announcements){
+            System.out.println(user);
+        }
     }
-    
-    @Override
-    public String toString() {
-        return "Admin{" +
-                "id=" + getId() +
-                ", name='" + getName() + '\'' +
-                ", surname='" + getSurname() + '\'' +
-                ", email='" + getEmail() + '\'' +
-                ", username='" + getUsername() + '\'' +
-                ", adminId='" + adminId + '\'' +
-                '}';
+    public boolean reviewTeacherRequest(){
+        return true;
     }
+    public void showTeacherRequests(){
+        for(User user : this.announcements){
+            System.out.println(user);
+        }
+    }
+    public void addAnnouncement(){
+        this.announcements.add(new Annoucement());
+    }
+    public void showProgramStatistics(){
+        for(User user : this.announcements){
+            System.out.println(user);
+        }
+    }
+
+
+
+    public void showUserDetails(){
+        System.out.println("Name: " + getName());
+        System.out.println("Surname: " + getSurname());
+        System.out.println("Age: " + getAge());
+        System.out.println("Email: " + getEmail());
+        System.out.println("Password: " + getPassword());
+        System.out.println("Username: " + getUsername());
+        System.out.println("Announcements: " + getAnnouncements());
+    }
+    public void signIn(User user){
+        this.id = user.getId();
+        this.name = user.getName();
+        this.surname = user.getSurname();
+        this.age = user.getAge();
+        this.email = user.getEmail();
+        this.password = user.getPassword();
+        this.username = user.getUsername();
+        this.createdDate = user.getCreatedDate();
+        this.updatedDate = user.getUpdatedDate();
+    }
+    public void logIn(User user){
+        this.id = user.getId();
+        this.name = user.getName();
+        this.surname = user.getSurname();
+        this.age = user.getAge();
+        this.email = user.getEmail();
+        this.password = user.getPassword();
+        this.username = user.getUsername();
+        this.createdDate = user.getCreatedDate();
+        this.updatedDate = user.getUpdatedDate();
+    }
+    public void logOut(User user){
+        //çıkmak istermisin diye kontrol edicek sonra ana sayfaya yönlendiricek
+    }
+
 }

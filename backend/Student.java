@@ -1,65 +1,98 @@
-package com.quizsystem.model;
+/*
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
+ * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
+ */
+package backend;
 
-import java.util.ArrayList;
+/**
+ *
+ * @author hakan
+ */
+
+import java.util.Date;
 import java.util.List;
 
 public class Student extends User {
-    private String studentNo;
-    private List<QuizResult> quizResults;
+    private String schoolName;
+    private String studentId;
+    private List<Quiz> quizzes;
+    
+
+
     
     public Student() {
         super();
-        this.quizResults = new ArrayList<>();
     }
     
-    public Student(int id, String name, String surname, int age, String email, String password, String username, String studentNo) {
-        super(id, name, surname, age, email, password, username);
-        this.studentNo = studentNo;
-        this.quizResults = new ArrayList<>();
+    public Student(String name, String surname, int age, String email, String password, List<Annoucement> annoucements, String username, String schoolName, String studentId, List<Quiz> quizzes, Date createdDate, Date updatedDate, boolean isActive) {
+        super(name, surname, age, email, password, annoucements, username, createdDate, updatedDate, isActive);
+        this.schoolName = schoolName;
+        this.studentId = studentId;
+        this.quizzes = quizzes;
     }
     
-    // Getters and Setters
-    public String getStudentNo() {
-        return studentNo;
+    public String getSchoolName(){
+        return schoolName;
     }
-    
-    public void setStudentNo(String studentNo) {
-        this.studentNo = studentNo;
+    public String getStudentId(){
+        return studentId;
     }
-    
-    public List<QuizResult> getQuizResults() {
-        return quizResults;
+    public List<Quiz> getQuizzes(){
+        return quizzes;
     }
-    
-    public void setQuizResults(List<QuizResult> quizResults) {
-        this.quizResults = quizResults;
+    public void setSchoolName(String schoolName){
+        this.schoolName = schoolName;
     }
-    
-    /**
-     * Adds a quiz result to the student's list of quiz results
-     * @param quizResult The quiz result to be added
-     */
-    public void addQuizResult(QuizResult quizResult) {
-        this.quizResults.add(quizResult);
+    public void setStudentId(String studentId){
+        this.studentId = studentId;
     }
-    
-    /**
-     * Removes a quiz result from the student's list of quiz results
-     * @param quizResult The quiz result to be removed
-     */
-    public void removeQuizResult(QuizResult quizResult) {
-        this.quizResults.remove(quizResult);
+    public void setQuizzes(List<Quiz> quizzes){
+        this.quizzes = quizzes;
     }
-    
-    @Override
-    public String toString() {
-        return "Student{" +
-                "id=" + getId() +
-                ", name='" + getName() + '\'' +
-                ", surname='" + getSurname() + '\'' +
-                ", email='" + getEmail() + '\'' +
-                ", username='" + getUsername() + '\'' +
-                ", studentNo='" + studentNo + '\'' +
-                '}';
+    public int CalculateAverage(){
+        int sum = 0;
+        for(Quiz quiz : quizzes){
+            sum += quiz.getGrade();
+        }
+        return sum / quizzes.size();
+    }
+    public int AskAItoGradeQuiz(Quiz quiz){
+        return quiz.getGrade();
+    }   
+    public void ShowUserDetails(){
+        System.out.println("Name: " + getName());
+        System.out.println("Surname: " + getSurname());
+        System.out.println("Age: " + getAge());
+        System.out.println("Email: " + getEmail());
+        System.out.println("Password: " + getPassword());
+        System.out.println("Username: " + getUsername());
+        System.out.println("School Name: " + getSchoolName());
+        System.out.println("Student ID: " + getStudentId());
+        System.out.println("Quizzes: " + getQuizzes());
+    }
+    public void signIn(User user){
+        this.id = user.getId();
+        this.name = user.getName();
+        this.surname = user.getSurname();
+        this.age = user.getAge();
+        this.email = user.getEmail();
+        this.password = user.getPassword();
+        this.username = user.getUsername();
+        this.createdDate = user.getCreatedDate();
+        this.updatedDate = user.getUpdatedDate();
+    }
+    public void logIn(User user){
+        this.id = user.getId();
+        this.name = user.getName();
+        this.surname = user.getSurname();
+        this.age = user.getAge();
+        this.email = user.getEmail();
+        this.password = user.getPassword();
+        this.username = user.getUsername();
+        this.createdDate = user.getCreatedDate();
+        this.updatedDate = user.getUpdatedDate();
+    }
+    public void logOut(User user){
+        //çıkmak istermisin diye kontrol edicek sonra ana sayfaya yönlendiricek
     }
 }
