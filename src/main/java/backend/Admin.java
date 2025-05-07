@@ -12,9 +12,12 @@ public class Admin extends User {
         
     }
     
-    public Admin(String name, String surname, int age, String email, String password, List<Announcement> announcements, Date createdate, Date updatedate, String username, boolean isActive) {
-        super(name, surname, age, email, password, username, createdate, updatedate, isActive);
-        this.announcements = announcements;
+     public Admin(String name, String surname, int age, String email, String password, 
+                 List<Announcement> announcements, String username, 
+                 Date createdDate, Date updatedDate, boolean isActive) {
+        // User sÄ±nÄ±fÄ±nÄ±n constructor'Ä±nÄ± doÄŸru parametrelerle Ã§aÄŸÄ±rÄ±yoruz
+        super(name, surname, age, email, password, announcements, username, createdDate, updatedDate, isActive);
+        this.announcements = announcements; // Admin sÄ±nÄ±fÄ±na Ã¶zel announcements alanÄ±nÄ± baÅŸlatÄ±yoruz
     }
     
     public void setAnnouncements(List<Announcement> announcements){
@@ -85,7 +88,7 @@ public class Admin extends User {
     }
     @Override
     public void logOut(User user){
-        //çıkmak istermisin diye kontrol edicek sonra ana sayfaya yönlendiricek
+        //Ã§Ä±kmak istermisin diye kontrol edicek sonra ana sayfaya yÃ¶nlendiricek
     }
 
 }
