@@ -17,8 +17,8 @@ public class Student extends User {
         super();
     }
     
-    public Student(String name, String surname, int age, String email, String password, List<Annoucement> annoucements, String username, String schoolName, String studentId, List<Quiz> quizzes, Date createdDate, Date updatedDate, boolean isActive) {
-        super(name, surname, age, email, password, annoucements, username, createdDate, updatedDate, isActive);
+    public Student(String name, String surname, int age, String email, String password, List<Announcement> annoucements, String username, String schoolName, String studentId, List<Quiz> quizzes, Date createdDate, Date updatedDate, boolean isActive) {
+        super(name,surname, age,  email,  password, username, createdDate, updatedDate,  isActive);
         this.schoolName = schoolName;
         this.studentId = studentId;
         this.quizzes = quizzes;
@@ -44,13 +44,14 @@ public class Student extends User {
     }
     public int CalculateAverage(){
         int sum = 0;
-        for(Quiz quiz : quizzes){
-            sum += quiz.getGrade();
+        for (Quiz quiz : quizzes) {
+            sum += AskAItoGradeQuiz(quiz);  
         }
         return sum / quizzes.size();
     }
     public int AskAItoGradeQuiz(Quiz quiz){
-        return quiz.getGrade();
+         
+        return 0;
     }   
     public void ShowUserDetails(){
         System.out.println("Name: " + getName());
@@ -63,6 +64,7 @@ public class Student extends User {
         System.out.println("Student ID: " + getStudentId());
         System.out.println("Quizzes: " + getQuizzes());
     }
+    @Override
     public void signIn(User user){
         this.id = user.getId();
         this.name = user.getName();
@@ -74,6 +76,7 @@ public class Student extends User {
         this.createdDate = user.getCreatedDate();
         this.updatedDate = user.getUpdatedDate();
     }
+    @Override
     public void logIn(User user){
         this.id = user.getId();
         this.name = user.getName();
@@ -85,6 +88,7 @@ public class Student extends User {
         this.createdDate = user.getCreatedDate();
         this.updatedDate = user.getUpdatedDate();
     }
+    @Override
     public void logOut(User user){
         //çıkmak istermisin diye kontrol edicek sonra ana sayfaya yönlendiricek
     }
