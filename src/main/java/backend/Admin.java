@@ -15,9 +15,9 @@ public class Admin extends User {
      public Admin(String name, String surname, int age, String email, String password, 
                  List<Announcement> announcements, String username, 
                  Date createdDate, Date updatedDate, boolean isActive) {
-        // User sÄ±nÄ±fÄ±nÄ±n constructor'Ä±nÄ± doÄŸru parametrelerle Ã§aÄŸÄ±rÄ±yoruz
+        
         super(name, surname, age, email, password, announcements, username, createdDate, updatedDate, isActive);
-        this.announcements = announcements; // Admin sÄ±nÄ±fÄ±na Ã¶zel announcements alanÄ±nÄ± baÅŸlatÄ±yoruz
+        this.announcements = announcements; 
     }
     
     public void setAnnouncements(List<Announcement> announcements){
