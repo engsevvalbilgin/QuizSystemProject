@@ -34,7 +34,7 @@ public class Announcement {
     public Date getDate(){
         return date;
     }
-    public User getPublisherId(){
+    public int getPublisherId(){
         return publisherId;
     }
     public void setId(int id){
@@ -49,7 +49,7 @@ public class Announcement {
     public void setDate(Date date){
         this.date = date;
     }
-    public void setPublisherId(User publisherId){
+    public void setPublisherId(int publisherId){
         this.publisherId = publisherId;
     }
 }
