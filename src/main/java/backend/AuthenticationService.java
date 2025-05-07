@@ -1,4 +1,3 @@
-
 package backend;
 
 import java.util.Map;
@@ -21,7 +20,7 @@ public class AuthenticationService {
         this.sessionId = "session_" + System.currentTimeMillis();
         this.lastLoginDate = new Date();
         this.isActive = true;
-        return new User(id,name, surname, age,  email,  password,  username,createdate, updatedate, isActive);  
+        return new User();  
     }
     
     public boolean signIn(User user) {
