@@ -13,15 +13,17 @@ public class Student extends User {
 
 
     
-    public Student() {
-        super();
-    }
-    
-    public Student(String name, String surname, int age, String email, String password, List<Announcement> annoucements, String username, String schoolName, String studentId, List<Quiz> quizzes, Date createdDate, Date updatedDate, boolean isActive) {
-        super(name,surname, age,  email,  password, username, createdDate, updatedDate,  isActive);
-        this.schoolName = schoolName;
-        this.studentId = studentId;
-        this.quizzes = quizzes;
+    public Student(String name, String surname, int age, String email, String password, 
+                   List<Announcement> announcements, String username, 
+                   String schoolName, String studentId, 
+                   List<Quiz> quizzes, Date createdDate, Date updatedDate, 
+                   boolean isActive) {
+        
+        super(name, surname, age, email, password, announcements, username, createdDate, updatedDate, isActive);
+        
+        this.schoolName = schoolName; 
+        this.studentId = studentId;   
+        this.quizzes = quizzes;       
     }
     
     public String getSchoolName(){
