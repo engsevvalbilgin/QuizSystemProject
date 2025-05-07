@@ -17,31 +17,29 @@ public class User {
     protected Date createdDate;
     protected Date updatedDate;
     protected boolean isActive;
-    protected List<String> annoucements;
+    protected List<Announcement> announcements;
     
     
     
     public User() {
-        this.quizzes = new ArrayList<>();
-        this.annoucements = new ArrayList<>();
-        this.isActive = true;
+        
     }
     
-    public User( String name, String surname,int age, String email, String password, String username,Date createdate,Date updatedate, Boolean isActive) {
-        
+    public User(String name, String surname, int age, String email, String password, 
+                List<Announcement> announcements, String username, 
+                Date createdDate, Date updatedDate, boolean isActive) {
         this.name = name;
         this.surname = surname;
         this.age = age;
         this.email = email;
         this.password = password;
-        
+        this.announcements = announcements;
         this.username = username;
-        this.createdDate = createdate;
-        this.updatedDate = updatedate;
-        this.isActive = true;
-        this.annoucements = new ArrayList<>();
-        this.quizzes = new ArrayList<>();
+        this.createdDate = createdDate;
+        this.updatedDate = updatedDate;
+        this.isActive = isActive;
     }
+
 
     
     // Getters and Setters
@@ -93,8 +91,8 @@ public class User {
         this.password = password;
     }
 
-    public List<String> getAnnoucements(){
-        return annoucements;
+    public List<Announcement> getAnnoucements(){
+        return announcements;
     }
 
     public Date getCreatedDate() {
