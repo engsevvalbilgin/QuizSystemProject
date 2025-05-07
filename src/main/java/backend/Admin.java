@@ -2,21 +2,22 @@ package backend;
 
 
 import java.util.List;
+import java.util.Date;
 
 public class Admin extends User {
-    private List<Annoucement> announcements;
+    private List<Announcement> announcements;
     
     public Admin() {
         super();
         
     }
     
-    public Admin(String name, String surname, int age, String email, String password, List<Annoucement> announcements, Date createdate, Date updatedate, String username, boolean isActive) {
+    public Admin(String name, String surname, int age, String email, String password, List<Announcement> announcements, Date createdate, Date updatedate, String username, boolean isActive) {
         super(name, surname, age, email, password, username, createdate, updatedate, isActive);
         this.announcements = announcements;
     }
     
-    public void setAnnouncements(List<Annoucement> announcements){
+    public void setAnnouncements(List<Announcement> announcements){
         this.announcements = announcements;
     }
     public void addUser(User user){
@@ -41,7 +42,7 @@ public class Admin extends User {
         
     }
     public void addAnnouncement(){
-        this.announcements.add(new Annoucement());
+        this.announcements.add(new Announcement());
     }
     public void showProgramStatistics(){
        
@@ -56,8 +57,9 @@ public class Admin extends User {
         System.out.println("Email: " + getEmail());
         System.out.println("Password: " + getPassword());
         System.out.println("Username: " + getUsername());
-        System.out.println("Announcements: " + getAnnouncements());
+        
     }
+    @Override
     public void signIn(User user){
         this.id = user.getId();
         this.name = user.getName();
@@ -69,6 +71,7 @@ public class Admin extends User {
         this.createdDate = user.getCreatedDate();
         this.updatedDate = user.getUpdatedDate();
     }
+    @Override
     public void logIn(User user){
         this.id = user.getId();
         this.name = user.getName();
@@ -80,6 +83,7 @@ public class Admin extends User {
         this.createdDate = user.getCreatedDate();
         this.updatedDate = user.getUpdatedDate();
     }
+    @Override
     public void logOut(User user){
         //çıkmak istermisin diye kontrol edicek sonra ana sayfaya yönlendiricek
     }
