@@ -10,7 +10,7 @@ import jakarta.persistence.OneToMany;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-
+import lombok.*;
 
 @Entity
 public class Quiz {
@@ -22,10 +22,10 @@ public class Quiz {
     private int teacherId;
     private String name;
 
-    @OneToMany(mappedBy = "quiz")
+    @OneToMany(mappedBy = "quiz",fetch = FetchType.LAZY)
     private List<Question> questions;
 
-    @OneToMany(mappedBy = "quiz")
+    @OneToMany(mappedBy = "quiz",fetch = FetchType.LAZY)
     private List<QuestionAnswer> answers;
 
     private Date startDate;

@@ -1,3 +1,4 @@
+package com.example.QuizSystemProject.Model;
 import jakarta.persistence.Entity;
 import jakarta.persistence.*;
 
