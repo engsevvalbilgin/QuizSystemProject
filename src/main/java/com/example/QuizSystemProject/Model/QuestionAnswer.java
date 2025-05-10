@@ -1,21 +1,14 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
-package com.example.QuizSystemProject.Model;
-
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import org.springframework.data.annotation.Id;
+import jakarta.persistence.*;
 
-/**
- *
- * @author hp
- */
 @Entity
 public class QuestionAnswer {
-     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+
+    @Id
+    private Long id;  // Add the @Id annotation to this field or any other field you wish to use as the primary key
+    @ManyToOne
+    @JoinColumn(name = "quiz_id") // Assuming the foreign key column is 'quiz_id'
+    private Quiz quiz;
+    // Other fields, constructors, getters, and setters
+
 }

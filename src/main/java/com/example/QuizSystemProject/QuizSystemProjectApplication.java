@@ -8,6 +8,6 @@ import org.springframework.boot.autoconfigure.domain.EntityScan;
 @EntityScan(basePackages = "com.example.QuizSystemProject.Model")
 public class QuizSystemProjectApplication {
     public static void main(String[] args) {
-        SpringApplication.run(QuizSystemProjectApplication.class);
+        SpringApplication.run(QuizSystemProjectApplication.class, args);
     }
 }

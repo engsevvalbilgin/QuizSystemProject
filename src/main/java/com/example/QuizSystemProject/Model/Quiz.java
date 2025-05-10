@@ -1,7 +1,7 @@
 package com.example.QuizSystemProject.Model;
 import com.example.QuizSystemProject.Model.Question;
 import com.example.QuizSystemProject.Model.QuestionAnswer;
-import jakarta.persistence.CascadeType;
+import jakarta.persistence.*;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -10,7 +10,7 @@ import jakarta.persistence.OneToMany;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import org.springframework.data.annotation.Id;
+
 
 @Entity
 public class Quiz {
@@ -22,10 +22,10 @@ public class Quiz {
     private int teacherId;
     private String name;
 
-    @OneToMany(mappedBy = "quiz", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "quiz")
     private List<Question> questions;
 
-    @OneToMany(mappedBy = "quiz", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "quiz")
     private List<QuestionAnswer> answers;
 
     private Date startDate;
