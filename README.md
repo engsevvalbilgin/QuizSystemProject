@@ -36,7 +36,7 @@ This project is an Online Quiz Platform developed using Java Swing and MySQL. Us
 2. **Step 1: Clone the Project**
    You can clone the project from GitHub:
    ```bash
-   git clone https://github.com/username/online-quiz-exam-platform.git
+   git clone https://github.com/engsevvalbilgin/QuizSystemProject
    ```
 
 3. **Step 2: Configure JDBC Connection**
