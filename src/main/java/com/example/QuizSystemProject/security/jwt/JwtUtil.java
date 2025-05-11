@@ -1,5 +1,6 @@
-package com.example.QuizSystemProject.security.jwt; // Paket adınızın doğru olduğundan emin olun
-import com.example.QuizSystemProject.Model.User; // Kendi User Entity'miz için
+package com.quizland.QuizSystemProject.security.jwt; // Paket adınızın doğru olduğundan emin olun
+
+import com.quizland.QuizSystemProject.model.User; // Kendi User Entity'miz için (claim eklemek isterseniz gerekebilir)
 import org.springframework.security.core.GrantedAuthority; // GrantedAuthority için
 import java.util.stream.Collectors; // Collectors için
 import java.util.Collection; // Koleksiyonlar için (GrantedAuthority için gerekli olabilir)
@@ -62,18 +63,25 @@ public class JwtUtil {
 
     // UserDetails objesinden token oluşturma
     public String generateToken(UserDetails userDetails) {
-        // Varsayılan claim'ler (subject = kullanıcı adı gibi) dışında ek claim'ler ekleyebilirsiniz
-        // Örneğin, kullanıcı ID'si, rolleri vb. claim olarak eklenebilir.
         Map<String, Object> claims = new HashMap<>();
         // Kullanıcı rollerini claim olarak ekleyelim (isteğe bağlı ama faydalı)
         claims.put("roles", userDetails.getAuthorities().stream()
-                                       .map(GrantedAuthority::getAuthority) // GrantedAuthority objelerinden String rollerini al
-                                       .collect(Collectors.toList())); // Liste olarak ekle
-        claims.put("userId", ((User) userDetails).getId()); // Kendi UserDetails objemizde ID varsa ekleyebiliriz (UserDetailsServiceImpl'de eklememiştik, ama User entity'den alınabilir)
-        // UserDetailsServiceImpl'deki dönüşümde User entity'den UserDetails oluştururken ID'yi eklemedik.
-        // Eğer ID'yi claim'e eklemek isterseniz UserDetailsServiceImpl'i güncelleyip UserDetails objesine ID eklemeli
-        // veya burada userDetails instanceof User kontrolü yapıp user.getId() çekmelisiniz.
-        // Basitlik için şimdilik username ve rolleri ekleyelim.
+                                     .map(GrantedAuthority::getAuthority) // GrantedAuthority objelerinden String rollerini al
+                                     .collect(Collectors.toList())); // Liste olarak ekle
+
+        // claims.put("userId", ((User) userDetails).getId()); // <-- BU SATIR ARTIK YORUM SATIRI VEYA SİLİNDİ!
+                                                            // ClassCastException'a neden olan burasıydı.
+
+        // NOT: Eğer ileride kullanıcı ID'sini JWT'ye eklemek isterseniz,
+        // UserDetailsServiceImpl'in UserDetails yerine kendi User objenizi veya
+        // özel bir UserDetails implementasyonu döndürmesi ve JWTUtil'un da buna uygun olması gerekir.
+        // Şimdilik basitlik için bu satırı kapalı tutuyoruz.
+
+
+        // İsteğe bağlı olarak yayıncı (issuer), hedef kitle (audience) gibi alanları claims objesine ekleyebilirsiniz.
+        // claims.put("iss", "quizland");
+        // claims.put("aud", "users");
+
 
         return createToken(claims, userDetails.getUsername());
     }
@@ -84,9 +92,13 @@ public class JwtUtil {
         return Jwts.builder()
                 .setClaims(claims) // Claim'leri set et
                 .setSubject(subject) // Konuyu (genellikle kullanıcı adı) set et
-                // İsteğe bağlı olarak yayıncı (issuer), hedef kitle (audience) gibi alanlar set edilebilir.
-                // setIssuedAt(new Date(System.currentTimeMillis())) // Oluşturulma zamanı
-                // setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 10)) // Son kullanma zamanı (örn: 10 saat)
+                .setIssuedAt(new Date(System.currentTimeMillis())) // Token oluşturulma zamanı
+                // Son kullanma zamanını eklemek çok önemlidir! Güvenlik için token'ların bir ömrü olmalı.
+                // Örn: 10 saat geçerlilik süresi (1000 ms * 60 s * 60 dk * 10 saat)
+                 .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 10)) // <-- Geçerlilik süresi ekledik
+                // Veya daha kısa bir süre: .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 15)) // 15 dakika
+
+
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256) // Anahtar ve algoritma ile imzala
                 .compact(); // JWT string'ini oluştur
     }
@@ -98,9 +110,13 @@ public class JwtUtil {
         return extractClaim(token, Claims::getExpiration); // Claims nesnesinden son kullanma zamanını çek
     }
 
-    private boolean isTokenExpired(String token) {
-        return extractExpiration(token).before(new Date()); // Son kullanma zamanı şu anki zamandan önceyse süresi dolmuş demektir
+    public boolean isTokenExpired(String token) {
+        // extractExpiration(token) null dönebilir mi? Jwts parser hata fırlatır süresi geçmişse, bu method ondan sonra çağrılır.
+        // Ancak yine de null kontrolü yapmak güvenli olabilir.
+        Date expirationDate = extractExpiration(token);
+        return expirationDate == null || expirationDate.before(new Date()); // Son kullanma zamanı yoksa veya geçmişse true dön
     }
+
 
     // Token'ın geçerli olup olmadığını kontrol etme
     // Kullanıcı adı eşleşiyor mu ve süresi dolmuş mu?

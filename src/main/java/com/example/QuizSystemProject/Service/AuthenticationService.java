@@ -7,6 +7,7 @@ import com.example.QuizSystemProject.exception.ExpiredTokenException;
 import com.example.QuizSystemProject.exception.InvalidTokenException;
 import com.example.QuizSystemProject.exception.UserNotFoundException;
 import com.example.QuizSystemProject.Model.Student;
+import com.example.QuizSystemProject.Model.Teacher;
 import com.example.QuizSystemProject.Model.User;
 import com.example.QuizSystemProject.Repository.UserRepository;
 import com.example.QuizSystemProject.security.jwt.JwtUtil; // JWT importu
@@ -36,6 +37,7 @@ import java.time.temporal.ChronoUnit; // Zaman birimleri için
 // MailService importu ve MailException importu
 import com.example.QuizSystemProject.Service.MailService;
 import org.springframework.mail.MailException;
+
 
 @Service
 @Transactional // Sınıf seviyesinde transaction yönetimi - Tüm public metotlar transactional olur
@@ -86,8 +88,8 @@ public class AuthenticationService {
             throw new DuplicateEmailException("Email adresi zaten kullanımda");
         }
 
-       
-        Student newUser = Student.createStudent();
+        // Yeni User objesi oluşturma
+        User newUser = new User();
         newUser.setUsername(registrationRequest.getUsername());
         // Parolayı şifreleme ve set etme
         newUser.setPassword(passwordEncoder.encode(registrationRequest.getPassword()));

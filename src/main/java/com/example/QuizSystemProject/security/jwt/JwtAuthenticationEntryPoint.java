@@ -1,4 +1,4 @@
-package com.example.QuizSystemProject.security.jwt; // Paket adınızın doğru olduğundan emin olun
+package com.quizland.QuizSystemProject.security.jwt; // Paket adınızın doğru olduğundan emin olun
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
