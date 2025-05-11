@@ -13,6 +13,7 @@ import java.util.List;
 import lombok.*;
 
 @Entity
+@Table(name = "quizzes")
 public class Quiz {
 
     @Id
@@ -36,6 +37,7 @@ public class Quiz {
     public Quiz() {
         this.questions = new ArrayList<>();
         this.isActive = true;
+        name="a";
     }
 
     // Getter and Setter methods
@@ -65,4 +67,6 @@ public class Quiz {
 
     public boolean isActive() { return isActive; }
     public void setActive(boolean active) { isActive = active; }
+
+	
 }

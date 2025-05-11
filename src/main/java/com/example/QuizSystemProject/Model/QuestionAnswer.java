@@ -1,15 +1,35 @@
 package com.example.QuizSystemProject.Model;
-import jakarta.persistence.Entity;
+
 import jakarta.persistence.*;
+import lombok.*;
 
 @Entity
+@Table(name = "question_answers")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class QuestionAnswer {
 
     @Id
-    private Long id;  // Add the @Id annotation to this field or any other field you wish to use as the primary key
-    @ManyToOne
-    @JoinColumn(name = "quiz_id") // Assuming the foreign key column is 'quiz_id'
-    private Quiz quiz;
-    // Other fields, constructors, getters, and setters
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int id;
 
+    @Column(name = "answer", nullable = false)
+    private String answer;
+
+    @Column(name = "is_correct")
+    private boolean isCorrect;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "take_quiz_id", nullable = false)
+    private TakeQuiz takeQuiz;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "question_id", nullable = false)
+    private Question question;
+
+    public void checkAndSetCorrectAnswer(String correctAnswer) {
+        this.isCorrect = this.answer != null && this.answer.equals(correctAnswer);
+    }
 }

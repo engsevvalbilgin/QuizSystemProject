@@ -1,21 +1,41 @@
 package com.example.QuizSystemProject.Model;
 
 import jakarta.persistence.*;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;  // Buradaki Id doğru olacak şekilde değiştirdim
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-/**
- *
- * @author hp
- */
 @Entity
+@Table(name = "questions")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class Question {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
-    @ManyToOne
-    @JoinColumn(name = "quiz_id")
+
+    @Column(name = "number", nullable = false)
+    private int number;
+
+    @Column(name = "question_sentence", nullable = false, length = 1000)
+    private String questionSentence;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "type", nullable = false)
+    private QuestionType type;
+
+    @Embedded
+    private QuestionAnswer answer;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "quiz_id", nullable = false)
     private Quiz quiz;
-    // Diğer alanlar ve getter/setter metodları buraya eklenebilir
+
+    public static Question createQuestion() {
+        return new Question();
+    }
 }
