@@ -19,19 +19,20 @@ public class QuizService {
     private final QuizRepository quizRepository;
     private final QuestionRepository questionRepository;
     private final OptionRepository optionRepository;
-    private final UserRepository userRepository; // Quiz oluştururken Teacher'ı bulmak için
+    private final UserRepository userRepository; 
     private final QuestionTypeRepository questionTypeRepository; // Soru tipi seçerken veya bulurken
-
+    private final TeacherRepository teacherRepository;
     // Bağımlılıkların enjekte edildiği constructor
     @Autowired
     public QuizService(QuizRepository quizRepository, QuestionRepository questionRepository,
                        OptionRepository optionRepository, UserRepository userRepository,
-                       QuestionTypeRepository questionTypeRepository) {
+                       QuestionTypeRepository questionTypeRepository,TeacherRepository teacherRepository) {
         this.quizRepository = quizRepository;
         this.questionRepository = questionRepository;
         this.optionRepository = optionRepository;
         this.userRepository = userRepository;
         this.questionTypeRepository = questionTypeRepository;
+		this.teacherRepository = teacherRepository;
     }
 
     // --- Sizin template'lerinizdeki ilgili işlevlere karşılık gelen metot imzaları ---

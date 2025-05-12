@@ -9,7 +9,7 @@ import java.util.stream.Collectors; // Akış işlemleri için
 // Bu DTO, API yanıtlarında bir öğrencinin tüm quiz oturumu sonuçlarını özetler.
 public class StudentOverallResultsResponse {
 
-    private Long studentId; // Öğrenci ID'si
+    private int studentId; // Öğrenci ID'si
     private String studentUsername; // Öğrenci kullanıcı adı
     private int totalSessions; // Tamamlanan toplam oturum sayısı
     private Double overallAverageScore; // Tüm oturumların ortalama puanı
@@ -30,7 +30,7 @@ public class StudentOverallResultsResponse {
             this.studentId = student.getId();
             this.studentUsername = student.getUsername();
         } else {
-            this.studentId = null;
+            this.studentId = -1;
             this.studentUsername = "Bilinmeyen Öğrenci";
         }
 
@@ -57,8 +57,8 @@ public class StudentOverallResultsResponse {
     // Getter ve Setterlar
     // IDE ile otomatik oluşturabilirsiniz.
 
-    public Long getStudentId() { return studentId; }
-    public void setStudentId(Long studentId) { this.studentId = studentId; }
+    public int getStudentId() { return studentId; }
+    public void setStudentId(int studentId) { this.studentId = studentId; }
 
     public String getStudentUsername() { return studentUsername; }
     public void setStudentUsername(String studentUsername) { this.studentUsername = studentUsername; }

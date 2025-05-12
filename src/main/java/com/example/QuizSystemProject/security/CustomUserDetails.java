@@ -1,6 +1,6 @@
-package com.quizland.QuizSystemProject.security; // Paket adınızı kontrol edin
+package com.example.QuizSystemProject.security; // Paket adınızı kontrol edin
 
-import com.quizland.QuizSystemProject.model.User; // Kendi User Entity'mizi import edin
+import com.example.QuizSystemProject.Model.User; // Kendi User Entity'mizi import edin
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails; // Spring Security UserDetails
 
@@ -10,7 +10,7 @@ import java.util.Collection; // Collection için
 // Bu sınıf, SecurityContext'te kullanıcı bilgilerini tutacak.
 public class CustomUserDetails implements UserDetails {
 
-    private Long id; // Kullanıcının veritabanı ID'si
+    private int id; // Kullanıcının veritabanı ID'si
     private String username; // Kullanıcı adı
     private String password; // Şifre (null olabilir eğer parola bilgisine JWT sonrası ihtiyacımız yoksa)
     private boolean enabled; // Hesap etkin mi?
@@ -73,7 +73,7 @@ public class CustomUserDetails implements UserDetails {
     }
 
     // --- Ekstra Get Metodu (Kullanıcı ID'si için) ---
-    public Long getId() {
+    public int getId() {
         return id;
     }
 }

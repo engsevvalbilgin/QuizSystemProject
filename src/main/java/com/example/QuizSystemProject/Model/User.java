@@ -1,5 +1,6 @@
 package com.example.QuizSystemProject.Model; // Paket adınızın doğru olduğundan emin olun
 import jakarta.validation.constraints.Size;
+import lombok.NoArgsConstructor;
 import jakarta.persistence.*; // JPA anotasyonları için
 import java.time.LocalDateTime; // Tarih/saat için modern Java API'si
 import java.util.ArrayList;
@@ -7,8 +8,10 @@ import java.util.List;
 import java.util.Objects; // equals/hashCode için
 
 @Entity // Bu sınıfın bir JPA Entity'si olduğunu ve veritabanı tablosuna karşılık geldiğini belirtir
-@Table(name = "users") // Veritabanındaki tablonun adı 'users' olacak
-public abstract class User {
+@Table(name = "users")
+@NoArgsConstructor
+// Veritabanındaki tablonun adı 'users' olacak
+public class User {
 
     @Id // Bu alanın birincil anahtar (Primary Key) olduğunu belirtir
     @GeneratedValue(strategy = GenerationType.IDENTITY) // ID'nin veritabanı tarafından otomatik artan olarak üretileceğini belirtir
@@ -68,9 +71,7 @@ public abstract class User {
 
 
     // JPA, argümansız (boş) bir constructor gerektirir
-    public User() {
-    }
-
+    
     // Temel alanları alan constructor (Yeni alanlar hariç)
     // Güvenlik için parola DTO'dan gelip Service'te şifrelenmeli.
     public User(String name, String surname, int age, String email, String username, String password, String role) {
@@ -189,7 +190,7 @@ public abstract class User {
 		
 	}
 
-	protected abstract void showUserDetails();
+	protected void showUserDetails() {}
 
 	
 }

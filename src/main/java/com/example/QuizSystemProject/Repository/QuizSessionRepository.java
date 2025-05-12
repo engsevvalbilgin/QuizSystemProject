@@ -13,7 +13,7 @@ import java.util.Optional; // Optional importu
 @Repository // Spring'e bu arayüzün bir Repository olduğunu belirtir
 // JpaRepository'den türeyerek temel CRUD metotlarını alır
 // <QuizSession, Long>: İlk parametre Entity tipi (QuizSession), ikinci parametre Entity'nin Primary Key (ID) tipidir (Long).
-public interface QuizSessionRepository extends JpaRepository<QuizSession, Long> {
+public interface QuizSessionRepository extends JpaRepository<QuizSession, Integer> {
 
     // Spring Data JPA, JpaRepository'den türediğimiz için
     // save(), findById(), findAll(), delete() gibi temel metotları otomatik sağlar.

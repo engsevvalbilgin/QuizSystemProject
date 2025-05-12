@@ -1,7 +1,10 @@
 package com.example.QuizSystemProject.dto; // Paket adınızın doğru olduğundan emin olun
 
 import com.example.QuizSystemProject.Model.Quiz; // Entity'den dönüşüm için Quiz Entity'sini import edin
+import com.example.QuizSystemProject.Model.Teacher;
+import com.example.QuizSystemProject.Repository.TeacherRepository;
 
+import java.sql.Date;
 import java.time.LocalDateTime; // Tarih/saat için
 import java.util.List; // Soru listesi için
 import java.util.stream.Collectors; // Akış işlemleri için
@@ -15,9 +18,9 @@ public class QuizDetailsResponse {
     private String teacherName; // Quizi oluşturan öğretmenin adı/kullanıcı adı
     private Integer durationMinutes; // Quiz süresi (dakika)
     private boolean isActive; // Quizin aktif olup olmadığı
-
-    private LocalDateTime startDate; // Başlangıç tarihi
-    private LocalDateTime endDate; // Bitiş tarihi
+    private TeacherRepository teacherRepository;
+    private java.util.Date startDate; // Başlangıç tarihi
+    private java.util.Date endDate; // Bitiş tarihi
 
     private List<QuestionResponse> questions; // Quize ait sorular listesi (QuestionResponse DTO'su)
 
@@ -30,8 +33,9 @@ public class QuizDetailsResponse {
         this.id = quiz.getId();
         this.name = quiz.getName();
         this.description = quiz.getDescription();
-        this.teacherName = quiz.getTeacher() != null ? quiz.getTeacher().getName() + " " + quiz.getTeacher().getSurname() : "Bilinmiyor";
-        this.durationMinutes = quiz.getDurationMinutes();
+        Teacher teacher = teacherRepository.findById(quiz.getTeacherId()).orElse(null);
+        this.teacherName = teacher != null ? teacher.getName() + " " + teacher.getSurname() : "Bilinmiyor";
+        this.durationMinutes = quiz.getDuration();
         this.isActive = quiz.isActive();
         this.startDate = quiz.getStartDate();
         this.endDate = quiz.getEndDate();
@@ -49,8 +53,8 @@ public class QuizDetailsResponse {
     // Getter ve Setterlar
     // IDE ile otomatik oluşturabilirsiniz.
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public int getId() { return id; }
+    public void setId(int id) { this.id = id; }
 
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
@@ -67,11 +71,11 @@ public class QuizDetailsResponse {
     public boolean isActive() { return isActive; }
     public void setActive(boolean active) { isActive = active; }
 
-    public LocalDateTime getStartDate() { return startDate; }
-    public void setStartDate(LocalDateTime startDate) { this.startDate = startDate; }
+    public java.util.Date getStartDate() { return startDate; }
+    public void setStartDate(java.util.Date startDate) { this.startDate = startDate; }
 
-    public LocalDateTime getEndDate() { return endDate; }
-    public void setEndDate(LocalDateTime endDate) { this.endDate = endDate; }
+    public java.util.Date getEndDate() { return endDate; }
+    public void setEndDate(java.util.Date endDate) { this.endDate = endDate; }
 
     public List<QuestionResponse> getQuestions() { return questions; }
     public void setQuestions(List<QuestionResponse> questions) { this.questions = questions; }

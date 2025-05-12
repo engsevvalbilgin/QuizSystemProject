@@ -27,8 +27,8 @@ public class OptionResponse {
     // Getter ve Setterlar
     // IDE ile otomatik oluşturabilirsiniz.
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public int getId() { return id; }
+    public void setId(int id) { this.id = id; }
 
     public String getText() { return text; }
     public void setText(String text) { this.text = text; }

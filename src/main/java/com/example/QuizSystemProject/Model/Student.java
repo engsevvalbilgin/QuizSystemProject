@@ -6,7 +6,7 @@ import java.util.Date;
 import java.util.List;
 
 @Entity
-@Table(name = "students")
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -19,7 +19,7 @@ public class Student extends User {
     @Column(name = "student_id", unique = true)
     private String studentId;
 
-    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinColumn(name="quiz_id")
     private List<Quiz> quizzes;
 
 	@Override

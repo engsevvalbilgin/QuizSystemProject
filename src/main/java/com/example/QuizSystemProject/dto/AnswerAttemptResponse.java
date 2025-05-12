@@ -37,7 +37,7 @@ public class AnswerAttemptResponse {
             this.questionSentence = attempt.getQuestion().getQuestionSentence();
         } else {
              // İlişkili soru yoksa boş veya default değerler
-             this.questionId = null;
+             this.questionId = -1;
              this.questionNumber = 0;
              this.questionSentence = "Bilinmeyen Soru";
         }
@@ -60,11 +60,11 @@ public class AnswerAttemptResponse {
     // Getter ve Setterlar
     // IDE ile otomatik oluşturabilirsiniz.
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public int getId() { return id; }
+    public void setId(int id) { this.id = id; }
 
-    public Long getQuestionId() { return questionId; }
-    public void setQuestionId(Long questionId) { this.questionId = questionId; }
+    public int getQuestionId() { return questionId; }
+    public void setQuestionId(int questionId) { this.questionId = questionId; }
 
     public int getQuestionNumber() { return questionNumber; }
     public void setQuestionNumber(int questionNumber) { this.questionNumber = questionNumber; }

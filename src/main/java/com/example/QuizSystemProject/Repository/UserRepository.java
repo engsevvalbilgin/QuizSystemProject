@@ -10,13 +10,14 @@ import java.util.Optional; // Optional import
 @Repository // Indicates that this interface is a Spring Data JPA Repository
 // Extends JpaRepository to inherit basic CRUD methods
 // <User, Long>: The first parameter is the Entity type (User), the second is the type of its Primary Key (Long).
-public interface UserRepository extends JpaRepository<User, Long> {
+public interface UserRepository extends JpaRepository<User, Integer> {
 
     // Spring Data JPA automatically provides methods like save(), findById(), findAll(), delete(), etc.
 
     // Needs based on analysis of user-related templates (Authentication, User Management, Roles):
     // Find a User by their username (Username is unique)
     // Used during login and registration check
+	
     Optional<User> findByUsername(String username); // Use Optional<User> as user might not exist
 
     // Find a User by their email (Email is unique)
@@ -51,5 +52,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     // Optional<User> findByUsernameOrEmailIgnoreCase(@Param("username") String username, @Param("email") String email);
     
     Optional<User> findByResetPasswordToken(String resetPasswordToken);
+    Optional<User> findById(int Id);
 }
 

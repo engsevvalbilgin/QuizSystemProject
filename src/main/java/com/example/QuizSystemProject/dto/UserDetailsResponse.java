@@ -7,7 +7,7 @@ import java.time.LocalDateTime; // Tarih/saat için
 // UserResponse'a göre daha fazla alan içerir, hassas bilgiler (parola gibi) dahil EDİLMEZ.
 public class UserDetailsResponse {
 
-    private Long id;
+    private int id;
     private String username;
     private String name;
     private String surname;
@@ -42,8 +42,8 @@ public class UserDetailsResponse {
     // Getter ve Setterlar
     // IDE ile otomatik oluşturabilirsiniz.
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public int getId() { return id; }
+    public void setId(int id) { this.id = id; }
 
     public String getUsername() { return username; }
     public void setUsername(String username) { this.username = username; }

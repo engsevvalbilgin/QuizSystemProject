@@ -8,6 +8,8 @@ import lombok.Setter;
 
 @Entity
 @Table(name = "questions")
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)  // Explicitly declare strategy
+@DiscriminatorColumn(name = "question_type")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -24,11 +26,11 @@ public class Question {
     @Column(name = "question_sentence", nullable = false, length = 1000)
     private String questionSentence;
 
-    @Enumerated(EnumType.STRING)
+    
     @Column(name = "type", nullable = false)
     private QuestionType type;
 
-    @Embedded
+    
     private QuestionAnswer answer;
 
     @ManyToOne(fetch = FetchType.LAZY)

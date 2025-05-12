@@ -16,6 +16,6 @@ public class QuestionType {
     @Column(name = "id")
     private int id;
 
-    @Column(name = "type_name", nullable = false, unique = true)
+    @Column(name = "type_name", nullable = false)
     private String typeName;
 }

@@ -10,8 +10,8 @@ import java.util.stream.Collectors; // Akış işlemleri için
 // Bu DTO, API yanıtlarında bir quiz oturumunun tüm detaylarını (verilen cevaplar dahil) taşır.
 public class QuizSessionDetailsResponse {
 
-    private Long id;
-    private Long quizId; // Hangi quize ait olduğu
+    private int id;
+    private int quizId; // Hangi quize ait olduğu
     private String quizName; // Quizin adı
     private LocalDateTime startTime; // Başlangıç zamanı
     private LocalDateTime endTime; // Bitiş zamanı
@@ -19,7 +19,7 @@ public class QuizSessionDetailsResponse {
     private Long durationMinutes; // Oturum süresi (dakika cinsinden)
 
     // Oturumun sahibi olan öğrencinin temel bilgileri de dahil edilebilir
-    private Long studentId;
+    private int studentId;
     private String studentUsername;
 
     private List<AnswerAttemptResponse> answers; // Oturumdaki cevaplar listesi (AnswerAttemptResponse DTO'su)
@@ -38,7 +38,7 @@ public class QuizSessionDetailsResponse {
             this.quizId = session.getQuiz().getId();
             this.quizName = session.getQuiz().getName();
         } else {
-             this.quizId = null;
+             this.quizId = -1;
              this.quizName = "Bilinmeyen Quiz";
         }
 
@@ -60,7 +60,7 @@ public class QuizSessionDetailsResponse {
             this.studentId = session.getStudent().getId();
             this.studentUsername = session.getStudent().getUsername();
         } else {
-             this.studentId = null;
+             this.studentId = -1;
              this.studentUsername = "Bilinmeyen Öğrenci";
         }
 
@@ -78,11 +78,11 @@ public class QuizSessionDetailsResponse {
     // Getter ve Setterlar
     // IDE ile otomatik oluşturabilirsiniz.
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public int getId() { return id; }
+    public void setId(int id) { this.id = id; }
 
-    public Long getQuizId() { return quizId; }
-    public void setQuizId(Long quizId) { this.quizId = quizId; }
+    public int getQuizId() { return quizId; }
+    public void setQuizId(int quizId) { this.quizId = quizId; }
 
     public String getQuizName() { return quizName; }
     public void setQuizName(String quizName) { this.quizName = quizName; }
@@ -99,8 +99,8 @@ public class QuizSessionDetailsResponse {
     public Long getDurationMinutes() { return durationMinutes; }
     public void setDurationMinutes(Long durationMinutes) { this.durationMinutes = durationMinutes; }
 
-    public Long getStudentId() { return studentId; }
-    public void setStudentId(Long studentId) { this.studentId = studentId; }
+    public int getStudentId() { return studentId; }
+    public void setStudentId(int studentId) { this.studentId = studentId; }
 
     public String getStudentUsername() { return studentUsername; }
     public void setStudentUsername(String studentUsername) { this.studentUsername = studentUsername; }
