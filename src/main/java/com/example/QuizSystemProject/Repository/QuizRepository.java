@@ -1,6 +1,8 @@
 package com.example.QuizSystemProject.Repository;
 
 import com.example.QuizSystemProject.Model.Quiz;
+import com.example.QuizSystemProject.Model.Teacher;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -28,7 +30,7 @@ public interface QuizRepository extends JpaRepository<Quiz, Integer> {
 
     // Aktif olan Quizleri bulmak için (isActive alanı olduğu için)
     List<Quiz> findAllByIsActiveTrue();
-
+    List<Teacher> findByTeacherId(int teacherId);
     // Başlangıç tarihi belirli bir tarihten sonra olan aktif Quizleri bulmak için (startDate ve isActive alanları olduğu için)
     // List<Quiz> findAllByStartDateAfterAndIsActiveTrue(LocalDateTime date); // Eğer LocalDateTime kullanılıyorsa
 

@@ -1,4 +1,4 @@
-package com.quizland.QuizSystemProject.security.jwt; // Paket adınızın doğru olduğundan emin olun
+package com.example.QuizSystemProject.security.jwt; // Paket adınızın doğru olduğundan emin olun
 
 import jakarta.servlet.FilterChain; // Servlet filtre zinciri için
 import jakarta.servlet.ServletException; // Servlet hataları için

@@ -83,7 +83,7 @@ public class UserService {
 
   /// ID'ye göre kullanıcı getirme (Admin veya kullanıcı kendi profilini getirebilir)
     // Dönüş tipi UserDetailsResponse olarak değişti, artık Optional dönmeyecek
-    public UserDetailsResponse getUserById(Long userId) {
+    public UserDetailsResponse getUserById(int userId) {
         System.out.println("UserService: Kullanıcı getiriliyor - ID: " + userId);
 
         // Repository'den kullanıcıyı ID'ye göre bul
@@ -102,7 +102,7 @@ public class UserService {
     // Sizin Admin.java template'indeki updateUser metodunun mantığı burada.
  // Kullanıcı bilgilerini güncelleme (Admin yetkisi gerektirecek, veya kullanıcı kendi bilgilerini güncelleyebilir - rol, email ve parola hariç)
     // UserUpdateRequest DTO'su kullanılacak
-    public User updateUser(Long userId, UserUpdateRequest updateRequest) { // Metot imzası UserUpdateRequest alacak şekilde değişti
+    public User updateUser(int userId, UserUpdateRequest updateRequest) { // Metot imzası UserUpdateRequest alacak şekilde değişti
         System.out.println("UserService: Kullanıcı güncelleniyor - ID: " + userId);
 
         // 1. Güncellenmek istenen kullanıcıyı ID'ye göre bul
@@ -143,7 +143,7 @@ public class UserService {
 
  // Kullanıcı rolünü değiştirme (Sadece Admin yetkisi gerektirecek)
     // RoleChangeRequest DTO'su kullanılacak
-    public User changeUserRole(Long userId, RoleChangeRequest roleChangeRequest) { // Metot imzası RoleChangeRequest alacak şekilde
+    public User changeUserRole(int userId, RoleChangeRequest roleChangeRequest) { // Metot imzası RoleChangeRequest alacak şekilde
         System.out.println("UserService: Kullanıcı rolü değiştiriliyor - ID: " + userId + ", Yeni Rol: " + roleChangeRequest.getNewRole());
 
         // 1. Rolü değiştirilmek istenen kullanıcıyı ID'ye göre bul
@@ -185,7 +185,7 @@ public class UserService {
  // Kullanıcının parolasını değiştirme (Admin yetkisi gerektirecek veya kullanıcı kendi parolasını değiştirebilir)
     // PasswordChangeRequest DTO'su kullanılacak
     // isAdminAction: İsteği yapan ADMIN ise true, kullanıcı kendi parolasını değiştiriyorsa false.
-    public User changeUserPassword(Long userId, PasswordChangeRequest passwordChangeRequest, boolean isAdminAction) {
+    public User changeUserPassword(int userId, PasswordChangeRequest passwordChangeRequest, boolean isAdminAction) {
         System.out.println("UserService: Kullanıcı parolası değiştiriliyor - ID: " + userId);
 
         // 1. Parolası değiştirilmek istenen kullanıcıyı ID'ye göre bul
@@ -233,7 +233,7 @@ public class UserService {
  // Kullanıcının e-posta adresini değiştirme (Admin yetkisi gerektirecek veya kullanıcı kendi e-postasını değiştirebilir)
     // EmailChangeRequest DTO'su kullanılacak
     // isAdminAction: İsteği yapan ADMIN ise true, kullanıcı kendi e-postasını değiştiriyorsa false.
-    public User changeUserEmail(Long userId, EmailChangeRequest emailChangeRequest, boolean isAdminAction) {
+    public User changeUserEmail(int userId, EmailChangeRequest emailChangeRequest, boolean isAdminAction) {
         System.out.println("UserService: Kullanıcı e-postası değiştiriliyor - ID: " + userId + ", Yeni Email: " + emailChangeRequest.getNewEmail());
 
         // 1. E-posta adresi değiştirilmek istenen kullanıcıyı ID'ye göre bul
@@ -248,7 +248,7 @@ public class UserService {
         Optional<User> existingUserWithNewEmail = userRepository.findByEmail(newEmail);
 
         // Eğer bu email başka bir kullanıcı tarafından kullanılıyorsa VE bu kullanıcı şu an güncellediğimiz kullanıcı değilse
-        if (existingUserWithNewEmail.isPresent() && !existingUserWithNewEmail.get().getId().equals(userId)) {
+        if (existingUserWithNewEmail.isPresent() && existingUserWithNewEmail.get().getId()!=userId) {
             System.err.println("UserService: E-posta değiştirme başarısız - '" + newEmail + "' e-posta adresi zaten kullanımda.");
             throw new DuplicateEmailException("'" + newEmail + "' e-posta adresi zaten kullanımda."); // Çakışma hatası fırlat
         }
@@ -294,7 +294,7 @@ public class UserService {
     // Kullanıcıyı silme (mantıksal silme: isActive = false yapma) (Admin yetkisi gerektirecek)
     // Sizin Admin.java template'indeki addUser, User.java template'indeki deleteUser metotlarının mantığı burada.
  // Kullanıcıyı silme (mantıksal silme: isActive = false yapma) (Admin yetkisi gerektirecek)
-    public void softDeleteUser(Long userId) {
+    public void softDeleteUser(int userId) {
         System.out.println("UserService: Kullanıcı siliniyor (mantıksal) - ID: " + userId);
 
         // 1. Silinmek istenen kullanıcıyı ID'ye göre bul
@@ -318,7 +318,7 @@ public class UserService {
  // Öğretmen olma isteğini gözden geçirme (Admin yetkisi gerektirecek)
     // userId: İsteği yapan kullanıcının ID'si (isteği kimin yaptığını kontrol etmek için gerekebilir, ancak Security ile de kontrol edilebilir)
     // approve: İsteğin onaylanıp onaylanmadığı (true = onaylandı, false = reddedildi)
-    public boolean reviewTeacherRequest(Long userId, boolean approve) {
+    public boolean reviewTeacherRequest(int userId, boolean approve) {
         System.out.println("UserService: Öğretmen isteği gözden geçiriliyor - Kullanıcı ID: " + userId + ", Onay: " + approve);
 
         // 1. İsteği yapılan kullanıcıyı ID'ye göre bul

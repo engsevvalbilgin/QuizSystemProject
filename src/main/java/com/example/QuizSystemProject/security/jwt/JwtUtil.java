@@ -1,6 +1,6 @@
-package com.quizland.QuizSystemProject.security.jwt; // Paket adınızın doğru olduğundan emin olun
+package com.example.QuizSystemProject.security.jwt; // Paket adınızın doğru olduğundan emin olun
 
-import com.quizland.QuizSystemProject.model.User; // Kendi User Entity'miz için (claim eklemek isterseniz gerekebilir)
+import com.example.QuizSystemProject.Model.User; // Kendi User Entity'miz için (claim eklemek isterseniz gerekebilir)
 import org.springframework.security.core.GrantedAuthority; // GrantedAuthority için
 import java.util.stream.Collectors; // Collectors için
 import java.util.Collection; // Koleksiyonlar için (GrantedAuthority için gerekli olabilir)

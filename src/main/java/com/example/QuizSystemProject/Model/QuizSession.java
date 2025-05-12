@@ -13,7 +13,7 @@ public class QuizSession {
 
     @Id // Birincil anahtar
     @GeneratedValue(strategy = GenerationType.IDENTITY) // Otomatik artan ID
-    private Long id; // Long tipinde ID
+    private int id; // int tipinde ID
 
     // Quiz oturumunu alan öğrenciyi belirten ilişki
     // Sizin template'inizdeki 'studentId' alanına karşılık gelir
@@ -60,8 +60,8 @@ public class QuizSession {
     }
 
     // Getter ve Setter Metotları
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; } // ID setter'ı genellikle kullanılmaz
+    public int getId() { return id; }
+    public void setId(int id) { this.id = id; } // ID setter'ı genellikle kullanılmaz
 
     public User getStudent() { return student; }
     public void setStudent(User student) { this.student = student; }

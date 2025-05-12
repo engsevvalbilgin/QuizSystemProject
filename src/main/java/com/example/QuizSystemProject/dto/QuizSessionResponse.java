@@ -9,8 +9,8 @@ import java.time.LocalDateTime; // Tarih/saat için
 // Tüm cevap listesi gibi detayları içermez.
 public class QuizSessionResponse {
 
-    private Long id;
-    private Long quizId; // Hangi quize ait olduğu
+    private int id;
+    private int quizId; // Hangi quize ait olduğu
     private String quizName; // Quizin adı
     private LocalDateTime startTime; // Başlangıç zamanı
     private LocalDateTime endTime; // Bitiş zamanı
@@ -37,7 +37,7 @@ public class QuizSessionResponse {
             this.quizName = session.getQuiz().getName();
             // İstenirse quizin durationMinutes da alınabilir: session.getQuiz().getDurationMinutes();
         } else {
-            this.quizId = null;
+            this.quizId = -1;
             this.quizName = "Bilinmeyen Quiz";
         }
 
@@ -49,7 +49,7 @@ public class QuizSessionResponse {
         if (session.getStartTime() != null && session.getEndTime() != null) {
              Duration duration = Duration.between(session.getStartTime(), session.getEndTime());
              this.durationMinutes = duration.toMinutes();
-        } else if (session.getStartTime() != null && session.getQuiz() != null && session.getQuiz().getDurationMinutes() != null) {
+        } else if (session.getStartTime() != null && session.getQuiz() != null && session.getQuiz().getDuration() != -1) {
              // Eğer oturum bitmemiş ama quizin süresi belliyse, kalan süreyi göstermek gibi daha gelişmiş senaryolar olabilir.
              // Şimdilik sadece tamamlanmış oturumun süresini veya quizin toplam süresini (eğer bitmemişse) düşünebiliriz.
              // Basit tutalım, sadece tamamlandıysa süreyi hesaplayalım veya null kalsın.
@@ -62,11 +62,11 @@ public class QuizSessionResponse {
     // Getter ve Setterlar
     // IDE ile otomatik oluşturabilirsiniz.
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public int getId() { return id; }
+    public void setId(int id) { this.id = id; }
 
-    public Long getQuizId() { return quizId; }
-    public void setQuizId(Long quizId) { this.quizId = quizId; }
+    public int getQuizId() { return quizId; }
+    public void setQuizId(int quizId) { this.quizId = quizId; }
 
     public String getQuizName() { return quizName; }
     public void setQuizName(String quizName) { this.quizName = quizName; }

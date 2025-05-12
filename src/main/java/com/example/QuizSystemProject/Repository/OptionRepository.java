@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository; // Import the Repository annot
 @Repository // Indicates that this interface is a Spring Data JPA Repository
 // Extends JpaRepository to inherit basic CRUD methods
 // <Option, Long>: The first parameter is the Entity type (Option), the second is the type of its Primary Key (Long).
-public interface OptionRepository extends JpaRepository<Option, Long> {
+public interface OptionRepository extends JpaRepository<Option, Integer> {
 
     // Spring Data JPA automatically provides methods like save(), findById(), findAll(), delete(), etc.
 

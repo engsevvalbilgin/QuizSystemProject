@@ -6,7 +6,8 @@ import java.time.LocalDateTime; // Tarih/saat için
 import java.util.Objects; // equals/hashCode için
 
 @Entity // Bu sınıfın bir JPA Entity'si olduğunu belirtir
-@Table(name = "announcements") // Veritabanındaki tablonun adı 'announcements' olacak
+@Table(name = "announcements")
+// Veritabanındaki tablonun adı 'announcements' olacak
 public class Announcement {
 
     @Id // Birincil anahtar
@@ -24,21 +25,21 @@ public class Announcement {
 
     // Duyuruyu kimin yayınladığını belirten ilişki
     // Sizin template'inizdeki 'publisherId' alanına karşılık gelir
-    @ManyToOne // Bir duyuru birden çok kullanıcı (Admin/Teacher) tarafından yayınlanabilir, ama bir duyurunun SADECE bir yayıncısı olur (Çoğa-Bir ilişki)
-    @JoinColumn(name = "publisher_id", nullable = false) // Veritabanındaki yabancı anahtar sütununun adı 'publisher_id' olacak. Boş olamaz.
-    private User publisher; // İlişkili User objesi
-
+     // İlişkili User objesi
+    @ManyToOne
+    @JoinColumn(name = "admin_id")
+    private Admin admin;
     // JPA için argümansız constructor
     public Announcement() {
     }
 
     // Alanları alan constructor (ID ve date otomatik yönetilebilir)
     // Publisher, ilişki kurulduktan sonra set edilmeli veya constructor'a dahil edilmeli
-    public Announcement(String title, String content, User publisher) {
+    public Announcement(String title, String content, Admin publisher) {
         this.title = title;
         this.content = content;
         this.date = LocalDateTime.now(); // Duyuru oluşturulduğunda otomatik tarih atayalım
-        this.publisher = publisher;
+        this.admin = publisher;
     }
 
 
@@ -55,8 +56,8 @@ public class Announcement {
     public LocalDateTime getDate() { return date; }
     public void setDate(LocalDateTime date) { this.date = date; }
 
-    public User getPublisher() { return publisher; }
-    public void setPublisher(User publisher) { this.publisher = publisher; }
+    public Admin getAdmin() { return this.getAdmin(); }
+    public void setAdmin(Admin publisher) { this.admin=publisher; }
 
     // equals() ve hashCode() (ID üzerinden)
     @Override
@@ -79,7 +80,7 @@ public class Announcement {
                "id=" + id +
                ", title='" + title + '\'' +
                ", date=" + date +
-               ", publisher=" + (publisher != null ? publisher.getUsername() : "null") + // Publisher username'ini gösterelim, tüm User objesini değil
+               ", publisher=" + (getAdmin() != null ? getAdmin().getUsername() : "null") + // Publisher username'ini gösterelim, tüm User objesini değil
                '}';
     }
 }

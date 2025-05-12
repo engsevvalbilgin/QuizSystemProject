@@ -6,14 +6,14 @@ import java.util.Date;
 import java.util.List;
 
 @Entity
-@Table(name = "teachers")
+
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class Teacher extends User {
 
-    @OneToMany(mappedBy = "teacher", fetch = FetchType.LAZY)
+    @OneToMany(fetch = FetchType.LAZY)
     private List<Quiz> quizzes;
 
     @Column(name = "subject")

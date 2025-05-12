@@ -1,6 +1,7 @@
 package com.example.QuizSystemProject.dto; // Paket adınızın doğru olduğundan emin olun
 
 import com.example.QuizSystemProject.Model.Question; // Entity'den dönüşüm için Question Entity'sini import edin
+import com.example.QuizSystemProject.Model.TestQuestion;
 
 import java.util.List; // Şık listesi için
 import java.util.stream.Collectors; // Akış işlemleri için
@@ -29,8 +30,8 @@ public class QuestionResponse {
         this.questionType = question.getType() != null ? question.getType().getTypeName() : null;
 
         // Eğer soru çoktan seçmeli ise şıkları DTO'ya dönüştürüp ekleyelim
-        if (question.getOptions() != null && !question.getOptions().isEmpty()) {
-             this.options = question.getOptions().stream()
+        if (((TestQuestion)question).getOptions() != null && !((TestQuestion)question).getOptions().isEmpty()) {
+             this.options = ((TestQuestion)question).getOptions().stream()
                                    .map(OptionResponse::new) // Her Option Entity'sini OptionResponse DTO'suna dönüştür
                                    .collect(Collectors.toList());
         } else {

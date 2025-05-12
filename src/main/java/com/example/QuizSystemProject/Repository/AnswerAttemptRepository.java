@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository; // Repository anotasyonunu imp
 @Repository // Spring'e bu arayüzün bir Repository olduğunu belirtir
 // JpaRepository'den türeyerek temel CRUD metotlarını alır
 // <AnswerAttempt, Long>: İlk parametre Entity tipi (AnswerAttempt), ikinci parametre Entity'nin Primary Key (ID) tipidir (Long).
-public interface AnswerAttemptRepository extends JpaRepository<AnswerAttempt, Long> {
+public interface AnswerAttemptRepository extends JpaRepository<AnswerAttempt,Integer  > {
 
     // Spring Data JPA, JpaRepository'den türediğimiz için
     // save(), findById(), findAll(), delete() gibi temel metotları otomatik sağlar.

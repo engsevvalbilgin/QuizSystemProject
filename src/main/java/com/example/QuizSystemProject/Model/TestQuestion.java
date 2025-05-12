@@ -6,8 +6,8 @@ import lombok.*;
 import java.util.List;
 
 @Entity
-@Table(name = "test_questions")
-@PrimaryKeyJoinColumn(name = "question_id")
+
+ 
 @Getter
 @Setter
 @NoArgsConstructor

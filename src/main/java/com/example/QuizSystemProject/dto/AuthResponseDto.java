@@ -6,7 +6,7 @@ import java.util.List; // Rol listesi için
 // Kullanıcı bilgileri ve erişim token'ı içerir.
 public class AuthResponseDto {
 
-    private Long userId;
+    private int userId;
     private String username;
     private List<String> roles; // Kullanıcının rolleri (örn: ["ROLE_STUDENT", "ROLE_ADMIN"])
     private String token; // JWT veya başka bir erişim token'ı
@@ -16,12 +16,11 @@ public class AuthResponseDto {
     // private Long expiresIn;
 
     // JPA için argümansız constructor (Spring genellikle buna ihtiyaç duymaz ama iyi practice'dir)
-    public AuthResponseDto() {
-    }
+    
 
     // Temel alanları alan constructor
-    public AuthResponseDto(Long userId, String username, List<String> roles, String token) {
-        this.userId = userId;
+    public AuthResponseDto(int i, String username, List<String> roles, String token) {
+        this.userId = i;
         this.username = username;
         this.roles = roles;
         this.token = token;
@@ -30,8 +29,8 @@ public class AuthResponseDto {
     // Getter ve Setterlar
     // IDE ile otomatik oluşturabilirsiniz.
 
-    public Long getUserId() { return userId; }
-    public void setUserId(Long userId) { this.userId = userId; }
+    public int getUserId() { return userId; }
+    public void setUserId(int userId) { this.userId = userId; }
 
     public String getUsername() { return username; }
     public void setUsername(String username) { this.username = username; }

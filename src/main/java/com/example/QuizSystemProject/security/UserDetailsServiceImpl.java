@@ -1,7 +1,7 @@
-package com.quizland.QuizSystemProject.security; // Paket adınızın doğru olduğundan emin olun
+package com.example.QuizSystemProject.security; // Paket adınızın doğru olduğundan emin olun
 
-import com.quizland.QuizSystemProject.model.User; // Kendi User Entity'mizi import edin
-import com.quizland.QuizSystemProject.repository.UserRepository; // UserRepository'yi import edin
+import com.example.QuizSystemProject.Model.User; // Kendi User Entity'mizi import edin
+import com.example.QuizSystemProject.Repository.UserRepository; // UserRepository'yi import edin
 import org.springframework.beans.factory.annotation.Autowired; // Bağımlılık enjeksiyonu için
 import org.springframework.security.core.GrantedAuthority; // Rolleri temsil etmek için
 import org.springframework.security.core.authority.SimpleGrantedAuthority; // GrantedAuthority implementasyonu için
@@ -9,7 +9,7 @@ import org.springframework.security.core.userdetails.UserDetails; // Spring Secu
 import org.springframework.security.core.userdetails.UserDetailsService; // UserDetailsService arayüzü
 import org.springframework.security.core.userdetails.UsernameNotFoundException; // Kullanıcı bulunamadığında fırlatılacak hata
 import org.springframework.stereotype.Service; // Service bileşeni olarak işaretlemek için
-import com.quizland.QuizSystemProject.security.CustomUserDetails;
+import com.example.QuizSystemProject.security.CustomUserDetails;
 import java.util.Collection; // Koleksiyonlar için
 import java.util.List; // Liste için
 import java.util.stream.Collectors; // Akış işlemleri için

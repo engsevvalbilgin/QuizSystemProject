@@ -29,6 +29,7 @@ public class QuestionAnswer {
     @JoinColumn(name = "question_id", nullable = false)
     private Question question;
 
+    
     public void checkAndSetCorrectAnswer(String correctAnswer) {
         this.isCorrect = this.answer != null && this.answer.equals(correctAnswer);
     }

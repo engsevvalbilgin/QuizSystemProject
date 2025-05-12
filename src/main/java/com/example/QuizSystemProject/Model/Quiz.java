@@ -14,6 +14,8 @@ import lombok.*;
 
 @Entity
 @Table(name = "quizzes")
+@Getter
+@Setter
 public class Quiz {
 
     @Id
@@ -26,14 +28,15 @@ public class Quiz {
     @OneToMany(mappedBy = "quiz",fetch = FetchType.LAZY)
     private List<Question> questions;
 
-    @OneToMany(mappedBy = "quiz",fetch = FetchType.LAZY)
+    @OneToMany
+    @JoinColumn(name = "quiz_id") // mappedBy kullanmadan
     private List<QuestionAnswer> answers;
 
     private Date startDate;
     private Date endDate;
     private int duration;
     private boolean isActive;
-
+    private String description;
     public Quiz() {
         this.questions = new ArrayList<>();
         this.isActive = true;

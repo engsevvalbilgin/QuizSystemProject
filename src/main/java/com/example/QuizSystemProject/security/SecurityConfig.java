@@ -1,8 +1,8 @@
-package com.quizland.QuizSystemProject.security;
+package com.example.QuizSystemProject.security;
 
-import com.quizland.QuizSystemProject.security.jwt.JwtAuthenticationEntryPoint;
-import com.quizland.QuizSystemProject.security.jwt.JwtAuthenticationFilter;
-import com.quizland.QuizSystemProject.security.CustomAccessDeniedHandler;
+import com.example.QuizSystemProject.security.jwt.JwtAuthenticationEntryPoint;
+import com.example.QuizSystemProject.security.jwt.JwtAuthenticationFilter;
+import com.example.QuizSystemProject.security.CustomAccessDeniedHandler;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;

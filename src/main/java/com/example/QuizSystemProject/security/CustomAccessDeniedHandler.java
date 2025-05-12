@@ -1,4 +1,4 @@
-package com.quizland.QuizSystemProject.security; // Paket adınızı kontrol edin
+package com.example.QuizSystemProject.security; // Paket adınızı kontrol edin
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
