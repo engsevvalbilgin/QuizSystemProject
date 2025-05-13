@@ -29,7 +29,6 @@ public class Question {
     
     @Column(name = "type", nullable = false)
     private QuestionType type;
-
     
     private QuestionAnswer answer;
 

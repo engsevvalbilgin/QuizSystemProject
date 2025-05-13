@@ -17,7 +17,7 @@ public class Student extends User {
     private String schoolName;
 
     @Column(name = "student_id", unique = true)
-    private String studentId;
+    private int studentId;
 
     @JoinColumn(name="quiz_id")
     private List<Quiz> quizzes;

@@ -11,6 +11,6 @@ import com.example.QuizSystemProject.Model.*;
 public class QuizSystemProjectApplication {
     public static void main(String[] args) {
         SpringApplication.run(QuizSystemProjectApplication.class, args);
-   Quiz q=new Quiz();
+        
     }
 }
