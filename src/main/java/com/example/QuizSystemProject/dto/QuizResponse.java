@@ -18,6 +18,7 @@ import java.time.LocalDateTime; // Tarih/saat için
 public class QuizResponse {
 
     private int id;
+    private int teacherId;
     private String name; // Quiz adı
     private String description; // Açıklama
     private String teacherName; // Quizi oluşturan öğretmenin adı/kullanıcı adı
@@ -37,11 +38,16 @@ public class QuizResponse {
     // Quiz Entity'sinden bu DTO'ya dönüşüm yapmayı kolaylaştıran constructor
     public QuizResponse(Quiz quiz) {
         this.id = quiz.getId();
+        if (quiz.getTeacher() != null) { // Add null check
+            this.teacherId = quiz.getTeacher().getId();
+        } else {
+            this.teacherId = 0; // Or handle as appropriate
+        }
         this.name = quiz.getName();
         this.description = quiz.getDescription();
         
 		// Öğretmen ilişkisinden adı alalım (null kontrolü önemli)
-        Teacher teacher = teacherRepository.findById(quiz.getTeacherId()).orElse(null);
+        Teacher teacher = teacherRepository.findById(quiz.getTeacher().getId()).orElse(null);
         this.teacherName = teacher != null ? teacher.getName() + " " + teacher.getSurname() : "Bilinmiyor";
 
         this.durationMinutes = quiz.getDuration();
@@ -53,7 +59,7 @@ public class QuizResponse {
     // Getter ve Setterlar
     // lombok ile otomatik oluşturuldu
 
-   
-
-    
+    public void setTeacherId(int teacherId) {
+        this.teacherId = teacherId;
+    }
 }

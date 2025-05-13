@@ -13,6 +13,7 @@ import java.util.stream.Collectors; // Akış işlemleri için
 public class QuizDetailsResponse {
 
     private int id;
+    private int teacherId; 
     private String name; // Quiz adı
     private String description; // Açıklama
     private String teacherName; // Quizi oluşturan öğretmenin adı/kullanıcı adı
@@ -31,9 +32,14 @@ public class QuizDetailsResponse {
     // Quiz Entity'sinden bu DTO'ya dönüşüm yapmayı kolaylaştıran constructor
     public QuizDetailsResponse(Quiz quiz) {
         this.id = quiz.getId();
+        if (quiz.getTeacher() != null) { 
+            this.teacherId = quiz.getTeacher().getId();
+        } else {
+            this.teacherId = 0; 
+        }
         this.name = quiz.getName();
         this.description = quiz.getDescription();
-        Teacher teacher = teacherRepository.findById(quiz.getTeacherId()).orElse(null);
+        Teacher teacher = teacherRepository.findById(this.teacherId).orElse(null);
         this.teacherName = teacher != null ? teacher.getName() + " " + teacher.getSurname() : "Bilinmiyor";
         this.durationMinutes = quiz.getDuration();
         this.isActive = quiz.isActive();
@@ -55,6 +61,9 @@ public class QuizDetailsResponse {
 
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
+
+    public int getTeacherId() { return teacherId; }
+    public void setTeacherId(int teacherId) { this.teacherId = teacherId; }
 
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }

@@ -1,12 +1,14 @@
 package com.example.QuizSystemProject.Model;
 import com.example.QuizSystemProject.Model.Question;
 import com.example.QuizSystemProject.Model.QuestionAnswer;
+import com.example.QuizSystemProject.Model.Teacher;
 import jakarta.persistence.*;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.OneToMany;
-
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.JoinColumn;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -22,14 +24,17 @@ public class Quiz {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    private int teacherId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "teacher_id") 
+    private Teacher teacher;
+
     private String name;
 
     @OneToMany(mappedBy = "quiz",fetch = FetchType.LAZY)
     private List<Question> questions;
 
     @OneToMany
-    @JoinColumn(name = "quiz_id") // mappedBy kullanmadan
+    @JoinColumn(name = "quiz_id") 
     private List<QuestionAnswer> answers;
 
     private Date startDate;
@@ -47,8 +52,8 @@ public class Quiz {
     public int getId() { return id; }
     public void setId(int id) { this.id = id; }
 
-    public int getTeacherId() { return teacherId; }
-    public void setTeacherId(int teacherId) { this.teacherId = teacherId; }
+    public Teacher getTeacher() { return teacher; }
+    public void setTeacher(Teacher teacher) { this.teacher = teacher; }
 
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
@@ -71,5 +76,4 @@ public class Quiz {
     public boolean isActive() { return isActive; }
     public void setActive(boolean active) { isActive = active; }
 
-	
 }
