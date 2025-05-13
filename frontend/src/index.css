@@ -1,0 +1,231 @@
+/* C:\Users\Hakan\Desktop\devam\front\QuizLandFrontend\src\index.css */
+/* Mevcut CSS kodlarınız burada kalacak */
+
+
+/* --- Genel Sayfa Stili --- */
+body {
+  font-family: 'Arial', sans-serif; /* Daha modern bir font */
+  line-height: 1.6;
+  margin: 0;
+  padding: 20px;
+  background-color: #f4f4f4; /* Açık gri arka plan */
+  color: #333;
+}
+
+.App { /* App komponentini saran div */
+  max-width: 900px; /* Maksimum genişlik */
+  margin: 0 auto; /* Ortala */
+  background: #fff; /* Beyaz arka plan */
+  padding: 20px;
+  border-radius: 8px; /* Köşeleri yuvarla */
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Hafif gölge */
+}
+
+h2, h3 {
+  color: #555; /* Başlık rengi */
+  border-bottom: 1px solid #eee; /* Alt çizgi */
+  padding-bottom: 10px;
+  margin-bottom: 20px;
+}
+
+/* --- Form Stili (Login gibi) --- */
+form div {
+  margin-bottom: 15px; /* Form elemanları arasına boşluk */
+}
+
+form label {
+  display: block; /* Label'ları ayrı satıra al */
+  margin-bottom: 5px; /* Label ile input arasına boşluk */
+  font-weight: bold;
+  color: #555;
+}
+
+form input[type="text"],
+form input[type="password"],
+form input[type="email"] { /* Eğer email inputu eklersek */
+  width: 100%; /* Genişliği %100 yap */
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  box-sizing: border-box; /* Padding ve border genişliğe dahil */
+}
+
+/* --- Düğme Stili --- */
+button {
+  background-color: #5cb85c; /* Yeşil */
+  color: white;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1em;
+  transition: background-color 0.3s ease; /* Hover efekti için */
+}
+
+button:hover:not(:disabled) {
+  background-color: #4cae4c; /* Daha koyu yeşil */
+}
+
+button:disabled {
+  background-color: #ccc; /* Gri */
+  cursor: not-allowed;
+}
+
+/* --- Tablo Stili (Kullanıcı Listesi gibi) --- */
+table {
+  width: 100%; /* Genişliği %100 yap */
+  border-collapse: collapse; /* Kenarlıkları birleştir */
+  margin-top: 20px;
+}
+
+th, td {
+  text-align: left; /* Yazıyı sola hizala */
+  padding: 10px;
+  border-bottom: 1px solid #ddd; /* Alt çizgi */
+}
+
+th {
+  background-color: #f2f2f2; /* Başlık arka plan rengi */
+  font-weight: bold;
+}
+
+/* Çift sıralı satırlar için arka plan */
+tbody tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+/* Satır üzerine gelindiğinde arka plan */
+tbody tr:hover {
+  background-color: #e9e9e9;
+}
+
+/* --- Hata Mesajı Stili --- */
+p[style*="color: red"] { /* Kırmızı renkli paragraflar (bizim hata mesajımız) */
+  background-color: #fdd;
+  border: 1px solid #fbc;
+  padding: 10px;
+  border-radius: 4px;
+  margin-bottom: 15px;
+}
+
+/* --- Header Stili --- */
+.app-header {
+  background-color: #333; /* Koyu gri arka plan */
+  color: white;
+  padding: 10px 0;
+  margin-bottom: 20px; /* İçerikle arasına boşluk */
+}
+
+.app-header .container {
+   max-width: 900px; /* İçeriği ortalamak ve genişliği sınırlamak için */
+   margin: 0 auto;
+   padding: 0 20px; /* Kenarlardan boşluk */
+   display: flex; /* Öğeleri yan yana hizala */
+   justify-content: space-between; /* Öğeleri uçlara hizala */
+   align-items: center; /* Öğeleri dikeyde ortala */
+}
+
+.app-header h1 {
+  margin: 0; /* Başlığın marginini sıfırla */
+  font-size: 1.8em;
+}
+
+.app-header h1 a {
+    color: white; /* Başlık link rengi */
+    text-decoration: none; /* Alt çizgiyi kaldır */
+}
+
+.app-header nav ul {
+  list-style: none; /* Liste işaretlerini kaldır */
+  margin: 0;
+  padding: 0;
+  display: flex; /* Liste elemanlarını yan yana hizala */
+}
+
+.app-header nav ul li {
+  margin-left: 20px; /* Linkler arasına boşluk */
+}
+
+.app-header nav ul li a {
+  color: white; /* Link rengi */
+  text-decoration: none; /* Alt çizgiyi kaldır */
+  font-weight: bold;
+  transition: color 0.3s ease;
+}
+
+.app-header nav ul li a:hover {
+  color: #5cb85c; /* Hover rengi */
+}
+
+/* --- Ana İçerik Alanı Stili --- */
+.main-content {
+    padding: 20px; /* İçerik etrafına boşluk */
+    /* box-shadow ve border-radius App sınıfında zaten var, gerekirse burada ezilebilir */
+}
+
+/* TODO: Admin Paneli Layoutu için özel CSS buraya gelecek */
+/* Örneğin sidebar ve content alanları için */
+
+/* --- Admin Layout Stili --- */
+.admin-layout {
+  display: flex; /* Sidebar ve içeriği yan yana hizala */
+  min-height: calc(100vh - 100px); /* En az ekran yüksekliği kadar olsun (header boşluğunu çıkar) */
+  /* max-width, margin auto gibi özellikleri App.jsx'teki App div'i veya MainLayout'un container'ı zaten veriyor olabilir */
+}
+
+.admin-sidebar {
+  width: 200px; /* Sidebar genişliği */
+  background-color: #eee; /* Açık gri arka plan */
+  padding: 20px;
+  flex-shrink: 0; /* Küçülmesini engelle */
+  border-right: 1px solid #ddd; /* Sağında çizgi */
+}
+
+.admin-sidebar h3 {
+    margin-top: 0; /* Başlığın üst marginini sıfırla */
+    margin-bottom: 15px;
+    padding-bottom: 5px;
+    border-bottom: 1px solid #ccc;
+}
+
+.admin-sidebar nav ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.admin-sidebar nav ul li {
+  margin-bottom: 10px; /* Menü elemanları arasına boşluk */
+}
+
+.admin-sidebar nav ul li a {
+  text-decoration: none;
+  color: #333;
+  font-weight: bold;
+  display: block; /* Alanın tamamına tıklanabilir yap */
+  padding: 5px 0;
+  transition: color 0.3s ease;
+}
+
+.admin-sidebar nav ul li a:hover {
+  color: #5cb85c; /* Hover rengi */
+}
+
+/* İsteğe bağlı: Aktif menü öğesini vurgulama (NavLink kullanılarak daha kolay yapılır) */
+/* .admin-sidebar nav ul li a.active { color: #5cb85c; } */
+
+
+.admin-content {
+  flex-grow: 1; /* Kalan alanı doldur */
+  padding: 20px; /* İçerik etrafına boşluk */
+  /* Arka plan ve gölge App div'inden veya MainLayout'tan geliyor olabilir */
+}
+
+/* Admin içeriği içindeki başlıklar */
+.admin-content h2,
+.admin-content h3 {
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+    margin-top: 0; /* Sayfanın başındaki başlıklar için */
+    margin-bottom: 20px;
+}
