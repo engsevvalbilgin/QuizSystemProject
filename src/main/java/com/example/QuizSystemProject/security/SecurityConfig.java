@@ -20,6 +20,9 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.web.authentication.AnonymousAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 @Configuration
 @EnableWebSecurity
@@ -30,6 +33,21 @@ public class SecurityConfig {
         return new BCryptPasswordEncoder();
     }
 
+// CORS Yapılandırma Bean'i (Frontend'den gelecek çapraz kaynak isteklere izin verir)
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        CorsConfiguration config = new CorsConfiguration();
+        config.setAllowCredentials(true); // Çerezlerin ve kimlik doğrulama başlıklarının (Authorization gibi) gönderilmesine izin ver
+
+        config.addAllowedOrigin("http://localhost:5173"); // Frontend adresiniz (Curl testinde kullandığımız port)
+
+        config.addAllowedHeader("*"); // Tüm başlıklara izin ver (Authorization, Content-Type vb.)
+        config.addAllowedMethod("*"); // Tüm HTTP metotlarına izin ver (GET, POST, PUT, DELETE, OPTIONS vb.)
+        source.registerCorsConfiguration("/**", config); // Tüm (/**) URL desenlerine bu CORS konfigürasyonunu uygula
+        return source;
+    }
+    
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
         return authenticationConfiguration.getAuthenticationManager();
@@ -59,6 +77,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
+            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .csrf(csrf -> csrf.disable())
             .exceptionHandling(exception -> exception
                 .authenticationEntryPoint(jwtAuthenticationEntryPoint)

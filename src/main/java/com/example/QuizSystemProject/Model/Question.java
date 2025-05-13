@@ -27,10 +27,12 @@ public class Question {
     private String questionSentence;
 
     
-    @Column(name = "type", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY) // Consider EAGER if type is always needed with Question
+    @JoinColumn(name = "question_type_id", nullable = false) // Foreign key column in 'questions' table
     private QuestionType type;
-
     
+    @OneToOne(cascade = CascadeType.ALL) 
+    @JoinColumn(name = "question_answer_id", referencedColumnName = "id")
     private QuestionAnswer answer;
 
     @ManyToOne(fetch = FetchType.LAZY)

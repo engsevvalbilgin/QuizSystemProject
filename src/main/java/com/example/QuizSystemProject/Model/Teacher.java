@@ -13,7 +13,7 @@ import java.util.List;
 @AllArgsConstructor
 public class Teacher extends User {
 
-    @OneToMany(fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "teacher", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Quiz> quizzes;
 
     @Column(name = "subject")
@@ -27,7 +27,7 @@ public class Teacher extends User {
 
     public void createQuiz(Quiz quiz) {
         quizzes.add(quiz);
-        quiz.setTeacherId(this.getId()); // Automatically associate the quiz with this teacher
+        quiz.setTeacher(this); // Automatically associate the quiz with this teacher
     }
 
     public void showQuizzes() {
