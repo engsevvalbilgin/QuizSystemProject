@@ -13,7 +13,7 @@ public class AuthResponseDto {
 
     // İsteğe bağlı olarak token tipi (örn: "Bearer") veya token'ın son kullanma süresi de eklenebilir.
     // private String tokenType = "Bearer";
-    // private Long expiresIn;
+    
 
     // JPA için argümansız constructor (Spring genellikle buna ihtiyaç duymaz ama iyi practice'dir)
     
@@ -45,9 +45,7 @@ public class AuthResponseDto {
     // public String getTokenType() { return tokenType; }
     // public void setTokenType(String tokenType) { this.tokenType = tokenType; }
 
-    // Eğer expiresIn eklediyseniz:
-    // public Long getExpiresIn() { return expiresIn; }
-    // public void setExpiresIn(Long expiresIn) { this.expiresIn = expiresIn; }
+    
 
 
     // İsteğe bağlı olarak toString, equals, hashCode metotları eklenebilir.

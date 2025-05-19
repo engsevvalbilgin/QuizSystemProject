@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "questions")
@@ -15,6 +17,10 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Question {
+
+    // JPA relationships often benefit from toString/equalsAndHashCode exclusions
+    // Consider adding @ToString(exclude = {"quiz", "options"})
+    // and @EqualsAndHashCode(exclude = {"quiz", "options"}) if @Data or similar is used.
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -31,7 +37,7 @@ public class Question {
     @JoinColumn(name = "question_type_id", nullable = false) // Foreign key column in 'questions' table
     private QuestionType type;
     
-    @OneToOne(cascade = CascadeType.ALL) 
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true) 
     @JoinColumn(name = "question_answer_id", referencedColumnName = "id")
     private QuestionAnswer answer;
 
@@ -39,7 +45,30 @@ public class Question {
     @JoinColumn(name = "quiz_id", nullable = false)
     private Quiz quiz;
 
+    @OneToMany(mappedBy = "question", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<Option> options = new ArrayList<>();
+
     public static Question createQuestion() {
         return new Question();
+    }
+
+    // Helper methods for managing the bidirectional relationship with Option
+    public void addOption(Option option) {
+        if (this.options == null) {
+            this.options = new ArrayList<>();
+        }
+        this.options.add(option);
+        if (option != null) { // Add null check for safety
+            option.setQuestion(this); // Assuming Option has setQuestion
+        }
+    }
+
+    public void removeOption(Option option) {
+        if (this.options != null) {
+            this.options.remove(option);
+        }
+        if (option != null) { // Add null check for safety
+            option.setQuestion(null); // Assuming Option has setQuestion
+        }
     }
 }
