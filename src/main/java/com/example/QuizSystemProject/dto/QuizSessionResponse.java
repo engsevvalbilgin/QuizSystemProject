@@ -17,7 +17,7 @@ public class QuizSessionResponse {
     private int score; // Oturumda alınan puan
 
     // Oturum süresi Entity'de tutulmasa bile burada hesaplanıp döndürülebilir
-    private int durationMinutes; // Oturum süresi (dakika cinsinden)
+    private Long durationMinutes; // Oturum süresi (dakika cinsinden)
 
     // Öğrenci bilgisi bu DTO'da genellikle olmaz (listelenen oturumlar zaten tek bir öğrenciye aittir)
     // Ama gerekirse eklenebilir.
@@ -29,11 +29,11 @@ public class QuizSessionResponse {
 
     // QuizSession Entity'sinden bu DTO'ya dönüşüm yapmayı kolaylaştıran constructor
     public QuizSessionResponse(QuizSession session) {
-        this.id = (int) session.getId();
+        this.id = session.getId();
 
         // İlişkili Quiz'den bilgileri alalım (null kontrolü önemli)
         if (session.getQuiz() != null) {
-            this.quizId = (int) session.getQuiz().getId();
+            this.quizId = session.getQuiz().getId();
             this.quizName = session.getQuiz().getName();
             // İstenirse quizin durationMinutes da alınabilir: session.getQuiz().getDurationMinutes();
         } else {
@@ -48,14 +48,14 @@ public class QuizSessionResponse {
         // Süreyi hesaplayıp DTO alanına set edelim (Null kontrolleri önemli)
         if (session.getStartTime() != null && session.getEndTime() != null) {
              Duration duration = Duration.between(session.getStartTime(), session.getEndTime());
-             this.durationMinutes = (int) duration.toMinutes();
+             this.durationMinutes = duration.toMinutes();
         } else if (session.getStartTime() != null && session.getQuiz() != null && session.getQuiz().getDuration() != -1) {
              // Eğer oturum bitmemiş ama quizin süresi belliyse, kalan süreyi göstermek gibi daha gelişmiş senaryolar olabilir.
              // Şimdilik sadece tamamlanmış oturumun süresini veya quizin toplam süresini (eğer bitmemişse) düşünebiliriz.
-             // Basit tutalım, sadece tamamlandıysa süreyi hesaplayalım veya 0 olsun.
-             this.durationMinutes = 0; // Tamamlanmamışsa 0
+             // Basit tutalım, sadece tamamlandıysa süreyi hesaplayalım veya null kalsın.
+             this.durationMinutes = null; // Tamamlanmamışsa null
         } else {
-             this.durationMinutes = 0;
+             this.durationMinutes = null;
         }
     }
 
@@ -80,8 +80,8 @@ public class QuizSessionResponse {
     public int getScore() { return score; }
     public void setScore(int score) { this.score = score; }
 
-    public int getDurationMinutes() { return durationMinutes; }
-    public void setDurationMinutes(int durationMinutes) { this.durationMinutes = durationMinutes; }
+    public Long getDurationMinutes() { return durationMinutes; }
+    public void setDurationMinutes(Long durationMinutes) { this.durationMinutes = durationMinutes; }
 
 
     // İsteğe bağlı olarak toString, equals, hashCode metotları eklenebilir.

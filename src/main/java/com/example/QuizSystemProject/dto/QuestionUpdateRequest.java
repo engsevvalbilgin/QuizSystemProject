@@ -22,7 +22,7 @@ public class QuestionUpdateRequest {
     private String correctAnswerText;
 
     @NotNull(message = "Soru tipi ID'si boş olamaz")
-    private int questionTypeId; // İlişkili QuestionType ID'si
+    private Long questionTypeId; // İlişkili QuestionType ID'si
 
     // Çoktan seçmeli sorular için güncel şık listesi
      @Valid // Listedeki her OptionUpdateRequest objesini de doğrula
@@ -41,8 +41,8 @@ public class QuestionUpdateRequest {
     public String getCorrectAnswerText() { return correctAnswerText; }
     public void setCorrectAnswerText(String correctAnswerText) { this.correctAnswerText = correctAnswerText; }
 
-    public int getQuestionTypeId() { return questionTypeId; }
-    public void setQuestionTypeId(int questionTypeId) { this.questionTypeId = questionTypeId; }
+    public Long getQuestionTypeId() { return questionTypeId; }
+    public void setQuestionTypeId(Long questionTypeId) { this.questionTypeId = questionTypeId; }
 
      public List<OptionUpdateRequest> getOptions() { return options; }
      public void setOptions(List<OptionUpdateRequest> options) { this.options = options; }

@@ -59,7 +59,7 @@ public class AuthenticationService {
     // Uygulama baz URL'si (maildeki linkleri oluşturmak için)
     // application.properties'ten okunabilir veya sabit tanımlanabilir.
     // @Value("${app.base.url}") // application.properties'e ekleyebilirsiniz: app.base.url=http://localhost:8080
-    private String appBaseUrl = "http://localhost:8080"; 
+    private String appBaseUrl = "http://localhost:8080"; // todo Şimdilik sabit veya application.properties'ten okuyabilirsiniz.
 
 
     @Autowired
@@ -88,8 +88,8 @@ public class AuthenticationService {
             throw new DuplicateEmailException("Email adresi zaten kullanımda");
         }
 
-        // Yeni Student objesi oluşturma (JPA kalıtımı için)
-        Student newUser = new Student();
+        // Yeni User objesi oluşturma
+        User newUser = new User();
         newUser.setUsername(registrationRequest.getUsername());
         // Parolayı şifreleme ve set etme
         newUser.setPassword(passwordEncoder.encode(registrationRequest.getPassword()));
@@ -348,7 +348,7 @@ public class AuthenticationService {
         return savedUser; // Güncellenen kullanıcıyı döndür
     }
 
-    
-   
+    // TODO: AuthenticationService'de JWT doğrulaması, parola güncelleme (giriş yapmış kullanıcı için) gibi diğer metotlar buraya eklenebilir.
+    // Ancak şu anki temel akış için yukarıdaki metotlar yeterlidir.
 
 }

@@ -5,14 +5,13 @@ import lombok.*;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import jakarta.persistence.DiscriminatorValue; 
+
 @Entity
 
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@DiscriminatorValue("Student")
 public class Student extends User {
 
     @Column(name = "school_name")
@@ -26,7 +25,7 @@ public class Student extends User {
 
 	@Override
 	protected void showUserDetails() {
-		
+		// TODO Auto-generated method stub
 		
 	}
 	public static Student createStudent() {

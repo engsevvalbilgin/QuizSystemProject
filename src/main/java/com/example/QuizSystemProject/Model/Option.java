@@ -24,7 +24,7 @@ public class Option {
     private String text;
 
     @Column(name = "is_correct", nullable = false)
-    private boolean correct;
+    private boolean isCorrect;
     
     @ManyToOne
     @JoinColumn(name = "test_question_id")
@@ -35,8 +35,13 @@ public class Option {
         Option option = new Option();
         option.setQuestion(question);
         option.setText(text);
-        option.setCorrect(isCorrect);
+        option.setIsCorrect(isCorrect);
         return option;
     }
 
+	private void setIsCorrect(boolean isCorrect2) {
+		// TODO Auto-generated method stub
+		isCorrect=!isCorrect2;
+		
+	}
 }

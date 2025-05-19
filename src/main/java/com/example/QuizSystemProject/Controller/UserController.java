@@ -1,29 +1,26 @@
-package com.example.QuizSystemProject.Controller; // Paket adınızın doğru olduğundan emin olun
+package com.example.QuizSystemProject.Controller;
+import com.example.QuizSystemProject.Model.*;
 
-import com.example.QuizSystemProject.dto.*; // İleride oluşturulacak tüm ilgili DTO'ları import edin (veya tek tek)
-import com.example.QuizSystemProject.Model.User; // User Entity'sini döndürmek için (DTO kullanmak daha iyi olabilir)
-import com.example.QuizSystemProject.Service.UserService; // UserService'i import edin
+import com.example.QuizSystemProject.*;
+import com.example.QuizSystemProject.Model.User;
+import com.example.QuizSystemProject.Service.UserService;
+import com.example.QuizSystemProject.dto.EmailChangeRequest;
+import com.example.QuizSystemProject.dto.PasswordChangeRequest;
+import com.example.QuizSystemProject.dto.RoleChangeRequest;
+import com.example.QuizSystemProject.dto.UserUpdateRequest;
+
 import jakarta.validation.Valid; // Girdi doğrulama için
 import org.springframework.beans.factory.annotation.Autowired; // Bağımlılık enjeksiyonu için
-
+import org.springframework.http.HttpStatus; // HTTP durum kodları için
 import org.springframework.http.ResponseEntity; // HTTP yanıtı oluşturmak için
 import org.springframework.web.bind.annotation.*; // Web anotasyonları için (@RestController, @RequestMapping, @GetMapping vb.)
-
 import java.util.List; // List importu
-// Optional importu artık doğrudan Controller'da kullanılmıyor (Service tarafından handle ediliyor)
-// import java.util.Optional;
+import java.util.Optional; // Optional importu
 
-// Bu exception importlarına Controller içinde artık yakalamadığımız için gerek kalmadı.
-// Ancak Service ve GlobalExceptionHandler'da hala gerekli olacaklardır.
-// import com.quizland.QuizSystemProject.exception.UserNotFoundException;
-// import com.quizland.QuizSystemProject.exception.DuplicateEmailException;
-// import org.springframework.security.authentication.BadCredentialsException;
-// import java.lang.IllegalArgumentException; // GlobalHandler tarafından yakalanıyor
-
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.Authentication; // Authentication objesi için
-
+// Şifre değiştirme hatası için (BadCredentialsException) Spring Security importu
+import org.springframework.security.authentication.BadCredentialsException;
+// Geçersiz rol gibi durumlar için
+import java.lang.IllegalArgumentException;
 
 @RestController // Bu sınıfın bir REST Controller olduğunu belirtir
 @RequestMapping("/api/users") // Bu controller altındaki tüm endpoint'lerin "/api/users" ile başlayacağını belirtir
@@ -41,224 +38,174 @@ public class UserController {
 
     // Tüm kullanıcıları listeleme
     // HTTP GET isteği ile "/api/users" adresine yapılan istekleri karşılar
-    // (Sadece Admin yetkisi gerektirir - Security ile sağlanacak)
+    // (Sadece Admin yetkisi gerektirir)
     @GetMapping
-    // Dönüş tipi ResponseEntity<List<UserResponse>> olarak değişti
-    public ResponseEntity<List<UserResponse>> getAllUsers() {
-            System.out.println("UserController: Tüm kullanıcılar listeleniyor.");
+    public ResponseEntity<List<User>> getAllUsers() {
+        System.out.println("UserController: Tüm kullanıcılar listeleniyor.");
+        // NOT: Gerçek implementasyonda, Service'ten tüm kullanıcıları çekme
+        // ve DTO listesine dönüştürüp 200 OK yanıtı ile döndürme mantığı olacak.
+        // Spring Security ile bu endpoint'in sadece ADMIN rolüne sahip kullanıcılar tarafından çağrılmasını sağlayacağız.
 
-            // try-catch bloğu kaldırıldı. Beklenmeyen Exception'lar
-            // artık GlobalExceptionHandler tarafından yakalanacak.
+        // List<User> users = userService.getAllUsers();
+        // return ResponseEntity.ok(users); // DTO listesi döndürülmeli
 
-            // Service katmanındaki tüm kullanıcıları getiren metodu çağır
-            // Service metodu zaten List<UserResponse> döndürüyor.
-            List<UserResponse> users = userService.getAllUsers();
+        return ResponseEntity.ok(List.of(Student.createStudent())); // Şimdilik simülasyon
+    }
 
-            System.out.println("UserController: " + users.size() + " kullanıcı bulundu.");
-            // Başarılı durumda 200 OK yanıtı ve DTO listesini döndür
-            return ResponseEntity.ok(users);
-        }
+     // Kullanıcıları role göre listeleme
+     // HTTP GET isteği ile "/api/users/role/{roleName}" adresine yapılan istekleri karşılar
+     // (Sadece Admin yetkisi gerektirir)
+     @GetMapping("/role/{roleName}")
+     public ResponseEntity<List<User>> getUsersByRole(@PathVariable("roleName") String roleName) {
+         System.out.println("UserController: Rolü '" + roleName + "' olan kullanıcılar listeleniyor.");
+         // NOT: Gerçek implementasyonda, Service'ten role göre kullanıcıları çekme
+         // ve DTO listesine dönüştürüp 200 OK yanıtı ile döndürme mantığı olacak.
+         // Spring Security ile bu endpoint'in sadece ADMIN rolüne sahip kullanıcılar tarafından çağrılmasını sağlayacağız.
 
-    // Kullanıcıları role göre listeleme
-    // HTTP GET isteği ile "/api/users/role/{roleName}" adresine yapılan istekleri karşılar
-    // (Sadece Admin yetkisi gerektirir - Security ile sağlanacak)
-    @GetMapping("/role/{roleName}")
-    // Dönüş tipi ResponseEntity<List<UserResponse>> olarak değişti
-    public ResponseEntity<List<UserResponse>> getUsersByRole(@PathVariable("roleName") String roleName) {
-            System.out.println("UserController: Rolü '" + roleName + "' olan kullanıcılar listeleniyor.");
+         // List<User> users = userService.getUsersByRole(roleName);
+         // return ResponseEntity.ok(users); // DTO listesi döndürülmeli
 
-            // try-catch blokları kaldırıldı. IllegalArgumentException ve diğer Exception'lar
-            // artık GlobalExceptionHandler tarafından yakalanacak.
-
-            // Service katmanındaki role göre kullanıcıları getiren metodu çağır
-            // Service metodu rolü doğrular ve List<UserResponse> döndürür veya IllegalArgumentException fırlatır.
-            List<UserResponse> users = userService.getUsersByRole(roleName);
-
-            System.out.println("UserController: Rolü '" + roleName + "' olan " + users.size() + " kullanıcı bulundu.");
-            // Başarılı durumda 200 OK yanıtı ve DTO listesini döndür
-            return ResponseEntity.ok(users);
-        }
+         return ResponseEntity.ok(List.of(Student.createStudent())); // Şimdilik simülasyon
+     }
 
 
     // ID'ye göre kullanıcı getirme
     // HTTP GET isteği ile "/api/users/{id}" adresine yapılan istekleri karşılar
-    // (Admin veya kullanıcı kendi profilini getirebilir - Security ile sağlanacak)
+    // (Admin veya kullanıcı kendi profilini getirebilir)
     @GetMapping("/{id}")
-    // Dönüş tipi ResponseEntity<UserDetailsResponse> olarak değişti
-    public ResponseEntity<UserDetailsResponse> getUserById(@PathVariable("id") int id) {
-            System.out.println("UserController: Kullanıcı detayları isteniyor - ID: " + id);
+    public ResponseEntity<User> getUserById(@PathVariable("id") Long id) {
+        System.out.println("UserController: Kullanıcı detayları isteniyor - ID: " + id);
+        // NOT: Gerçek implementasyonda, Service'ten kullanıcıyı ID'ye göre çekme,
+        // eğer varsa DTO'ya dönüştürüp 200 OK yanıtı döndürme, yoksa 404 Not Found döndürme mantığı olacak.
+        // Spring Security ile bu endpoint'in ADMIN tarafından veya kullanıcının kendi ID'si için çağrılmasını sağlayacağız.
 
-        // try-catch blokları kaldırıldı. UserNotFoundException ve diğer Exception'lar
-        // artık GlobalExceptionHandler tarafından yakalanacak.
+        // Optional<User> userOptional = userService.getUserById(id);
+        // return userOptional.map(user -> ResponseEntity.ok(user)) // Eğer kullanıcı varsa 200 OK
+        //                      .orElseGet(() -> ResponseEntity.notFound().build()); // Yoksa 404 Not Found
 
-            // Service katmanındaki kullanıcıyı ID'ye göre getiren metodu çağır
-            // Service metodu kullanıcıyı bulursa UserDetailsResponse döndürür, bulamazsa UserNotFoundException fırlatır.
-            UserDetailsResponse userDetailsResponse = userService.getUserById(id);
-
-            System.out.println("UserController: Kullanıcı bulundu - ID: " + id);
-            // Başarılı durumda 200 OK yanıtı ve UserDetailsResponse DTO'sunu döndür
-            return ResponseEntity.ok(userDetailsResponse);
-        }
+        return ResponseEntity.ok(Student.createStudent()); // Şimdilik simülasyon
+    }
 
     // Kullanıcı bilgilerini güncelleme
     // HTTP PUT isteği ile "/api/users/{id}" adresine yapılan istekleri karşılar
-    // (Admin yetkisi gerektirecek, veya kullanıcı kendi bilgilerini gücelleyebilir - rol, email ve parola hariç - Security ile sağlanacak)
+    // (Admin yetkisi gerektirecek, veya kullanıcı kendi bilgilerini güncelleyebilir - rol hariç)
     @PutMapping("/{id}")
-    // Dönüş tipi ResponseEntity<UserDetailsResponse> olarak değişti
-    public ResponseEntity<UserDetailsResponse> updateUser(@PathVariable("id") int id, @Valid @RequestBody UserUpdateRequest userUpdateRequest) {
-            System.out.println("UserController: Kullanıcı güncelleniyor - ID: " + id);
+    public ResponseEntity<User> updateUser(@PathVariable("id") Long id, @Valid @RequestBody UserUpdateRequest userUpdateRequest) {
+        System.out.println("UserController: Kullanıcı güncelleniyor - ID: " + id);
+        // NOT: Gerçek implementasyonda, id ve DTO'daki bilgileri kullanarak Service'teki updateUser metodunu çağırma,
+        // yetki kontrolü (kim güncelliyor, neyi güncelliyor?), güncellenen kullanıcıyı (veya DTO'sunu) döndürme mantığı olacak.
 
-        // try-catch blokları kaldırıldı. UserNotFoundException ve diğer Exception'lar
-        // artık GlobalExceptionHandler tarafından yakalanacak.
+        // User updatedUser = userService.updateUser(
+        //      id,
+        //      userUpdateRequest.getName(),
+        //      userUpdateRequest.getSurname(),
+        //      userUpdateRequest.getAge(), // Eğer DTO'da varsa
+        //      userUpdateRequest.getEmail(),
+        //      userUpdateRequest.getUsername(),
+        //      userUpdateRequest.isActive() // Admin sadece active durumunu güncelleyebilir
+        // );
+        // return ResponseEntity.ok(updatedUser);
 
-            // Service katmanındaki updateUser metodunu çağır
-            // Service metodu kullanıcıyı bulur, günceller, kaydeder ve güncellenmiş User Entity'sini döndürür veya UserNotFoundException fırlatır.
-            User updatedUser = userService.updateUser(id, userUpdateRequest);
+        return ResponseEntity.ok(Student.createStudent()); // Şimdilik simülasyon
+    }
 
-            // Service'ten dönen User Entity'sini UserDetailsResponse DTO'suna dönüştür
-            UserDetailsResponse userDetailsResponse = new UserDetailsResponse(updatedUser);
+     // Kullanıcı rolünü değiştirme
+     // HTTP PUT isteği ile "/api/users/{id}/role" adresine yapılan istekleri karşılar
+     // (Sadece Admin yetkisi gerektirecek)
+     @PutMapping("/{id}/role")
+     public ResponseEntity<User> changeUserRole(@PathVariable("id") Long id, @Valid @RequestBody RoleChangeRequest roleChangeRequest) {
+         System.out.println("UserController: Kullanıcı rolü değiştiriliyor - ID: " + id + ", Yeni Rol: " + roleChangeRequest.getNewRole());
+         // NOT: Gerçek implementasyonda, id ve DTO'daki yeni rolü kullanarak Service'teki changeUserRole metodunu çağırma,
+         // yetki kontrolü (sadece Admin), güncellenen kullanıcıyı döndürme mantığı olacak.
 
-            System.out.println("UserController: Kullanıcı başarıyla güncellendi - ID: " + updatedUser.getId());
-            // Başarılı durumda 200 OK yanıtı ve güncellenmiş kullanıcı DTO'sunu döndür
-            return ResponseEntity.ok(userDetailsResponse);
-        }
-    // Kullanıcı rolünü değiştirme
-    // HTTP PUT isteği ile "/api/users/{id}/role" adresine yapılan istekleri karşılar
-    // (Sadece Admin yetkisi gerektirecek - Security ile sağlanacak)
-    @PutMapping("/{id}/role")
-    // Dönüş tipi ResponseEntity<UserDetailsResponse> olarak değişti
-    public ResponseEntity<UserDetailsResponse> changeUserRole(@PathVariable("id") int id, @Valid @RequestBody RoleChangeRequest roleChangeRequest) {
-            System.out.println("UserController: Kullanıcı rolü değiştiriliyor - ID: " + id + ", Yeni Rol: " + roleChangeRequest.getNewRole());
+         // User updatedUser = userService.changeUserRole(id, roleChangeRequest.getNewRole());
+         // return ResponseEntity.ok(updatedUser);
 
-        // try-catch blokları kaldırıldı. UserNotFoundException, IllegalArgumentException ve diğer Exception'lar
-        // artık GlobalExceptionHandler tarafından yakalanacak.
-
-            // Service katmanındaki changeUserRole metodunu çağır
-            // Service metodu kullanıcıyı bulur, rolü değiştirir, kaydeder ve güncellenmiş User Entity'sini döndürür veya UserNotFound/IllegalArgumentException fırlatır.
-            User updatedUser = userService.changeUserRole(id, roleChangeRequest);
-
-            // Service'ten dönen User Entity'sini UserDetailsResponse DTO'sına dönüştür
-            UserDetailsResponse userDetailsResponse = new UserDetailsResponse(updatedUser);
-
-            System.out.println("UserController: Kullanıcı rolü başarıyla değiştirildi - ID: " + updatedUser.getId() + ", Yeni Rol: " + updatedUser.getRole());
-            // Başarılı durumda 200 OK yanıtı ve güncellenmiş kullanıcı DTO'sunu döndür
-            return ResponseEntity.ok(userDetailsResponse);
-        }
+         return ResponseEntity.ok(Student.createStudent()); // Şimdilik simülasyon
+     }
 
     // Kullanıcının parolasını değiştirme
     // HTTP PUT isteği ile "/api/users/{id}/password" adresine yapılan istekleri karşılar
-    // (Admin yetkisi gerektirecek veya kullanıcı kendi parolasını değiştirebilir - Security ile sağlanacak)
+    // (Admin yetkisi gerektirecek veya kullanıcı kendi parolasını değiştirebilir)
     @PutMapping("/{id}/password")
-    // Dönüş tipi ResponseEntity<UserDetailsResponse> olarak değişti
-    public ResponseEntity<UserDetailsResponse> changeUserPassword(@PathVariable("id") int id, @Valid @RequestBody PasswordChangeRequest passwordChangeRequest) {
-            System.out.println("UserController: Kullanıcı parolası değiştiriliyor - ID: " + id);
+    public ResponseEntity<User> changeUserPassword(@PathVariable("id") Long id, @Valid @RequestBody PasswordChangeRequest passwordChangeRequest) {
+        System.out.println("UserController: Kullanıcı parolası değiştiriliyor - ID: " + id);
+        // NOT: Gerçek implementasyonda, id ve DTO'daki eski/yeni parolaları kullanarak Service'teki changeUserPassword metodunu çağırma,
+        // yetki kontrolü (Admin mi kendi mi?), güncellenen kullanıcıyı döndürme mantığı olacak.
 
-        // try-catch blokları kaldırıldı. UserNotFoundException, BadCredentialsException ve diğer Exception'lar
-        // artık GlobalExceptionHandler tarafından yakalanacak.
-        // Not: BadCredentialsException'ı GlobalExceptionHandler'da yakalamak için özel bir handler eklemelisiniz
-        // veya RuntimeException handler'ı yakalayacaktır (500 dönebilir, 401 için özel handler önerilir).
+        // boolean isAdminAction = ... // İsteği yapanın Admin olup olmadığı güvenlik bağlamından kontrol edilebilir
+        // User updatedUser = userService.changeUserPassword(
+        //      id,
+        //      passwordChangeRequest.getCurrentPassword(), // Sadece kullanıcı kendi değiştiriyorsa gerekli
+        //      passwordChangeRequest.getNewPassword(),
+        //      isAdminAction
+        // );
+        // return ResponseEntity.ok(updatedUser);
 
-            // Spring Security bağlamından şu anki kimliği doğrulanmış kullanıcının bilgilerini al
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            // Principal genellikle UserDetails objesidir
-            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+         return ResponseEntity.ok(Student.createStudent()); // Şimdilik simülasyon
+    }
 
-            // İstek yapan kullanıcının Admin olup olmadığını belirle
-            // UserDetails'in getAuthorities() metodu kullanıcının rollerini (GrantedAuthority olarak) döner.
-            boolean isAdminAction = userDetails.getAuthorities().stream()
-                    .anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN"));
-
-            System.out.println("UserController: Parola değiştirme isteği - Kullanıcı ID: " + id + ", ADMIN işlemi mi?: " + isAdminAction);
-
-
-            // Service katmanındaki changeUserPassword metodunu çağır
-            // Service metodu kullanıcıyı bulur, parolayı şifreler, günceller, kaydeder ve güncellenmiş User Entity'sini döndürür
-            // veya UserNotFound/BadCredentialsException fırlatır.
-            User updatedUser = userService.changeUserPassword(
-                    id, // Parolası değiştirilecek kullanıcının ID'si (URL'den geldi)
-                    passwordChangeRequest, // Mevcut ve yeni parola DTO'su
-                    isAdminAction // İsteği yapanın Admin olup olmadığı bilgisi
-            );
-
-            // Service'ten dönen User Entity'sini UserDetailsResponse DTO'sına dönüştür
-            UserDetailsResponse userDetailsResponse = new UserDetailsResponse(updatedUser);
-
-            System.out.println("UserController: Kullanıcı parolası başarıyla değiştirildi - ID: " + updatedUser.getId());
-            // Başarılı durumda 200 OK yanıtı ve güncellenmiş kullanıcı DTO'sunu döndür
-            return ResponseEntity.ok(userDetailsResponse);
-        }
-
-    // Kullanıcının e-posta adresini değiştirme
-    // HTTP PUT isteği ile "/api/users/{id}/email" adresine yapılan istekleri karşılar
-    // (Admin yetkisi gerektirecek veya kullanıcı kendi e-postasını değiştirebilir - Security ile sağlanacak)
+     // Kullanıcının e-posta adresini değiştirme
+     // HTTP PUT isteği ile "/api/users/{id}/email" adresine yapılan istekleri karşılar
+     // (Admin yetkisi gerektirecek veya kullanıcı kendi e-postasını değiştirebilir)
     @PutMapping("/{id}/email")
-    // Dönüş tipi ResponseEntity<UserDetailsResponse> olarak değişti
-    public ResponseEntity<UserDetailsResponse> changeUserEmail(@PathVariable("id") int id, @Valid @RequestBody EmailChangeRequest emailChangeRequest) {
-            System.out.println("UserController: Kullanıcı e-postası değiştiriliyor - ID: " + id + ", Yeni Email: " + emailChangeRequest.getNewEmail());
+    public ResponseEntity<User> changeUserEmail(@PathVariable("id") Long id, @Valid @RequestBody EmailChangeRequest emailChangeRequest) {
+         System.out.println("UserController: Kullanıcı e-postası değiştiriliyor - ID: " + id + ", Yeni Email: " + emailChangeRequest.getNewEmail());
+         // NOT: Gerçek implementasyonda, id ve DTO'daki yeni e-postayı kullanarak Service'teki changeUserEmail metodunu çağırma,
+         // yetki kontrolü (Admin mi kendi mi?), güncellenen kullanıcıyı döndürme mantığı olacak.
 
-        // try-catch blokları kaldırıldı. UserNotFoundException, DuplicateEmailException ve diğer Exception'lar
-        // artık GlobalExceptionHandler tarafından yakalanacak.
+         // boolean isAdminAction = ... // İsteği yapanın Admin olup olmadığı güvenlik bağlamından kontrol edilebilir
+         // User updatedUser = userService.changeUserEmail(id, emailChangeRequest.getNewEmail(), isAdminAction);
+         // return ResponseEntity.ok(updatedUser);
 
-            Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-            boolean isAdminAction = userDetails.getAuthorities().stream()
-                    .anyMatch(auth -> auth.getAuthority().equals("ROLE_ADMIN"));
-            System.out.println("UserController: E-posta değiştirme isteği - Kullanıcı ID: " + id + ", ADMIN işlemi mi?: " + isAdminAction);
-
-            User updatedUser = userService.changeUserEmail(id, emailChangeRequest, isAdminAction);
-            UserDetailsResponse userDetailsResponse = new UserDetailsResponse(updatedUser);
-            System.out.println("UserController: Kullanıcı e-postası başarıyla değiştirildi - ID: " + updatedUser.getId());
-            return ResponseEntity.ok(userDetailsResponse);
-    }
+         return ResponseEntity.ok(Student.createStudent()); // Şimdilik simülasyon
+     }
 
 
-// Kullanıcıyı silme (mantıksal silme: isActive = false yapma)
+    // Kullanıcıyı silme (mantıksal silme: isActive = false yapma)
     // HTTP DELETE isteği ile "/api/users/{id}" adresine yapılan istekleri karşılar
-    // (Sadece Admin yetkisi gerektirecek - Security ile sağlanacak)
+    // (Sadece Admin yetkisi gerektirecek)
     @DeleteMapping("/{id}")
-    // Dönüş tipi ResponseEntity<Void> olarak kalacak
     public ResponseEntity<Void> softDeleteUser(@PathVariable("id") int id) {
-            System.out.println("UserController: Kullanıcı siliniyor (mantıksal) - ID: " + id);
+        System.out.println("UserController: Kullanıcı siliniyor (mantıksal) - ID: " + id);
+        // NOT: Gerçek implementasyonda, id kullanarak Service'teki softDeleteUser metodunu çağırma,
+        // yetki kontrolü (sadece Admin), başarılı ise 204 No Content yanıtı döndürme mantığı olacak.
 
-            // try-catch blokları kaldırıldı. UserNotFoundException ve diğer Exception'lar
-            // artık GlobalExceptionHandler tarafından yakalanacak.
+        // userService.softDeleteUser(id);
+        // return ResponseEntity.noContent().build();
 
-            // Service katmanındaki softDeleteUser metodunu çağır
-            // Service metodu kullanıcıyı bulur, isActive = false yapar ve kaydeder veya UserNotFoundException fırlatır.
-            userService.softDeleteUser(id);
-
-            System.out.println("UserController: Kullanıcı başarıyla silindi (mantıksal olarak pasif yapıldı) - ID: " + id);
-            // Başarılı durumda 204 No Content yanıtı döndür
-            return ResponseEntity.noContent().build();
-        }
-
-// Öğretmen olma isteğini gözden geçirme
-// HTTP PUT isteği ile "/api/users/{id}/review-teacher-request" adresine yapılan istekleri karşılar
-// (Sadece Admin yetkisi gerektirecek - Security ile sağlanacak)
-@PutMapping("/{id}/review-teacher-request")
-// Dönüş tipi ResponseEntity<UserDetailsResponse> olarak değişti
-public ResponseEntity<UserDetailsResponse> reviewTeacherRequest(@PathVariable("id") int id, @RequestParam("approve") boolean approve) {
-           
-            System.out.println("UserController: Öğretmen isteği gözden geçiriliyor - Kullanıcı ID: " + id + ", Onay: " + approve);
-
-            // try-catch blokları kaldırıldı. UserNotFoundException ve diğer Exception'lar
-            // artık GlobalExceptionHandler tarafından yakalanacak.
-            // NOT: Service'in reviewTeacherRequest metodu boolean dönüyordu, bu yüzden if(success) bloğu kaldı.
-
-            // Service katmanındaki reviewTeacherRequest metodunu çağır
-            // Service metodu kullanıcıyı bulur, onaylanırsa rolü değiştirir, kaydeder ve güncellenmiş User objesini döndürür veya UserNotFoundException fırlatır.
-            User updatedUser = userService.reviewTeacherRequest(id, approve);
-
-            // User objesini UserDetailsResponse DTO'suna çevir
-            UserDetailsResponse userDetailsResponse = new UserDetailsResponse(updatedUser);
-
-            System.out.println("UserController: Öğretmen isteği başarıyla işlendi - Kullanıcı ID: " + id + ", Onay: " + approve);
-            // Başarılı durumda 200 OK yanıtı ve güncellenmiş kullanıcı DTO'sunu döndür
-            return ResponseEntity.ok(userDetailsResponse);
+        return ResponseEntity.noContent().build(); // Şimdilik simülasyon
     }
+
+    // Öğretmen olma isteğini gözden geçirme
+    // HTTP PUT isteği ile "/api/users/{id}/review-teacher-request" adresine yapılan istekleri karşılar
+    // (Sadece Admin yetkisi gerektirecek)
+    @PutMapping("/{id}/review-teacher-request")
+    public ResponseEntity<User> reviewTeacherRequest(@PathVariable("id") Long id, @RequestBody boolean approve) {
+        // @RequestBody boolean: İstek gövdesindeki boolean değeri (true/false) alır.
+        // Bunun için de ayrı bir DTO oluşturulabilir (örn: TeacherRequestReviewDto { boolean approve; }).
+        System.out.println("UserController: Öğretmen isteği gözden geçiriliyor - Kullanıcı ID: " + id + ", Onay: " + approve);
+        // NOT: Gerçek implementasyonda, id ve onay bilgisini kullanarak Service'teki reviewTeacherRequest metodunu çağırma,
+        // yetki kontrolü (sadece Admin), güncellenen kullanıcıyı (eğer rolü değiştiyse) döndürme mantığı olacak.
+
+        // boolean success = userService.reviewTeacherRequest(id, approve);
+        // if (success) {
+        //     // Başarılı ise güncellenmiş kullanıcıyı döndür veya sadece başarı mesajı dön.
+        //     Optional<User> updatedUserOptional = userService.getUserById(id); // Güncellenmiş kullanıcıyı tekrar çekelim
+        //     return updatedUserOptional.map(ResponseEntity::ok)
+        //                                .orElseGet(() -> ResponseEntity.ok().body(null)); // Kullanıcı bulunamazsa boş body ile 200 OK
+        // } else {
+        //      // Hata yönetimi
+        //      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null); // Hata durumunda 400 Bad Request
+        // }
+
+        return ResponseEntity.ok(Student.createStudent()); // Şimdilik simülasyon
+    }
+
 
     // --- Diğer Endpoint'ler ---
     // Kimlik doğrulama (login, register vb.) AuthController'da.
     // Quiz oturumu yönetimi QuizSessionController'da.
     // İstatistikler StatisticsController'da.
 }
+

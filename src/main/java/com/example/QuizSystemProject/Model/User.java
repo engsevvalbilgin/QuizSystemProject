@@ -6,23 +6,16 @@ import java.time.LocalDateTime; // Tarih/saat için modern Java API'si
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects; // equals/hashCode için
-import jakarta.persistence.Inheritance;
-import jakarta.persistence.InheritanceType;
-import jakarta.persistence.DiscriminatorColumn;
-import jakarta.persistence.DiscriminatorType;
 
 @Entity // Bu sınıfın bir JPA Entity'si olduğunu ve veritabanı tablosuna karşılık geldiğini belirtir
 @Table(name = "users")
 @NoArgsConstructor
-@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
-@DiscriminatorColumn(name = "dtype", discriminatorType = DiscriminatorType.STRING)
-
 // Veritabanındaki tablonun adı 'users' olacak
 public class User {
 
     @Id // Bu alanın birincil anahtar (Primary Key) olduğunu belirtir
     @GeneratedValue(strategy = GenerationType.IDENTITY) // ID'nin veritabanı tarafından otomatik artan olarak üretileceğini belirtir
-    private int id; 
+    private int id; // JPA'de ID'ler için Long kullanmak yaygın ve önerilir
 
     @Column(nullable = false, length = 50) // Boş olamaz ve maksimum 50 karakter olabilir
     private String name;
@@ -183,17 +176,17 @@ public class User {
     }
 
 	public void logIn(User user) {
-		
+		// TODO Auto-generated method stub
 		
 	}
 
 	public void signIn(User user) {
-		
+		// TODO Auto-generated method stub
 		
 	}
 
 	public void logOut(User user) {
-		
+		// TODO Auto-generated method stub
 		
 	}
 

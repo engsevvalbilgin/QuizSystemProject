@@ -3,7 +3,7 @@ package com.example.QuizSystemProject.dto; // Paket adınızın doğru olduğund
 // Bu DTO, API yanıtlarında tek bir ortalama puan değerini taşır.
 public class AverageScoreResponse {
 
-    private int studentId; // Hangi öğrenciye ait olduğu (opsiyonel, bağlama göre değişir)
+    private Long studentId; // Hangi öğrenciye ait olduğu (opsiyonel, bağlama göre değişir)
     private Double averageScore; // Ortalama puan değeri
 
     // JPA için argümansız constructor
@@ -11,7 +11,7 @@ public class AverageScoreResponse {
     }
 
     // Alanları alan constructor
-    public AverageScoreResponse(int studentId, Double averageScore) {
+    public AverageScoreResponse(Long studentId, Double averageScore) {
         this.studentId = studentId;
         this.averageScore = averageScore;
     }
@@ -24,8 +24,8 @@ public class AverageScoreResponse {
     // Getter ve Setterlar
     // IDE ile otomatik oluşturabilirsiniz.
 
-    public int getStudentId() { return studentId; }
-    public void setStudentId(int studentId) { this.studentId = studentId; }
+    public Long getStudentId() { return studentId; }
+    public void setStudentId(Long studentId) { this.studentId = studentId; }
 
     public Double getAverageScore() { return averageScore; }
     public void setAverageScore(Double averageScore) { this.averageScore = averageScore; }
