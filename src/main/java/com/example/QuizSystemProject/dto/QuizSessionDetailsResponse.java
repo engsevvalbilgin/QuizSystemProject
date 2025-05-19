@@ -16,7 +16,7 @@ public class QuizSessionDetailsResponse {
     private LocalDateTime startTime; // Başlangıç zamanı
     private LocalDateTime endTime; // Bitiş zamanı
     private int score; // Oturumda alınan puan
-    private Long durationMinutes; // Oturum süresi (dakika cinsinden)
+    private int durationMinutes; // Oturum süresi (dakika cinsinden)
 
     // Oturumun sahibi olan öğrencinin temel bilgileri de dahil edilebilir
     private int studentId;
@@ -49,9 +49,9 @@ public class QuizSessionDetailsResponse {
          // Süreyi hesaplayıp DTO alanına set edelim (Null kontrolleri önemli)
          if (session.getStartTime() != null && session.getEndTime() != null) {
               Duration duration = Duration.between(session.getStartTime(), session.getEndTime());
-              this.durationMinutes = duration.toMinutes();
+              this.durationMinutes = (int) duration.toMinutes();
          } else {
-              this.durationMinutes = null;
+              this.durationMinutes = 0;
          }
 
 
@@ -96,8 +96,8 @@ public class QuizSessionDetailsResponse {
     public int getScore() { return score; }
     public void setScore(int score) { this.score = score; }
 
-    public Long getDurationMinutes() { return durationMinutes; }
-    public void setDurationMinutes(Long durationMinutes) { this.durationMinutes = durationMinutes; }
+    public int getDurationMinutes() { return durationMinutes; }
+    public void setDurationMinutes(int durationMinutes) { this.durationMinutes = durationMinutes; }
 
     public int getStudentId() { return studentId; }
     public void setStudentId(int studentId) { this.studentId = studentId; }

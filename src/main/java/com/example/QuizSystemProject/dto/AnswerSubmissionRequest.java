@@ -10,7 +10,7 @@ import java.util.Set; // Set importu (seçilen şıkların ID'leri için)
 public class AnswerSubmissionRequest {
 
     @NotNull(message = "Soru ID'si boş olamaz") // Hangi soruya cevap verildiği bilgisi zorunlu
-    private Long questionId;
+    private int questionId;
 
     @Size(max = 5000, message = "Cevap metni çok uzun") // Metin tabanlı cevaplar için, boş olabilir
     private String submittedAnswerText; // Açık uçlu veya kısa cevaplı sorular için metin cevabı
@@ -18,7 +18,7 @@ public class AnswerSubmissionRequest {
     // Çoktan seçmeli sorularda öğrencinin seçtiği şıkların ID'leri
     // Boş olabilir (eğer metin tabanlı bir soruya cevap veriliyorsa)
     // Set kullanmak daha mantıklı (sıra önemli değil, tekrar eden ID olmaz)
-    private Set<Long> selectedOptionIds;
+    private Set<Integer> selectedOptionIds;
 
 
     // DTO'lar için genellikle argümansız constructor ve getter/setter metotları yeterlidir.
@@ -27,7 +27,7 @@ public class AnswerSubmissionRequest {
     }
 
     // Alanları alan constructor (isteğe bağlı)
-    public AnswerSubmissionRequest(Long questionId, String submittedAnswerText, Set<Long> selectedOptionIds) {
+    public AnswerSubmissionRequest(int questionId, String submittedAnswerText, Set<Integer> selectedOptionIds) {
         this.questionId = questionId;
         this.submittedAnswerText = submittedAnswerText;
         this.selectedOptionIds = selectedOptionIds;
@@ -37,11 +37,11 @@ public class AnswerSubmissionRequest {
     // Getter ve Setter Metotları
     // IDE ile otomatik oluşturabilirsiniz.
 
-    public Long getQuestionId() {
+    public int getQuestionId() {
         return questionId;
     }
 
-    public void setQuestionId(Long questionId) {
+    public void setQuestionId(int questionId) {
         this.questionId = questionId;
     }
 
@@ -53,11 +53,11 @@ public class AnswerSubmissionRequest {
         this.submittedAnswerText = submittedAnswerText;
     }
 
-    public Set<Long> getSelectedOptionIds() {
+    public Set<Integer> getSelectedOptionIds() {
         return selectedOptionIds;
     }
 
-    public void setSelectedOptionIds(Set<Long> selectedOptionIds) {
+    public void setSelectedOptionIds(Set<Integer> selectedOptionIds) {
         this.selectedOptionIds = selectedOptionIds;
     }
 

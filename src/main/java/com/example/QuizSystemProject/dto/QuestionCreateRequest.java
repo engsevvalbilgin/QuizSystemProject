@@ -22,7 +22,7 @@ public class QuestionCreateRequest {
     private String correctAnswerText;
 
     @NotNull(message = "Soru tipi ID'si boş olamaz")
-    private Long questionTypeId; // İlişkili QuestionType ID'si
+    private int questionTypeId; // İlişkili QuestionType ID'si
 
     // Çoktan seçmeli sorular için şık listesi
     @Valid // Listedeki her OptionCreateRequest objesini de doğrula
@@ -40,8 +40,8 @@ public class QuestionCreateRequest {
     public String getCorrectAnswerText() { return correctAnswerText; }
     public void setCorrectAnswerText(String correctAnswerText) { this.correctAnswerText = correctAnswerText; }
 
-    public Long getQuestionTypeId() { return questionTypeId; }
-    public void setQuestionTypeId(Long questionTypeId) { this.questionTypeId = questionTypeId; }
+    public int getQuestionTypeId() { return questionTypeId; }
+    public void setQuestionTypeId(int questionTypeId) { this.questionTypeId = questionTypeId; }
 
     public List<OptionCreateRequest> getOptions() { return options; }
     public void setOptions(List<OptionCreateRequest> options) { this.options = options; }

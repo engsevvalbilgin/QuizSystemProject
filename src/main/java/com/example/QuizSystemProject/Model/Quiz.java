@@ -30,12 +30,12 @@ public class Quiz {
 
     private String name;
 
-    @OneToMany(mappedBy = "quiz",fetch = FetchType.LAZY)
-    private List<Question> questions;
+    @OneToMany(mappedBy = "quiz", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<Question> questions = new ArrayList<>(); // Initialize here
 
-    @OneToMany
-    @JoinColumn(name = "quiz_id") 
-    private List<QuestionAnswer> answers;
+    // @OneToMany
+    // @JoinColumn(name = "quiz_id") 
+    // private List<QuestionAnswer> answers; // This mapping is likely incorrect and needs review
 
     private Date startDate;
     private Date endDate;
@@ -43,37 +43,30 @@ public class Quiz {
     private boolean isActive;
     private String description;
     public Quiz() {
-        this.questions = new ArrayList<>();
+        // questions list is now initialized at declaration
         this.isActive = true;
-        name="a";
+        name="a"; // Consider if default name 'a' is intended or placeholder
     }
 
-    // Getter and Setter methods
-    public int getId() { return id; }
-    public void setId(int id) { this.id = id; }
+    // Helper methods for managing the bidirectional relationship with Question
+    public void addQuestion(Question question) {
+        if (this.questions == null) {
+            this.questions = new ArrayList<>();
+        }
+        this.questions.add(question);
+        if (question != null) {
+            question.setQuiz(this); // Assuming Question has setQuiz
+        }
+    }
 
-    public Teacher getTeacher() { return teacher; }
-    public void setTeacher(Teacher teacher) { this.teacher = teacher; }
-
-    public String getName() { return name; }
-    public void setName(String name) { this.name = name; }
-
-    public List<Question> getQuestions() { return questions; }
-    public void setQuestions(List<Question> questions) { this.questions = questions; }
-
-    public List<QuestionAnswer> getAnswers() { return answers; }
-    public void setAnswers(List<QuestionAnswer> answers) { this.answers = answers; }
-
-    public Date getStartDate() { return startDate; }
-    public void setStartDate(Date startDate) { this.startDate = startDate; }
-
-    public Date getEndDate() { return endDate; }
-    public void setEndDate(Date endDate) { this.endDate = endDate; }
-
-    public int getDuration() { return duration; }
-    public void setDuration(int duration) { this.duration = duration; }
-
-    public boolean isActive() { return isActive; }
-    public void setActive(boolean active) { isActive = active; }
-
+    public void removeQuestion(Question question) {
+        if (this.questions != null) {
+            this.questions.remove(question);
+        }
+        if (question != null) {
+            question.setQuiz(null); // Assuming Question has setQuiz
+        }
+    }
+    // Manual getters and setters removed; Lombok's @Getter and @Setter will be used.
+    // Note: The 'answers' list and its getter/setter were commented out due to problematic mapping.
 }

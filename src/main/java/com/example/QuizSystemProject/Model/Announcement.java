@@ -12,7 +12,7 @@ public class Announcement {
 
     @Id // Birincil anahtar
     @GeneratedValue(strategy = GenerationType.IDENTITY) // Otomatik artan ID
-    private Long id; // Long tipinde ID
+    private int id; // Primary key
 
     @Column(nullable = false, length = 100) // Boş olamaz, maks 100 karakter
     private String title;
@@ -44,8 +44,8 @@ public class Announcement {
 
 
     // Getter ve Setter Metotları
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; } // ID setter'ı genellikle kullanılmaz
+    public int getId() { return id; }
+    public void setId(int id) { this.id = id; } // ID setter'ı genellikle kullanılmaz
 
     public String getTitle() { return title; }
     public void setTitle(String title) { this.title = title; }
