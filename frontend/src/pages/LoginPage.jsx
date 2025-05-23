@@ -88,14 +88,13 @@ function LoginPage() {
         console.log("Login sonrası yönlendirme: ADMIN -> /admin");
         navigate('/admin'); // Admin dashboard'a yönlendir
       }
-      // TODO: TEACHER rolü eklenince buraya kontrol eklenecek
-      // else if (userRoles.includes('ROLE_TEACHER')) {
-      //   console.log("Login sonrası yönlendirme: TEACHER -> /teacher-dashboard");
-      //   navigate('/teacher-dashboard'); // Teacher dashboard'a yönlendir
-      // }
+      else if (userRoles.includes('ROLE_TEACHER')) {
+        console.log("Login sonrası yönlendirme: TEACHER -> /teacher");
+        navigate('/teacher'); // Teacher paneli sayfasına yönlendir
+      }
       else if (userRoles.includes('ROLE_STUDENT')) {
-        console.log("Login sonrası yönlendirme: STUDENT -> /student-dashboard");
-        navigate('/student-dashboard'); // Student dashboard'a yönlendir
+        console.log("Login sonrası yönlendirme: STUDENT -> /student");
+        navigate('/student'); // Student dashboard'a yönlendir
       }
        else {
            // Beklenmedik bir rol veya rol yoksa (olmaması gereken durum)
@@ -164,7 +163,7 @@ function LoginPage() {
         </div>
 
 
-        <div style={{ marginBottom: '20px' }}> {/* Şifre input alanı için kapsayıcı */}
+        <div style={{ marginBottom: '10px' }}> {/* Şifre input alanı için kapsayıcı */}
             <label htmlFor="password" style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>Şifre:</label> {/* Label stili eklendi */}
             <input
                 type="password" // Şifre input alanı (girilen karakterleri gizler)
@@ -176,6 +175,24 @@ function LoginPage() {
             disabled={isLoading} // İstek gönderilirken inputu devre dışı bırak
             style={{ width: '100%', padding: '10px', border: '1px solid #ddd', borderRadius: '4px', boxSizing: 'border-box' }} 
             />
+        </div>
+        
+        {/* Şifremi Unuttum Linki */}
+        <div style={{ marginBottom: '20px', textAlign: 'right' }}>
+            <a 
+                href="/password-reset" 
+                style={{ 
+                    color: '#007bff', 
+                    textDecoration: 'none', 
+                    fontSize: '0.9em' 
+                }}
+                onClick={(e) => {
+                    e.preventDefault();
+                    navigate('/password-reset');
+                }}
+            >
+                Şifremi Unuttum
+            </a>
         </div>
 
             {/* Formu gönderme düğmesi */}

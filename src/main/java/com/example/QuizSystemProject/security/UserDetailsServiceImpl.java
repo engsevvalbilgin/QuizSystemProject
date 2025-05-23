@@ -1,68 +1,107 @@
-package com.example.QuizSystemProject.security; // Paket adınızın doğru olduğundan emin olun
+package com.example.QuizSystemProject.security;
 
-import com.example.QuizSystemProject.Model.User; // Kendi User Entity'mizi import edin
-import com.example.QuizSystemProject.Repository.UserRepository; // UserRepository'yi import edin
-import org.springframework.beans.factory.annotation.Autowired; // Bağımlılık enjeksiyonu için
-import org.springframework.security.core.GrantedAuthority; // Rolleri temsil etmek için
-import org.springframework.security.core.authority.SimpleGrantedAuthority; // GrantedAuthority implementasyonu için
-import org.springframework.security.core.userdetails.UserDetails; // Spring Security'nin kullanıcı detayları arayüzü
-import org.springframework.security.core.userdetails.UserDetailsService; // UserDetailsService arayüzü
-import org.springframework.security.core.userdetails.UsernameNotFoundException; // Kullanıcı bulunamadığında fırlatılacak hata
-import org.springframework.stereotype.Service; // Service bileşeni olarak işaretlemek için
-import com.example.QuizSystemProject.security.CustomUserDetails;
-import java.util.Collection; // Koleksiyonlar için
-import java.util.List; // Liste için
-import java.util.stream.Collectors; // Akış işlemleri için
+import com.example.QuizSystemProject.Model.User;
+import com.example.QuizSystemProject.Repository.UserRepository;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-@Service // Spring'e bu sınıfın bir Service bileşeni olduğunu belirtir (otomatik tanıma için)
-public class UserDetailsServiceImpl implements UserDetailsService { // UserDetailsService arayüzünü implemente ediyoruz
+import java.util.List;
 
-    private final UserRepository userRepository; // Kullanıcı verilerini çekmek için Repository bağımlılığı
+/**
+ * Implementation of Spring Security's UserDetailsService that loads user-specific data.
+ */
+@Service
+@Transactional
+public class UserDetailsServiceImpl implements UserDetailsService {
 
-    // UserRepository bağımlılığının enjekte edildiği constructor
-    @Autowired
+    private final UserRepository userRepository;
+
     public UserDetailsServiceImpl(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
 
-    // --- UserDetailsService Arayüz Metodunun Implementasyonu ---
-
-    // Spring Security tarafından kimlik doğrulama sırasında çağrılır.
-    // Parametre olarak kullanıcının girdiği kullanıcı adını (veya e-postayı) alır.
     @Override
-    public UserDetails loadUserByUsername(String usernameOrEmail) throws UsernameNotFoundException {
-        System.out.println("UserDetailsServiceImpl: Kullanıcı yükleniyor - Username/Email: " + usernameOrEmail);
-
-        User user = userRepository.findByUsername(usernameOrEmail)
-                    .orElseGet(() -> userRepository.findByEmail(usernameOrEmail)
+    @Transactional(readOnly = true)
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        try {
+            // Find the user by username or email (case-insensitive)
+            User user = userRepository.findByUsername(username)
+                    .or(() -> userRepository.findByEmail(username))
                     .orElseThrow(() -> {
-                        System.out.println("UserDetailsServiceImpl: Kullanıcı bulunamadı - Username/Email: " + usernameOrEmail);
-                        return new UsernameNotFoundException("Kullanıcı bulunamadı: " + usernameOrEmail);
-                    }));
+                        String errorMsg = "User not found with username/email: " + username;
+                        System.err.println(errorMsg);
+                        return new UsernameNotFoundException(errorMsg);
+                    });
 
-        System.out.println("UserDetailsServiceImpl: Kullanıcı bulundu - Kullanıcı Adı: " + user.getUsername());
-
-        String role = user.getRole();
-        if (role != null && !role.startsWith("ROLE_")) {
-            role = "ROLE_" + role;
+            // Log user loading for debugging
+            System.out.println("Loading user: " + user.getUsername() + 
+                             ", Type: " + user.getClass().getSimpleName() + 
+                             ", Active: " + user.isActive());
+            
+            // Create and return our custom UserDetails implementation
+            return new CustomUserDetails(user, getAuthorities(user));
+            
+        } catch (Exception e) {
+            System.err.println("Error loading user " + username + ": " + e.getMessage());
+            if (e instanceof UsernameNotFoundException) {
+                throw e;
+            }
+            throw new UsernameNotFoundException("Error loading user: " + username, e);
         }
-        Collection<? extends GrantedAuthority> authorities = List.of(new SimpleGrantedAuthority(role));
-        /*
-        return new org.springframework.security.core.userdetails.User(
-            user.getUsername(),
-            user.getPassword(),
-            user.isEnabled(),      // Hesabın etkin olup olmadığı (e-posta doğrulaması vb.)
-            true,                  // accountNonExpired (Hesap süresi dolmamış kabul edelim)
-            true,                  // credentialsNonExpired (Parola süresi dolmamış kabul edelim)
-            user.isActive(),       // accountNonLocked (Hesap kilitli mi? user.isActive() buna map ediliyor)
-            authorities
-        );
-        */
-        return new CustomUserDetails(user, authorities);
-
     }
+    
+    private List<GrantedAuthority> getAuthorities(User user) {
+        String role = determineUserRole(user);
+        
+        // Log user information for debugging
+        System.out.println("UserDetailsServiceImpl: User ID: " + user.getId());
+        System.out.println("UserDetailsServiceImpl: User Type: " + user.getClass().getSimpleName());
+        System.out.println("UserDetailsServiceImpl: Granted Role: " + role);
 
-    // NOT: userRepository'ye findByUsername ve findByEmail metodlarının eklenmesi gerekebilir.
-    // Veya AuthenticationService'de yaptığımız gibi, findByUsernameOrEmail metodunu UserRepository'de tanımlayabiliriz.
-    // Eğer findByUsername ve findByEmail metodları zaten UserRepository'de varsa, bu kod çalışacaktır.
+        return List.of(new SimpleGrantedAuthority(role));
+    }
+    
+    
+    /**
+     * Determine the role of the user based on their type
+     */
+    private String determineUserRole(User user) {
+        // Debug: Print the actual class name and role
+        String className = user.getClass().getName();
+        String role = user.getRole();
+        
+        System.out.println("UserDetailsServiceImpl: User class: " + className);
+        System.out.println("UserDetailsServiceImpl: User role from DB: " + role);
+        
+        // If the role is already set in the user entity, use it
+        if (role != null && !role.isEmpty()) {
+            // Ensure the role has the ROLE_ prefix if it's missing
+            if (!role.startsWith("ROLE_")) {
+                role = "ROLE_" + role.toUpperCase();
+            }
+            System.out.println("UserDetailsServiceImpl: Using role from user entity: " + role);
+            return role;
+        }
+        
+        // Fallback to class-based role determination if role field is not set
+        if (user instanceof com.example.QuizSystemProject.Model.Admin) {
+            System.out.println("UserDetailsServiceImpl: Determined role from class: ROLE_ADMIN");
+            return "ROLE_ADMIN";
+        } else if (user instanceof com.example.QuizSystemProject.Model.Teacher) {
+            System.out.println("UserDetailsServiceImpl: Determined role from class: ROLE_TEACHER");
+            return "ROLE_TEACHER";
+        } else if (user instanceof com.example.QuizSystemProject.Model.Student) {
+            System.out.println("UserDetailsServiceImpl: Determined role from class: ROLE_STUDENT");
+            return "ROLE_STUDENT";
+        }
+        
+        // If we can't determine the role, log a warning and default to USER
+        System.err.println("Warning: Could not determine role for user: " + user.getUsername() + ", class: " + className);
+        return "ROLE_USER";
+    }
 }

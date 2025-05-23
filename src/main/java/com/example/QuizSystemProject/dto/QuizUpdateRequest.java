@@ -14,6 +14,9 @@ public class QuizUpdateRequest {
 
     @Size(max = 1000, message = "Açıklama 1000 karakterden uzun olamaz")
     private String description;
+    
+    @Size(max = 100, message = "Konu 100 karakterden uzun olamaz")
+    private String topic;
 
     @Min(value = 1, message = "Süre en az 1 dakika olmalı")
     private Integer durationMinutes;
@@ -29,10 +32,18 @@ public class QuizUpdateRequest {
 
     public String getDescription() { return description; }
     public void setDescription(String description) { this.description = description; }
+    
+    public String getTopic() { return topic; }
+    public void setTopic(String topic) { this.topic = topic; }
 
     public Integer getDurationMinutes() { return durationMinutes; }
     public void setDurationMinutes(Integer durationMinutes) { this.durationMinutes = durationMinutes; }
 
+    // Jackson ile doğru deserializasyon için hem isActive() hem de getIsActive() metodlarını ekliyoruz
     public Boolean isActive() { return isActive; } // boolean alanlar için isXxx() convention'ı
+    public Boolean getIsActive() { return isActive; } // Alternatif getter (JSON deserialization için)
+    
+    // Setter metodu - hem setActive hem de setIsActive
     public void setActive(Boolean active) { isActive = active; }
+    public void setIsActive(Boolean active) { isActive = active; } // JSON deserializasyon için
 }

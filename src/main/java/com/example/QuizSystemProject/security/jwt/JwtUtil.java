@@ -1,10 +1,9 @@
 package com.example.QuizSystemProject.security.jwt; // Paket adınızın doğru olduğundan emin olun
 
-import com.example.QuizSystemProject.Model.User; // Kendi User Entity'miz için (claim eklemek isterseniz gerekebilir)
+
 import org.springframework.security.core.GrantedAuthority; // GrantedAuthority için
 import java.util.stream.Collectors; // Collectors için
-import java.util.Collection; // Koleksiyonlar için (GrantedAuthority için gerekli olabilir)
-import java.util.List; // List için
+
 import io.jsonwebtoken.Claims; // JWT Claim'leri için
 import io.jsonwebtoken.Jwts; // JWT builder ve parser için
 import io.jsonwebtoken.SignatureAlgorithm; // İmza algoritması için
@@ -94,9 +93,9 @@ public class JwtUtil {
                 .setSubject(subject) // Konuyu (genellikle kullanıcı adı) set et
                 .setIssuedAt(new Date(System.currentTimeMillis())) // Token oluşturulma zamanı
                 // Son kullanma zamanını eklemek çok önemlidir! Güvenlik için token'ların bir ömrü olmalı.
-                // Örn: 10 saat geçerlilik süresi (1000 ms * 60 s * 60 dk * 10 saat)
-                 .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 10)) // <-- Geçerlilik süresi ekledik
-                // Veya daha kısa bir süre: .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 15)) // 15 dakika
+                // Örn: 24 saat geçerlilik süresi (1000 ms * 60 s * 60 dk * 24 saat)
+                 .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24)) // <-- Geçerlilik süresi 24 saate çıkarıldı
+                 // Not: Önceki süre: 10 saat (1000 * 60 * 60 * 10)
 
 
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256) // Anahtar ve algoritma ile imzala
@@ -120,9 +119,38 @@ public class JwtUtil {
 
     // Token'ın geçerli olup olmadığını kontrol etme
     // Kullanıcı adı eşleşiyor mu ve süresi dolmuş mu?
-    public boolean validateToken(String token, UserDetails userDetails) {
-        final String username = extractUsername(token); // Token'dan kullanıcı adını çek
-        // Token'daki kullanıcı adı, UserDetails'deki kullanıcı adı ile aynı mı VE token'ın süresi dolmamış mı?
+    public boolean isTokenValid(String token, UserDetails userDetails) {
+        final String username = extractUsername(token);
         return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
+    }
+    
+    // Refresh token doğrulama
+    public boolean validateRefreshToken(String token) {
+        try {
+            Jwts.parserBuilder()
+                .setSigningKey(getSigningKey())
+                .build()
+                .parseClaimsJws(token);
+            return !isTokenExpired(token);
+        } catch (Exception e) {
+            return false;
+        }
+    }
+    
+    // Refresh token oluşturma (daha uzun süreli)
+    public String generateRefreshToken(UserDetails userDetails) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("roles", userDetails.getAuthorities().stream()
+                                     .map(GrantedAuthority::getAuthority)
+                                     .collect(Collectors.toList()));
+        claims.put("type", "refresh");
+        
+        return Jwts.builder()
+                .setClaims(claims)
+                .setSubject(userDetails.getUsername())
+                .setIssuedAt(new Date(System.currentTimeMillis()))
+                .setExpiration(new Date(System.currentTimeMillis() + 1000L * 60 * 60 * 24 * 7)) // 7 gün geçerli
+                .signWith(getSigningKey(), SignatureAlgorithm.HS256)
+                .compact();
     }
 }

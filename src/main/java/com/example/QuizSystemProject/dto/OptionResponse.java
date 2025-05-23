@@ -3,7 +3,7 @@ package com.example.QuizSystemProject.dto; // Paket adınızın doğru olduğund
 import com.example.QuizSystemProject.Model.*;
 
 // Bu DTO, API yanıtlarında bir çoktan seçmeli soruya ait şık bilgilerini taşır.
-// Doğru cevap bilgisi (isCorrect) dahil EDİLMEZ.
+// Doğru cevap bilgisi (isCorrect) dahil EDİLMEZ. Öğrencilere gösterilecek version.
 public class OptionResponse {
 
     private int id;

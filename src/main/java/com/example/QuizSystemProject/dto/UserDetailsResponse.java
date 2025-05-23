@@ -1,6 +1,8 @@
 package com.example.QuizSystemProject.dto; // Paket adınızın doğru olduğundan emin olun
 
 import com.example.QuizSystemProject.Model.User; // Entity'den dönüşüm için User Entity'sini import edin
+import com.example.QuizSystemProject.Model.Student; // Student spesifik alanlar için
+import com.example.QuizSystemProject.Model.Teacher; // Teacher spesifik alanlar için
 import java.time.LocalDateTime; // Tarih/saat için
 
 // Bu DTO, API yanıtlarında bir kullanıcının detaylı bilgilerini taşır.
@@ -19,6 +21,13 @@ public class UserDetailsResponse {
     private int age; // Kullanıcı yaşı
     private LocalDateTime createdDate; // Oluşturulma tarihi
     private LocalDateTime updatedDate; // Son güncellenme tarihi
+    
+    private String schoolName; // Öğrencinin okulu (Öğrenci rolü için)
+    
+    // Teacher (Ogretmen) rolü için alanlar
+    private String subject; // Öğretmenin dersi/branşı
+    private String graduateSchool; // Mezun olduğu okul
+    private String diplomaNumber; // Diploma numarası
 
     // JPA için argümansız constructor
     public UserDetailsResponse() {
@@ -37,6 +46,19 @@ public class UserDetailsResponse {
         this.age = user.getAge();
         this.createdDate = user.getCreatedDate();
         this.updatedDate = user.getUpdatedDate();
+        
+        // Student tipindeki kullanıcılar için okul bilgisini ekle
+        if (user instanceof Student) {
+            this.schoolName = ((Student) user).getSchoolName();
+        }
+        
+        // Teacher tipindeki kullanıcılar için öğretmen bilgilerini ekle
+        if (user instanceof Teacher) {
+            Teacher teacher = (Teacher) user;
+            this.subject = teacher.getSubject();
+            this.graduateSchool = teacher.getGraduateSchool();
+            this.diplomaNumber = teacher.getDiplomaNumber();
+        }
     }
 
     // Getter ve Setterlar
@@ -74,6 +96,19 @@ public class UserDetailsResponse {
 
     public LocalDateTime getUpdatedDate() { return updatedDate; }
     public void setUpdatedDate(LocalDateTime updatedDate) { this.updatedDate = updatedDate; }
+    
+    public String getSchoolName() { return schoolName; }
+    public void setSchoolName(String schoolName) { this.schoolName = schoolName; }
+    
+    // Teacher-specific field getters and setters
+    public String getSubject() { return subject; }
+    public void setSubject(String subject) { this.subject = subject; }
+    
+    public String getGraduateSchool() { return graduateSchool; }
+    public void setGraduateSchool(String graduateSchool) { this.graduateSchool = graduateSchool; }
+    
+    public String getDiplomaNumber() { return diplomaNumber; }
+    public void setDiplomaNumber(String diplomaNumber) { this.diplomaNumber = diplomaNumber; }
 
     // İsteğe bağlı olarak toString, equals, hashCode metotları eklenebilir.
 }

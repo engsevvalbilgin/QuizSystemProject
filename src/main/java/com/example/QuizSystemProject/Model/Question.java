@@ -31,14 +31,16 @@ public class Question {
 
     @Column(name = "question_sentence", nullable = false, length = 1000)
     private String questionSentence;
+    
+    @Column(name = "points", nullable = false)
+    private int points = 1; // Default value of 1 point
 
     
     @ManyToOne(fetch = FetchType.LAZY) // Consider EAGER if type is always needed with Question
     @JoinColumn(name = "question_type_id", nullable = false) // Foreign key column in 'questions' table
     private QuestionType type;
     
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true) 
-    @JoinColumn(name = "question_answer_id", referencedColumnName = "id")
+    @OneToOne(mappedBy = "question", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private QuestionAnswer answer;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -47,6 +49,12 @@ public class Question {
 
     @OneToMany(mappedBy = "question", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Option> options = new ArrayList<>();
+
+
+    
+
+    
+
 
     public static Question createQuestion() {
         return new Question();

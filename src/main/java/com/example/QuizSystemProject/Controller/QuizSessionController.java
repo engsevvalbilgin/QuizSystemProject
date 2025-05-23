@@ -16,7 +16,7 @@ import com.example.QuizSystemProject.Model.AnswerAttempt; // AnswerAttempt Entit
 import com.example.QuizSystemProject.Service.QuizSessionService; // QuizSessionService'i import edin
 import com.example.QuizSystemProject.dto.QuizSessionDetailsResponse;
 import jakarta.validation.Valid; // Girdi doğrulama için
-import org.springframework.beans.factory.annotation.Autowired; // Bağımlılık enjeksiyonu için
+
 import org.springframework.http.HttpStatus; // HTTP durum kodları için
 import org.springframework.http.ResponseEntity; // HTTP yanıtı oluşturmak için
 import org.springframework.web.bind.annotation.*; // Web anotasyonları için (@RestController, @RequestMapping, @PostMapping vb.)
@@ -32,7 +32,7 @@ public class QuizSessionController {
     private final QuizSessionService quizSessionService; // Quiz Oturumu iş mantığı servisi
 
     // QuizSessionService bağımlılığının enjekte edildiği constructor
-    @Autowired
+    
     public QuizSessionController(QuizSessionService quizSessionService) {
         this.quizSessionService = quizSessionService;
     }

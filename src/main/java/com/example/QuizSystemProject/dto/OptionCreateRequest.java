@@ -19,6 +19,10 @@ public class OptionCreateRequest {
     public String getText() { return text; }
     public void setText(String text) { this.text = text; }
 
-    public Boolean isCorrect() { return isCorrect; } // boolean için isXxx()
+    // Jackson için getter metodu getXxx() formatında olmalı
+    public Boolean getIsCorrect() { return isCorrect; }
     public void setCorrect(Boolean correct) { isCorrect = correct; }
+    
+    // Boolean özellikler için ek isXxx() yardımcı metodu
+    public Boolean isCorrect() { return isCorrect; }
 }

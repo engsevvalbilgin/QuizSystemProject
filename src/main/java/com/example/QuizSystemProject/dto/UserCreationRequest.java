@@ -24,6 +24,9 @@ public class UserCreationRequest {
     @Size(min = 6, message = "Password must be at least 6 characters long")
     private String password;
 
+    @NotBlank(message = "Username cannot be blank") // Added validation for username
+    private String username; 
+
     @NotBlank(message = "Role cannot be blank")
     private String role; // e.g., "ROLE_STUDENT", "ROLE_TEACHER", "ROLE_ADMIN"
 
@@ -78,5 +81,13 @@ public class UserCreationRequest {
 
     public void setAge(Integer age) {
         this.age = age;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
 }

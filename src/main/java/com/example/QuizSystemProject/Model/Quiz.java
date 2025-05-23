@@ -1,14 +1,7 @@
 package com.example.QuizSystemProject.Model;
-import com.example.QuizSystemProject.Model.Question;
-import com.example.QuizSystemProject.Model.QuestionAnswer;
-import com.example.QuizSystemProject.Model.Teacher;
+
 import jakarta.persistence.*;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.JoinColumn;
+
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -33,6 +26,9 @@ public class Quiz {
     @OneToMany(mappedBy = "quiz", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Question> questions = new ArrayList<>(); // Initialize here
 
+
+    
+
     // @OneToMany
     // @JoinColumn(name = "quiz_id") 
     // private List<QuestionAnswer> answers; // This mapping is likely incorrect and needs review
@@ -42,6 +38,8 @@ public class Quiz {
     private int duration;
     private boolean isActive;
     private String description;
+    private String topic;
+    
     public Quiz() {
         // questions list is now initialized at declaration
         this.isActive = true;

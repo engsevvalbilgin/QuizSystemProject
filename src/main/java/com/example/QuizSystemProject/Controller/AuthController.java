@@ -1,10 +1,18 @@
 package com.example.QuizSystemProject.Controller;
 
 // Spring ve Web importları
-import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.http.HttpStatus; // HTTP durum kodları için
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity; // HTTP yanıtı oluşturmak için
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.http.ResponseCookie;
+
+import jakarta.servlet.http.HttpSession;
+import java.util.Map;
+import java.util.HashMap;
 import org.springframework.web.bind.annotation.*; // Tüm Web anotasyonları için
+import org.springframework.web.server.ResponseStatusException;
 
 // JPA/Model importları (Controller'da entity döndürmek yerine DTO döndürüyoruz, sadece DTO için gerekli entity importları kalır)
 import com.example.QuizSystemProject.Model.User; // Service'ten dönen User Entity'si için (DTO'ya çevrilecek)
@@ -12,6 +20,7 @@ import com.example.QuizSystemProject.Model.User; // Service'ten dönen User Enti
 // DTO importları
 import com.example.QuizSystemProject.dto.LoginRequest; // Login isteği DTO'su
 import com.example.QuizSystemProject.dto.UserRegistrationRequest; // Kullanıcı kayıt isteği DTO'su
+import com.example.QuizSystemProject.dto.TeacherRegistrationRequest; // Öğretmen kayıt isteği DTO'su
 import com.example.QuizSystemProject.dto.UserResponse; // Kayıt yanıtı DTO'su (kullanıcı bilgileri için)
 import com.example.QuizSystemProject.dto.AuthResponseDto; // Giriş yanıtı DTO'su (JWT için)
 import com.example.QuizSystemProject.dto.EmailRequestDto; // Parola sıfırlama isteği (email içeren) DTO'su
@@ -20,6 +29,7 @@ import com.example.QuizSystemProject.dto.ResetPasswordRequest; // Parola sıfır
 // Service importu
 import com.example.QuizSystemProject.Service.AuthenticationService; // Kimlik doğrulama servisimiz
 
+import jakarta.servlet.http.HttpServletRequest;
 // Validasyon importu
 import jakarta.validation.Valid; // Validasyon için
 
@@ -41,7 +51,7 @@ public class AuthController {
     private final AuthenticationService authenticationService; // Kimlik doğrulama iş mantığı servisi
 
     // AuthenticationService bağımlılığının enjekte edildiği constructor
-    @Autowired
+    
     public AuthController(AuthenticationService authenticationService) {
         this.authenticationService = authenticationService;
     }
@@ -65,6 +75,32 @@ public class AuthController {
         UserResponse userResponse = new UserResponse(registeredUser);
 
         System.out.println("AuthController: Kayıt başarılı - Kullanıcı ID: " + registeredUser.getId());
+        return ResponseEntity.status(HttpStatus.CREATED).body(userResponse);
+    }
+    @PostMapping("/refresh-token")
+public ResponseEntity<AuthResponseDto> refreshToken(HttpServletRequest request) {
+    String authHeader = request.getHeader("Authorization");
+    if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Geçersiz veya eksik token");
+    }
+    
+    String refreshToken = authHeader.substring(7);
+    AuthResponseDto authResponse = authenticationService.refreshToken(refreshToken);
+    return ResponseEntity.ok(authResponse);
+}
+    // Öğretmen Kayıt Endpoint'i
+    // HTTP POST isteği ile "/api/auth/register/teacher" adresine yapılan istekleri karşılar
+    @PostMapping("/register/teacher")
+    public ResponseEntity<UserResponse> registerTeacher(@Valid @RequestBody TeacherRegistrationRequest registrationRequest) {
+        System.out.println("AuthController: Öğretmen kayıt isteği alındı - Email: " + registrationRequest.getEmail());
+
+        // Service katmanındaki öğretmen kayıt iş mantığını çağır
+        User registeredTeacher = authenticationService.registerTeacher(registrationRequest);
+
+        // Kayıt başarılıysa 201 Created (Oluşturuldu) yanıtı döndür
+        UserResponse userResponse = new UserResponse(registeredTeacher);
+
+        System.out.println("AuthController: Öğretmen kayıt başarılı - Kullanıcı ID: " + registeredTeacher.getId());
         return ResponseEntity.status(HttpStatus.CREATED).body(userResponse);
     }
 
@@ -165,4 +201,34 @@ public class AuthController {
 
     // --- Diğer Endpoint'ler ---
     // Güvenlik yapısı kurulduktan sonra user detaylarını getirme vb. endpoint'ler eklenebilir.
+
+    // Çıkış Yap Endpoint'i
+    @PostMapping("/logout")
+    public ResponseEntity<Map<String, String>> logout(HttpServletRequest request) {
+        System.out.println("AuthController: Çıkış isteği alındı");
+        
+        // Clear the security context
+        SecurityContextHolder.clearContext();
+        
+        // Invalidate the session if it exists
+        HttpSession session = request.getSession(false);
+        if (session != null) {
+            session.invalidate();
+        }
+        
+        // Clear any authentication cookies if they exist
+        ResponseCookie cookie = ResponseCookie.from("JSESSIONID", "")
+            .httpOnly(true)
+            .secure(true)
+            .path("/")
+            .maxAge(0)
+            .build();
+            
+        Map<String, String> response = new HashMap<>();
+        response.put("message", "Başarıyla çıkış yapıldı");
+        
+        return ResponseEntity.ok()
+            .header(HttpHeaders.SET_COOKIE, cookie.toString())
+            .body(response);
+    }
 }

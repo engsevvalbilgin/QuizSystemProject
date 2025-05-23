@@ -24,22 +24,20 @@ public class Announcement {
     private LocalDateTime date; // Duyuru tarihi (oluşturulma tarihi olabilir)
 
     // Duyuruyu kimin yayınladığını belirten ilişki
-    // Sizin template'inizdeki 'publisherId' alanına karşılık gelir
-     // İlişkili User objesi
     @ManyToOne
-    @JoinColumn(name = "admin_id")
-    private Admin admin;
+    @JoinColumn(name = "user_id")
+    private User user; // Admin değil, User kullanıyoruz
     // JPA için argümansız constructor
     public Announcement() {
     }
 
     // Alanları alan constructor (ID ve date otomatik yönetilebilir)
     // Publisher, ilişki kurulduktan sonra set edilmeli veya constructor'a dahil edilmeli
-    public Announcement(String title, String content, Admin publisher) {
+    public Announcement(String title, String content, User user) {
         this.title = title;
         this.content = content;
         this.date = LocalDateTime.now(); // Duyuru oluşturulduğunda otomatik tarih atayalım
-        this.admin = publisher;
+        this.user = user;
     }
 
 
@@ -56,8 +54,8 @@ public class Announcement {
     public LocalDateTime getDate() { return date; }
     public void setDate(LocalDateTime date) { this.date = date; }
 
-    public Admin getAdmin() { return this.getAdmin(); }
-    public void setAdmin(Admin publisher) { this.admin=publisher; }
+    public User getUser() { return user; }
+    public void setUser(User user) { this.user = user; }
 
     // equals() ve hashCode() (ID üzerinden)
     @Override
@@ -80,7 +78,7 @@ public class Announcement {
                "id=" + id +
                ", title='" + title + '\'' +
                ", date=" + date +
-               ", publisher=" + (getAdmin() != null ? getAdmin().getUsername() : "null") + // Publisher username'ini gösterelim, tüm User objesini değil
+               ", publisher=" + (getUser() != null ? getUser().getUsername() : "null") + // Publisher username'ini gösterelim, tüm User objesini değil
                '}';
     }
 }

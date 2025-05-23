@@ -20,10 +20,14 @@ function AdminLayout() {
               {/* App.jsx'te path="admin" element={<AdminLayout />} altına path="users" element={<AdminUserListPage />} ekleyeceğiz. */}
               <Link to="/admin/users">Kullanıcıları Listele</Link> {/* <-- Kullanıcı Listesi linki */}
             </li>
-            {/* TODO: Diğer Admin fonksiyonları için linkler buraya eklenecek (örn: Quiz Yönetimi, İstatistikler, Öğretmen İstekleri) */}
-            {/* <li><Link to="/admin/quizzes">Quiz Yönetimi</Link></li> */}
-            {/* <li><Link to="/admin/stats">İstatistikler</Link></li> */}
-            {/* <li><Link to="/admin/teacher-requests">Öğretmen İstekleri</Link></li> */}
+            <li>
+              <Link to="/admin/teacher-requests">Öğretmen Başvuruları</Link>
+            </li>
+            <li>
+              <Link to="/admin/announcements">Duyurular</Link>
+            </li>
+            
+            {/* TODO: Diğer Admin fonksiyonları için linkler buraya eklenecek (örn: Quiz Yönetimi, İstatistikler) */}
           </ul>
         </nav>
       </aside>

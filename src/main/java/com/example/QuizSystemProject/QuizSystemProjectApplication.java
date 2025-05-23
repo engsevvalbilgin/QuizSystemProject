@@ -1,7 +1,10 @@
 package com.example.QuizSystemProject;
 
 import com.example.QuizSystemProject.Model.User;
+import com.example.QuizSystemProject.Model.Teacher;
+import com.example.QuizSystemProject.Model.QuestionType;
 import com.example.QuizSystemProject.Repository.UserRepository;
+import com.example.QuizSystemProject.Repository.QuestionTypeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
@@ -13,7 +16,9 @@ import java.util.List;
 import java.util.Optional;
 import java.time.LocalDateTime;
 
-
+/**
+ * QuizSystemProjectApplication
+ */
 @SpringBootApplication
 public class QuizSystemProjectApplication {
 
@@ -21,22 +26,51 @@ public class QuizSystemProjectApplication {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    // UserRepository'yi inject etmek için alan
+    // Repository'leri inject etmek için alan
     @Autowired
     private UserRepository userRepository;
-
-
+    
+    @Autowired
+    private QuestionTypeRepository questionTypeRepository;
+    
     public static void main(String[] args) {
         SpringApplication.run(QuizSystemProjectApplication.class, args);
+    }
+    
+    /**
+     * Uygulama başlatıldığında varsayılan soru tiplerini ekler
+     */
+    @Bean
+    public CommandLineRunner initQuestionTypes() {
+        return args -> {
+            // Soru tiplerini kontrol et, yoksa ekle
+            if (questionTypeRepository.count() == 0) {
+                System.out.println("Varsayılan soru tipleri oluşturuluyor...");
+                
+                // Çoktan seçmeli soru tipi (ID: 1) - Frontend'de de 1 olarak kullanılıyor
+                QuestionType multipleChoice = new QuestionType();
+                multipleChoice.setId(1); // ID'yi manuel olarak ayarlıyoruz
+                multipleChoice.setTypeName("Çoktan Seçmeli");
+                questionTypeRepository.save(multipleChoice);
+                
+                // Açık uçlu soru tipi (ID: 2) - Frontend'de de 2 olarak kullanılıyor
+                QuestionType openEnded = new QuestionType();
+                openEnded.setId(2); // ID'yi manuel olarak ayarlıyoruz
+                openEnded.setTypeName("Açık Uçlu");
+                questionTypeRepository.save(openEnded);
+                
+                System.out.println("Soru tipleri başarıyla oluşturuldu.");
+            } else {
+                System.out.println("Soru tipleri zaten mevcut.");
+            }
+        };
     }
 
 
     @Bean
     public CommandLineRunner demoUser() { // UserRepository parametresini kaldırdık, yukarıda inject ediliyor
         return (args) -> {
-             // TODO: Bu metodun yalnızca bir kere çalışmasını sağlamak için kontrol ekleyebilirsiniz.
-             // Örneğin, eğer Admin kullanıcısı veritabanında yoksa ekle gibi.
-             // Basit bir kontrol ekleyelim: Eğer varsayılan kullanıcılardan herhangi biri (örn: admin) zaten varsa, ekleme.
+   
              if (userRepository.findByUsername("adminuser").isPresent()) {
                  System.out.println("\nVarsayılan kullanıcılar zaten mevcut, tekrar eklenmiyor.");
                  // Temel okuma testlerini yine de çalıştırabilirsiniz isterseniz:
@@ -52,8 +86,9 @@ public class QuizSystemProjectApplication {
             // enabled durumunu email akışına uygun ayarla.
 
             // Admin Kullanıcısı
-            User adminUser = new User("Admin", "Soyadi", 45, "admin@example.com", "adminuser", passwordEncoder.encode("adminpassword"), "ROLE_ADMIN"); // <-- Parola şifrelendi
-            adminUser.setEnabled(true); // Admin genellikle başlangıçta etkin
+            User adminUser = new User("Admin", "Soyadi", 45, "admin@example.com", "adminuser", 
+                passwordEncoder.encode("adminpassword"), "ROLE_ADMIN");
+            adminUser.setEnabled(true);
             adminUser.setActive(true);
             adminUser.setCreatedDate(LocalDateTime.now());
             adminUser.setUpdatedDate(LocalDateTime.now());
@@ -62,8 +97,9 @@ public class QuizSystemProjectApplication {
 
 
             // Öğrenci Kullanıcısı
-            User studentUser = new User("Ogrenci", "Soyadi", 20, "student@example.com", "studentuser", passwordEncoder.encode("studentpassword"), "ROLE_STUDENT"); // <-- Parola şifrelendi
-            studentUser.setEnabled(false); // <-- Email doğrulama için başlangıçta etkin değil
+            User studentUser = new User("Ogrenci", "Soyadi", 20, "student@example.com", 
+                "studentuser", passwordEncoder.encode("studentpassword"), "ROLE_STUDENT");
+            studentUser.setEnabled(false); // Email doğrulama için başlangıçta etkin değil
             studentUser.setActive(true);
             studentUser.setCreatedDate(LocalDateTime.now());
             studentUser.setUpdatedDate(LocalDateTime.now());
@@ -72,11 +108,21 @@ public class QuizSystemProjectApplication {
 
 
             // Öğretmen Kullanıcısı
-            User teacherUser = new User("Ogretmen", "Soyadi", 35, "teacher@example.com", "teacheruser", passwordEncoder.encode("teacherpassword"), "ROLE_TEACHER"); // <-- Parola şifrelendi
-            teacherUser.setEnabled(false); // <-- Email doğrulama için başlangıçta etkin değil
+            Teacher teacherUser = new Teacher();
+            teacherUser.setName("Ogretmen");
+            teacherUser.setSurname("Soyadi");
+            teacherUser.setAge(35);
+            teacherUser.setEmail("teacher@example.com");
+            teacherUser.setUsername("teacheruser");
+            teacherUser.setPassword(passwordEncoder.encode("teacherpassword"));
+            teacherUser.setRole("ROLE_TEACHER");
+            teacherUser.setEnabled(true);
             teacherUser.setActive(true);
             teacherUser.setCreatedDate(LocalDateTime.now());
             teacherUser.setUpdatedDate(LocalDateTime.now());
+            teacherUser.setSubject("Matematik");
+            teacherUser.setGraduateSchool("Ankara Üniversitesi");
+            teacherUser.setDiplomaNumber("T12345");
             userRepository.save(teacherUser);
             System.out.println("Kaydedilen Öğretmen: " + teacherUser.getUsername());
 

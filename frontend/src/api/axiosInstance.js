@@ -1,4 +1,3 @@
-// C:\Users\Hakan\Desktop\devam\front\QuizLandFrontend\src\api\axiosInstance.js
 import axios from 'axios';
 
 // Backend API'mizin temel URL'si
@@ -12,64 +11,110 @@ const axiosInstance = axios.create({
   },
 });
 
-// İstek Interceptor'ı: Her istek gönderilmeden önce çalışır
-axiosInstance.interceptors.request.use(
-  (config) => {
-    // localStorage'dan JWT token'ı al
-    const token = localStorage.getItem('token'); // <-- Token'ı 'token' anahtarıyla alıyoruz
+// Axios interceptor'larını kurmak için fonksiyon
+export const setupAxiosInterceptors = (refreshToken, logout) => {
+    // İstek Interceptor'ı: Her istek gönderilmeden önce çalışır
+    axiosInstance.interceptors.request.use(
+        (config) => {
+            // TOKEN EKLENMEMESİ GEREKEN ENDPOINT'LER
+            const NO_TOKEN_ENDPOINTS = [
+                '/auth/login', 
+                '/auth/register',
+                '/auth/register/teacher',
+                '/teachers/register',
+                '/auth/forgot-password',
+                '/auth/reset-password',
+                '/auth/verify-email',
+                '/users/password-reset/request',
+                '/users/password-reset/complete'
+            ];
+            
+            // Endpoint kontrolü - tam url yerine, sadece path kontrolü yap
+            const shouldSkipToken = NO_TOKEN_ENDPOINTS.includes(config.url);
+            
+            // Özel log ekle
+            console.log(`Axios Request: ${config.method.toUpperCase()} ${config.url} - Token Gerekli: ${!shouldSkipToken}`);
+            
+            // Eğer token gereken bir endpoint ise ve token mevcutsa, token'i ekle
+            if (!shouldSkipToken) {
+                const token = localStorage.getItem('token');
+                if (token) {
+                    config.headers.Authorization = `Bearer ${token}`;
+                    console.log(`Axios: PRIVATE ENDPOINT - Token eklendi - ${config.url}`);
+                }
+            }
+            
+            // Eğer token gereken bir endpoint değilse veya token yoksa, Authorization header'ını temizle
+            if (shouldSkipToken || !localStorage.getItem('token')) {
+                if (config.headers.Authorization) {
+                    delete config.headers.Authorization;
+                }
+            }
 
-    // Token varsa ve istek login veya register endpoint'ine gitmiyorsa
-    // Authorization başlığına token'ı ekle
-    // Login ve Register endpoint'leri token gerektirmez, bu yüzden hariç tutulurlar.
-    const isLoginOrRegister = config.url.includes('/auth/login') || config.url.includes('/auth/register');
+            return config;
+        },
+        (error) => {
+            console.error('Axios Request Error:', error);
+            return Promise.reject(error);
+        }
+    );
 
-    if (token && !isLoginOrRegister) {
-      config.headers['Authorization'] = `Bearer ${token}`;
-      console.log(`Axios Interceptor: Token eklendi - ${config.method.toUpperCase()} ${config.url}`);
-    } else {
-       // Token yoksa veya login/register isteği ise token eklenmez
-       if (!token && !isLoginOrRegister) {
-           console.log(`Axios Interceptor: Token yok, eklenmedi - ${config.method.toUpperCase()} ${config.url}`);
-       } else {
-           console.log(`Axios Interceptor: Login/Register isteği, token eklenmedi - ${config.method.toUpperCase()} ${config.url}`);
-       }
-    }
+    // Yanıt Interceptor'ı: Her yanıt alındıktan sonra çalışır
+    axiosInstance.interceptors.response.use(
+        (response) => {
+            // Başarılı yanıtlar için yapılacaklar
+            console.log(`Axios Interceptor: ${response.status} yanıtı alındı - ${response.config.method.toUpperCase()} ${response.config.url}`);
+            return response; // Yanıtı döndür
+        },
+        async (error) => {
+            const originalRequest = error.config;
+            
+            // Hatalı yanıtlar için yapılacaklar - daha detaylı loglama yapalım
+            console.error('Axios Interceptor (Response Error):', error.response || error.message || error);
+            
+            // Detaylı hata bilgisi
+            if (error.response) {
+                // Sunucudan dönen yanıt var (4xx veya 5xx)
+                console.error(`Detaylı Hata [${error.response.status}]:`, {
+                    endpoint: originalRequest.url,
+                    method: originalRequest.method.toUpperCase(),
+                    statusText: error.response.statusText,
+                    data: error.response.data,
+                    headers: error.response.headers,
+                    hasToken: !!originalRequest.headers['Authorization']
+                });
+            }
 
-    return config; // Güncellenmiş istek yapılandırmasını döndür
-  },
-  (error) => {
-    // İstek hatası durumunda yapılacaklar
-    console.error('Axios Interceptor (Request Error):', error);
-    return Promise.reject(error); // Hatayı yay
-  }
-);
-
-// Yanıt Interceptor'ı: Her yanıt alındıktan sonra çalışır
-axiosInstance.interceptors.response.use(
-  (response) => {
-    // Başarılı yanıtlar için yapılacaklar
-    console.log(`Axios Interceptor: ${response.status} yanıtı alındı - ${response.config.method.toUpperCase()} ${response.config.url}`);
-    return response; // Yanıtı döndür
-  },
-  (error) => {
-    // Hatalı yanıtlar için yapılacaklar
-    console.error('Axios Interceptor (Response Error):', error.response || error.message || error);
-
-    // Örneğin, 401 Unauthorized hatası alınırsa (token süresi dolmuş olabilir)
-    if (error.response && error.response.status === 401) {
-      console.log('Axios Interceptor: 401 Unauthorized yanıtı alındı. Muhtemelen token süresi dolmuş veya geçersiz.');
-      // TODO: Kullanıcıyı login sayfasına yönlendirme veya token yenileme işlemleri yapılabilir
-      // Örnek: window.location.href = '/login'; // Sayfayı login sayfasına yönlendir
-    }
-     // 403 Forbidden hatası alınırsa (yetkisiz erişim)
-     if (error.response && error.response.status === 403) {
-         console.log('Axios Interceptor: 403 Forbidden yanıtı alındı. Yetkiniz yok.');
-         // TODO: Kullanıcıya yetkisiz erişim mesajı gösterme veya farklı bir sayfaya yönlendirme
-     }
-
-    return Promise.reject(error); // Hatayı yay
-  }
-);
+            // 401 Unauthorized hatası alınırsa (token süresi dolmuş olabilir) ve daha önce yenileme denemesi yapılmadıysa
+            if (error.response && 
+                error.response.status === 401 && 
+                !originalRequest._retry && // Önceden denenmediğinden emin ol
+                localStorage.getItem('token')) { // Token varsa yenileme dene
+                
+                originalRequest._retry = true; // Bu isteği yeniden denediğimizi işaretle
+                console.log('Axios Interceptor: 401 hatası - Token yenileme deneniyor...');
+                
+                try {
+                    // Token'i refresh et
+                    const refreshSuccess = await refreshToken();
+                    
+                    if (refreshSuccess) {
+                        // Yeni token ile orijinal isteği tekrar gönder
+                        return axiosInstance(originalRequest);
+                    }
+                } catch (refreshError) {
+                    console.error('Token refresh hatası:', refreshError);
+                    // Token refresh başarısız olduğunda logout yap
+                    logout();
+                    window.location.href = '/login';
+                }
+            }
+            
+            // Diğer hatalar için normal hata yönetimi
+            return Promise.reject(error);
+        }
+    );
+};
 
 // Oluşturulan instance'ı dışa aktar
 export default axiosInstance;

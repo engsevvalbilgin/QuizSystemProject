@@ -2,12 +2,11 @@ package com.example.QuizSystemProject.exception; // Dosyayı kaydettiğiniz pake
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.ControllerAdvice;
+
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice; // REST Controller'lar için
 
-import java.time.LocalDateTime; // İsteğe bağlı, hata zamanını eklemek için
 
 
 // Bu anotasyon, uygulamanın tüm Controller'larından (özellikle RestController'lardan) fırlatılan

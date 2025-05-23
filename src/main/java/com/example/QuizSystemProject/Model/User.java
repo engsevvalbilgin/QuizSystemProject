@@ -3,8 +3,7 @@ import jakarta.validation.constraints.Size;
 import lombok.NoArgsConstructor;
 import jakarta.persistence.*; // JPA anotasyonları için
 import java.time.LocalDateTime; // Tarih/saat için modern Java API'si
-import java.util.ArrayList;
-import java.util.List;
+
 import java.util.Objects; // equals/hashCode için
 import jakarta.persistence.Inheritance;
 import jakarta.persistence.InheritanceType;
@@ -51,6 +50,8 @@ public class User {
     @Column(nullable = false) // E-posta doğrulaması veya Admin tarafından devre dışı bırakılma durumu
     private boolean enabled = false; // Başlangıçta varsayılan olarak pasif (e-posta doğrulaması gerekebilir)
 
+    
+
     // Oluşturulma tarihi (otomatik olarak veritabanında veya uygulamada ayarlanabilir)
     @Column(nullable = false)
     private LocalDateTime createdDate; // java.util.Date yerine LocalDateTime kullanıyoruz
@@ -76,6 +77,10 @@ public class User {
     @Column(nullable = true) // Parola sıfırlama token'ının son kullanma tarihi (null olabilir)
     private LocalDateTime resetPasswordTokenExpiryDate; // Parola sıfırlama token'ının son kullanma tarihi
 
+    // E-posta değişikliği bekleyen yeni e-posta adresi (doğrulamadan sonra email alanına taşınacak)
+    @Column(nullable = true)
+    private String pendingEmail; // Doğrulama bekleyen yeni e-posta adresi
+
 
     // JPA, argümansız (boş) bir constructor gerektirir
     
@@ -100,6 +105,15 @@ public class User {
     // Getter ve Setter Metotları (Tüm alanlar için - yeni eklenenler dahil)
     // IDE ile otomatik olarak Generate Getters and Setters diyerek tüm alanlar için oluşturun.
     // Aşağıda yeni eklenenlerin getter/setterları örnek olarak verilmiştir.
+    
+    // PendingEmail için getter ve setter
+    public String getPendingEmail() {
+        return pendingEmail;
+    }
+    
+    public void setPendingEmail(String pendingEmail) {
+        this.pendingEmail = pendingEmail;
+    }
 
     public int getId() { return id; }
     public void setId(int id) { this.id = id; } // ID setter'ı genellikle kullanılmaz (otomatik üretilir)
@@ -126,6 +140,8 @@ public class User {
     public void setRole(String role) { this.role = role; }
 
     public boolean isEnabled() { return enabled; }
+
+    
     public void setEnabled(boolean enabled) { this.enabled = enabled; }
 
     public LocalDateTime getCreatedDate() { return createdDate; }

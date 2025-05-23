@@ -16,7 +16,6 @@ import com.example.QuizSystemProject.dto.QuizSessionDetailsResponse;
 
 import com.example.QuizSystemProject.Service.StatisticsService; // StatisticsService'i import edin
 
-import org.springframework.beans.factory.annotation.Autowired; // Bağımlılık enjeksiyonu için
 
 import org.springframework.http.ResponseEntity; // HTTP yanıtı oluşturmak için
 import org.springframework.web.bind.annotation.*; // Web anotasyonları için (@RestController, @RequestMapping, @GetMapping vb.)
@@ -32,7 +31,7 @@ public class StatisticsController {
     private final StatisticsService statisticsService; // İstatistik iş mantığı servisi
 
     // StatisticsService bağımlılığının enjekte edildiği constructor
-    @Autowired
+    
     public StatisticsController(StatisticsService statisticsService) {
         this.statisticsService = statisticsService;
     }

@@ -2,32 +2,29 @@ package com.example.QuizSystemProject.Model;
 
 import jakarta.persistence.*;
 import lombok.*;
-import java.util.Date;
-import java.util.List;
+
 import jakarta.persistence.DiscriminatorValue;
+
 @Entity
-@DiscriminatorValue("ADMIN") // Inheritance kullanacaksan
+@DiscriminatorValue("ADMIN")
 @Getter
 @Setter
 @NoArgsConstructor
-@AllArgsConstructor
 public class Admin extends User {
 
-    @OneToMany(mappedBy = "admin", cascade = CascadeType.ALL)
-    private List<Announcement> announcements;
-
-    public void addAnnouncement() {
-        this.announcements.add(new Announcement());
+    // Constructor that sets the role to ROLE_ADMIN
+    public Admin(String name, String surname, int age, String email, String username, String password) {
+        super(name, surname, age, email, username, password, "ROLE_ADMIN");
     }
+    
+    // No need for announcements list as it's now managed by User
 
     public void showUserDetails() {
         System.out.println("Name: " + getName());
         System.out.println("Surname: " + getSurname());
         System.out.println("Age: " + getAge());
         System.out.println("Email: " + getEmail());
-        System.out.println("Password: " + getPassword());
         System.out.println("Username: " + getUsername());
+        System.out.println("Role: " + getRole());
     }
-
-    // Diğer işlevlerin içi doldurulabilir
 }

@@ -1,82 +1,86 @@
-// C:\Users\Hakan\Desktop\devam\front\QuizLandFrontend\src\App.jsx
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 
-// Layout Komponentlerini Import Et
+// Layouts
 import MainLayout from './components/MainLayout';
-import ProtectedRoutes from './components/ProtectedRoutes'; // Korumalı Rota
-import AdminLayout from './components/AdminLayout'; // AdminLayout
+import ProtectedRoutes from './components/ProtectedRoutes';
+import AdminLayout from './components/AdminLayout';
 
-// Sayfa Komponentlerini Import Et
+// Page Components
 import MainScreen from './pages/MainScreen.jsx';
 import LoginPage from './pages/LoginPage.jsx';
 import RegisterPage from './pages/RegisterPage.jsx';
-import VerifyEmailPage from './pages/VerifyEmailPage.jsx'; // Email Doğrulama Sayfası
-import AdminDashboardPage from './pages/AdminDashboardPage.jsx'; // Admin Dashboard Sayfası
-import AdminUserListPage from './pages/AdminUserListPage.jsx'; // Kullanıcı listeleme sayfası
-import StudentPanel from './pages/StudentPanel.jsx'; // StudentPanel importu
+import StudentRegisterPage from './pages/StudentRegisterPage.jsx';
+import TeacherRegisterPage from './pages/TeacherRegisterPage.jsx';
+import TeacherPanel from './pages/TeacherPanel.jsx';
+import VerifyEmailPage from './pages/VerifyEmailPage.jsx';
+import PasswordResetPage from './pages/PasswordResetPage.jsx';
+import AdminDashboardPage from './pages/AdminDashboardPage.jsx';
+import AdminUserListPage from './pages/AdminUserListPage.jsx';
+import TeacherRequestsPage from './pages/TeacherRequestsPage.jsx';
+import StudentPanel from './pages/StudentPanel.jsx';
+import StudentProfilePage from './pages/StudentProfilePage.jsx';
+import TeacherProfilePage from './pages/TeacherProfilePage.jsx';
+import TeacherMyQuizzesPage from './pages/TeacherMyQuizzesPage.jsx';
+import TeacherCreateQuizPage from './pages/TeacherCreateQuizPage.jsx';
+import TeacherEditQuizPage from './pages/TeacherEditQuizPage.jsx';
+import TeacherQuizQuestionsPage from './pages/TeacherQuizQuestionsPage.jsx';
+import Dashboard from './components/Dashboard';
+import AdminPanel from './pages/AdminPanel.jsx';
+import AdminAnnouncementsPage from './pages/AdminAnnouncementsPage.jsx';
+import TeacherAnnouncementsPage from './pages/TeacherAnnouncementsPage.jsx';
+import StudentAnnouncementsPage from './pages/StudentAnnouncementsPage.jsx';
 
-// axiosInstance importu buradan KALDIRILDI. App.jsx'in buna ihtiyacı yok.
-
+// Styles
+import './styles/teacher.css';
+import './styles/admin.css';
 
 function App() {
   return (
     <div className="App">
-      {/* Tüm rotaları ve sayfaları sarmalayacak Ana Layout */}
       <Routes>
-        <Route path="/" element={<MainLayout />} > {/* Ana Layout Rotası */}
+        <Route path="/" element={<MainLayout />}>
+          {/* Public Routes */}
+          <Route index element={<MainScreen />} />
+          <Route path="login" element={<LoginPage />} />
+          <Route path="register" element={<RegisterPage />} />
+          <Route path="register/student" element={<StudentRegisterPage />} />
+          <Route path="register/teacher" element={<TeacherRegisterPage />} />
+          <Route path="verify-email" element={<VerifyEmailPage />} />
+          <Route path="password-reset" element={<PasswordResetPage />} />
+          <Route path="reset-password" element={<PasswordResetPage />} />
+          <Route path="logout" element={<LoginPage />} />
 
-             {/* --- Herkese Açık Rotalar (Layout içinde) --- */}
-            <Route index element={<MainScreen />} /> {/* Anasayfa (index) rotası */}
-            <Route path="login" element={<LoginPage />} /> {/* Login sayfası rotası */}
-            <Route path="register" element={<RegisterPage />} /> {/* Kayıt sayfası rotası */}
-            <Route path="verify-email" element={<VerifyEmailPage />} /> {/* Email Doğrulama rotası */}
-
-
-             {/* --- Korumalı Rotalar Grubu (Layout içinde) --- */}
-            {/* Bu ProtectedRoutes ADMIN ve STUDENT rolleri için kullanılabilir, veya ayrı ayrı tanımlanabilir */}
-            {/* ADMIN rotalarını ayrı bir ProtectedRoutes sarmalına almak daha temiz olabilir */}
-
-             {/* ADMIN Rotaları (Sadece ADMIN rolüne sahip kullanıcılar) */}
-            <Route element={<ProtectedRoutes requiredRoles={['ROLE_ADMIN']} />} > {/* ADMIN Korumalı Rotalar için kapsayıcı */}
-                 {/* Admin Paneli Rotası */}
-                <Route path="admin" element={<AdminLayout />} > {/* Admin Paneli Layout Rotası */}
-                    {/* /admin'in varsayılan alt rotası */}
-                   <Route index element={<AdminDashboardPage />} /> {/* Admin Dashboard Sayfası */}
-                   {/* Kullanıcı Listeleme Sayfası Rotası */}
-                    <Route path="users" element={<AdminUserListPage />} /> {/* Kullanıcı listeleme sayfası */}
-                </Route>
+          {/* Admin Routes */}
+          <Route element={<ProtectedRoutes requiredRoles={['ROLE_ADMIN']} />}>
+            <Route path="admin" element={<AdminLayout />}>
+              <Route index element={<AdminDashboardPage />} />
+              <Route path="users" element={<AdminUserListPage />} />
+              <Route path="teacher-requests" element={<TeacherRequestsPage />} />
+              <Route path="announcements" element={<AdminAnnouncementsPage />} />
             </Route>
+          </Route>
 
-             {/* STUDENT Rotaları (Sadece STUDENT rolüne sahip kullanıcılar) */}
-            <Route element={<ProtectedRoutes requiredRoles={['ROLE_STUDENT']} />} > {/* STUDENT Korumalı Rotalar için kapsayıcı */}
-                 {/* Student Paneli Rotası */}
-                 <Route path="student-dashboard" element={<StudentPanel />} /> {/* Student Paneli rotası */}
-                 {/* TODO: Öğrencilere özel diğer rotalar buraya eklenecek */}
-                 {/* <Route path="quizzes" element={<StudentQuizListPage />} /> */}
-                 {/* <Route path="results" element={<StudentResultsPage />} /> */}
-            </Route>
+          {/* Student Routes */}
+          <Route element={<ProtectedRoutes requiredRoles={['ROLE_STUDENT']} />}>
+            <Route path="student" element={<StudentPanel />} />
+            <Route path="student/profile" element={<StudentProfilePage />} />
+            <Route path="student/announcements" element={<StudentAnnouncementsPage />} />
+            <Route path="student/dashboard" element={<Dashboard />} />
+          </Route>
 
-             {/* TODO: TEACHER paneli rotaları buraya eklenecek (Kendi ProtectedRoutes sarmalında veya mevcut STUDENT sarmalında) */}
-             {/* TEACHER Rotaları (Sadece TEACHER rolüne sahip kullanıcılar) */}
-             {/* <Route element={<ProtectedRoutes requiredRoles={['ROLE_TEACHER']} />} >
-                   <Route path="teacher-dashboard" element={<TeacherPanel />} />
-                 </Route> */}
-
-             {/* Login olmuş herhangi bir kullanıcının erişebileceği rotalar (örn: Profil Sayfası) */}
-             {/* <Route element={<ProtectedRoutes requiredRoles={['ROLE_ADMIN', 'ROLE_TEACHER', 'ROLE_STUDENT']} />} >
-                   <Route path="profile" element={<ProfilePage />} />
-                 </Route> */}
-
-
-            {/* Eşleşmeyen tüm yollar için 404 sayfası (Layout içinde) */}
-            {/* <Route path="*" element={<NotFoundPage />} /> */}
-
-        </Route> {/* Ana Layout Rotası Sonu */}
-
-
-        {/* Layout dışında render edilecek tam sayfa rotaları buraya */}
-
+          {/* Teacher Routes */}
+          <Route element={<ProtectedRoutes requiredRoles={['ROLE_TEACHER']} />}>
+            <Route path="teacher" element={<TeacherPanel />} />
+            <Route path="teacher/profile" element={<TeacherProfilePage />} />
+            <Route path="teacher/my-quizzes" element={<TeacherMyQuizzesPage />} />
+            <Route path="teacher/create-quiz" element={<TeacherCreateQuizPage />} />
+            <Route path="teacher/edit-quiz/:quizId" element={<TeacherEditQuizPage />} />
+            <Route path="teacher/quiz/:quizId/questions" element={<TeacherQuizQuestionsPage />} />
+            <Route path="teacher/announcements" element={<TeacherAnnouncementsPage />} />
+            <Route path="teacher/dashboard" element={<Dashboard />} />
+          </Route>
+        </Route>
       </Routes>
     </div>
   );

@@ -3,6 +3,7 @@ package com.example.QuizSystemProject.Service;
 import com.example.QuizSystemProject.dto.AuthResponseDto;
 import com.example.QuizSystemProject.dto.LoginRequest;
 import com.example.QuizSystemProject.dto.UserRegistrationRequest;
+import com.example.QuizSystemProject.dto.TeacherRegistrationRequest;
 import com.example.QuizSystemProject.exception.ExpiredTokenException;
 import com.example.QuizSystemProject.exception.InvalidTokenException;
 import com.example.QuizSystemProject.exception.UserNotFoundException;
@@ -10,65 +11,57 @@ import com.example.QuizSystemProject.Model.Student;
 import com.example.QuizSystemProject.Model.Teacher;
 import com.example.QuizSystemProject.Model.User;
 import com.example.QuizSystemProject.Repository.UserRepository;
-import com.example.QuizSystemProject.security.jwt.JwtUtil; // JWT importu
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value; // application.properties'ten değer okumak için
-import org.springframework.security.authentication.AuthenticationManager; // Spring Security Kimlik Doğrulama Yöneticisi
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken; // Kimlik doğrulama için token
-import org.springframework.security.core.Authentication; // Kimlik doğrulama objesi
-import org.springframework.security.core.userdetails.UserDetails; // Kullanıcı detayları
-import org.springframework.security.crypto.password.PasswordEncoder; // Parola şifreleyici
+import com.example.QuizSystemProject.security.jwt.JwtUtil;
+
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional; // Transaction yönetimi
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
+
 import com.example.QuizSystemProject.exception.DuplicateUsernameException;
 import com.example.QuizSystemProject.exception.DuplicateEmailException;
-import com.example.QuizSystemProject.exception.UserNotAuthorizedException; // Kullanıcı yetkisiz hatası
-import com.example.QuizSystemProject.exception.UserAlreadyEnabledException; // Hesap zaten etkin hatası
-import com.example.QuizSystemProject.exception.QuizSessionNotFoundException; // QuizSessionNotFoundException (Daha önceki istatistik implementasyonunda kullanıldı)
-import com.example.QuizSystemProject.exception.QuizNotFoundException; // QuizNotFoundException (Daha önceki istatistik implementasyonunda kullanıldı)
-
+import com.example.QuizSystemProject.exception.UserNotAuthorizedException;
+import com.example.QuizSystemProject.exception.UserAlreadyEnabledException;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
-import java.time.temporal.ChronoUnit; // Zaman birimleri için
 
-// MailService importu ve MailException importu
-import com.example.QuizSystemProject.Service.MailService;
+
+import org.springframework.http.HttpStatus;
 import org.springframework.mail.MailException;
 
-
 @Service
-@Transactional // Sınıf seviyesinde transaction yönetimi - Tüm public metotlar transactional olur
+@Transactional
 public class AuthenticationService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final MailService mailService; // MailService inject edildi
+    private final MailService mailService;
+    private final AuthenticationManager authenticationManager;
+    private final JwtUtil jwtUtil;
+    private final UserDetailsService userDetailsService;
+    private final long CONFIRMATION_TOKEN_EXPIRY_HOURS = 24;
+    private final long RESET_TOKEN_EXPIRY_MINUTES = 60;
+    private final String appBaseUrl = "http://localhost:8080";
 
-    private final AuthenticationManager authenticationManager; // Spring Security'den inject edilecek
-    private final JwtUtil jwtUtil; // JWT util inject edilecek
-
-    // Doğrulama token'ının geçerlilik süresi (örn: 24 saat)
-    private final long CONFIRMATION_TOKEN_EXPIRY_HOURS = 24; // Doğrulama token süresi için sabit
-
-    // Parola sıfırlama token'ının geçerlilik süresi (örn: 1 saat)
-    private final long RESET_TOKEN_EXPIRY_MINUTES = 60; // Parola sıfırlama token süresi için sabit
-
-    // Uygulama baz URL'si (maildeki linkleri oluşturmak için)
-    // application.properties'ten okunabilir veya sabit tanımlanabilir.
-    // @Value("${app.base.url}") // application.properties'e ekleyebilirsiniz: app.base.url=http://localhost:8080
-    private String appBaseUrl = "http://localhost:8080"; 
-
-
-    @Autowired
-    public AuthenticationService(UserRepository userRepository, PasswordEncoder passwordEncoder, MailService mailService, AuthenticationManager authenticationManager, JwtUtil jwtUtil) {
+    public AuthenticationService(UserRepository userRepository, 
+                               PasswordEncoder passwordEncoder, 
+                               MailService mailService, 
+                               AuthenticationManager authenticationManager, 
+                               JwtUtil jwtUtil, 
+                               UserDetailsService userDetailsService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.mailService = mailService;
         this.authenticationManager = authenticationManager;
         this.jwtUtil = jwtUtil;
+        this.userDetailsService = userDetailsService;
     }
 
     // --- Kullanıcı Kayıt (Register) ---
@@ -97,6 +90,7 @@ public class AuthenticationService {
         newUser.setSurname(registrationRequest.getSurname());
         newUser.setEmail(registrationRequest.getEmail());
         newUser.setAge(registrationRequest.getAge());
+        newUser.setSchoolName(registrationRequest.getSchoolName()); // Okul ismini set et
         newUser.setRole("ROLE_STUDENT"); // Varsayılan rol STUDENT
         newUser.setActive(true); // Varsayılan olarak aktif (Silinmemiş)
         newUser.setEnabled(false); // Başlangıçta etkin değil (E-posta Doğrulama bekleniyor)
@@ -135,6 +129,70 @@ public class AuthenticationService {
 
 
         return savedUser; // Kaydedilen User objesini döndür
+    }
+    
+    // --- Öğretmen Kayıt (Teacher Register) ---
+    @Transactional
+    public User registerTeacher(TeacherRegistrationRequest registrationRequest) {
+        System.out.println("AuthenticationService: Öğretmen kayıt işlemi başlatıldı - Email: " + registrationRequest.getEmail());
+
+        // E-posta benzersizlik kontrolü
+        
+        if (userRepository.findByEmail(registrationRequest.getEmail()).isPresent()) {
+            System.out.println("AuthenticationService: Öğretmen kayıt başarısız - Email adresi zaten mevcut.");
+            throw new DuplicateEmailException("Email adresi zaten kullanımda");
+        }
+
+        // Yeni Teacher objesi oluşturma
+        Teacher newTeacher = new Teacher();
+        // Email'i kullanıcı adı olarak kullan
+        newTeacher.setUsername(registrationRequest.getEmail());
+        newTeacher.setPassword(passwordEncoder.encode(registrationRequest.getPassword()));
+        newTeacher.setName(registrationRequest.getName());
+        newTeacher.setSurname(registrationRequest.getSurname());
+        newTeacher.setEmail(registrationRequest.getEmail());
+        newTeacher.setAge(registrationRequest.getAge());
+        newTeacher.setRole("ROLE_TEACHER"); // Öğretmen rolü
+        
+        // Öğretmen-spesifik alanları ayarla
+        newTeacher.setSubject(registrationRequest.getSubject());
+        newTeacher.setGraduateSchool(registrationRequest.getGraduateSchool());
+        newTeacher.setDiplomaNumber(registrationRequest.getDiplomaNumber());
+        
+        newTeacher.setCreatedDate(LocalDateTime.now());
+        newTeacher.setUpdatedDate(LocalDateTime.now());
+        newTeacher.setActive(true);
+        newTeacher.setEnabled(false); // ÖNEMLİ: Öğretmen admin onayına kadar etkin değil
+
+        // --- E-posta Doğrulama Token'ı Oluştur ve Set Et ---
+        String confirmationToken = UUID.randomUUID().toString(); // Benzersiz token oluştur
+        newTeacher.setConfirmationToken(confirmationToken);
+        // Token'ın son kullanma tarihi (CONFIRMATION_TOKEN_EXPIRY_HOURS saat sonra)
+        LocalDateTime expiryDate = LocalDateTime.now().plusHours(CONFIRMATION_TOKEN_EXPIRY_HOURS);
+        newTeacher.setConfirmationTokenExpiryDate(expiryDate);
+
+        System.out.println("AuthenticationService: Öğretmen için e-posta doğrulama token'ı oluşturuldu - Token: " + confirmationToken);
+
+        // Öğretmeni kaydet
+        User savedTeacher = userRepository.save(newTeacher);
+        System.out.println("AuthenticationService: Öğretmen başarıyla kaydedildi - ID: " + savedTeacher.getId());
+
+        // --- Bekleyen inceleme maili gönderme ---
+        String emailSubject = "Öğretmenlik Başvurunuz Alındı";
+        String emailBody = "Sayın " + savedTeacher.getName() + " " + savedTeacher.getSurname() + ",\n\n" +
+                         "Öğretmenlik başvurunuz başarıyla alınmıştır. Başvurunuz admin tarafından incelendikten sonra" +
+                         " sizinle iletişime geçilecektir.\n\n" +
+                         "Saygılarımızla,\nQuizland Ekibi";
+
+        try {
+            mailService.sendEmail(savedTeacher.getEmail(), emailSubject, emailBody);
+            System.out.println("AuthenticationService: Bekleyen inceleme maili başarıyla gönderildi.");
+        } catch (MailException e) {
+            System.err.println("AuthenticationService: Bekleyen inceleme maili gönderilemedi: " + e.getMessage());
+            // Mail gönderme hatası durumunda kayıt yine de başarılı sayılır
+        }
+
+        return savedTeacher;
     }
 
     // --- Kullanıcı Giriş (Login) ---
@@ -201,11 +259,18 @@ public class AuthenticationService {
 
         System.out.println("AuthenticationService: Kullanıcı token ile bulundu - Kullanıcı Adı: " + user.getUsername());
 
-        // Kullanıcı zaten etkinleştirilmiş mi kontrolü
-        if (user.isEnabled()) {
+        // E-posta değişikliği için kullanılıyorsa, hesap zaten etkinleştirilmiş olsa bile devam et
+        boolean isEmailChange = user.getPendingEmail() != null && !user.getPendingEmail().isEmpty();
+        
+        // Kullanıcı zaten etkinleştirilmiş mi kontrolü - sadece yeni hesap doğrulaması için kontrol et
+        if (user.isEnabled() && !isEmailChange) {
              System.out.println("AuthenticationService: Kullanıcı zaten etkinleştirilmiş - Kullanıcı Adı: " + user.getUsername());
-             // Zaten aktifse hata fırlatılır. GlobalExceptionHandler yakalayacak.
+             // Zaten aktifse VE email değişikliği değilse hata fırlatılır.
              throw new UserAlreadyEnabledException("Hesap zaten etkinleştirilmiş.");
+        }
+        
+        if (user.isEnabled() && isEmailChange) {
+             System.out.println("AuthenticationService: Etkinleştirilmiş kullanıcı için e-posta değişikliği doğrulaması - Kullanıcı Adı: " + user.getUsername());
         }
 
         // Token süresinin dolup dolmadığını kontrol et
@@ -214,9 +279,24 @@ public class AuthenticationService {
             throw new ExpiredTokenException("Doğrulama token'ının süresi dolmuş.");
         }
 
-        // Kullanıcıyı etkinleştir
-        user.setEnabled(true);
-        System.out.println("AuthenticationService: Kullanıcı etkinleştirildi - Kullanıcı Adı: " + user.getUsername());
+        // E-posta değişikliği için token kullanılıyorsa, bekleyen e-postayı uygula
+        if (user.getPendingEmail() != null && !user.getPendingEmail().isEmpty()) {
+            String oldEmail = user.getEmail();
+            String newEmail = user.getPendingEmail();
+            
+            // E-posta adresini güncelle
+            user.setEmail(newEmail);
+            user.setPendingEmail(null); // Bekleyen e-postayı temizle
+            
+            System.out.println("AuthenticationService: Kullanıcının e-posta adresi güncellendi - Kullanıcı: " 
+                + user.getUsername() + ", Eski E-posta: " + oldEmail + ", Yeni E-posta: " + newEmail);
+        } 
+
+        // Kullanıcıyı etkinleştir (yeni kayıt doğrulaması ise)
+        if (!user.isEnabled()) {
+            user.setEnabled(true);
+            System.out.println("AuthenticationService: Kullanıcı etkinleştirildi - Kullanıcı Adı: " + user.getUsername());
+        }
 
         // Token bilgilerini temizle (Token tek kullanımlık olmalı)
         user.setConfirmationToken(null);
@@ -269,10 +349,7 @@ public class AuthenticationService {
         System.out.println("AuthenticationService: Kullanıcı token bilgileriyle kaydedildi.");
 
 
-        // --- MailService kullanarak parola sıfırlama maili gönderme ---
-        // TODO: Gerçek frontend parola sıfırlama sayfasının URL'sini buraya yazın!
-        // Örneğin: http://localhost:3000/reset-password?token=OLUSTURULAN_TOKEN
-        
+       
         String frontendResetUrl = "http://localhost:3000/reset-password"; // <-- Frontend Parola Sıfırlama URL'si (Controller'da da sabit tanımlanabilir)
         String resetLink = frontendResetUrl + "?token=" + resetPasswordToken; // Parola sıfırlama linki
 
@@ -348,6 +425,32 @@ public class AuthenticationService {
         return savedUser; // Güncellenen kullanıcıyı döndür
     }
 
+
+    public AuthResponseDto refreshToken(String refreshToken) {
+    // Validate the refresh token
+    if (!jwtUtil.validateRefreshToken(refreshToken)) {
+        throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Geçersiz refresh token");
+    }
+    
+    // Extract username from refresh token
+    String username = jwtUtil.extractUsername(refreshToken);
+    
+    // Load user details
+    UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+    
+    // Generate new access token
+    String newAccessToken = jwtUtil.generateToken(userDetails);
+    
+    // Get user details for roles
+    User user = userRepository.findByUsername(username)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Kullanıcı bulunamadı"));
+    
+    // Get user role (since User has a single role as String)
+    List<String> roles = List.of(user.getRole());
+            
+    // Return new tokens with user details
+    return new AuthResponseDto(user.getId(), username, roles, newAccessToken);
+}
     
    
 
