@@ -18,14 +18,15 @@ let failedQueue = [];
 
 // Process queued requests
 const processQueue = (error, token = null) => {
-  failedQueue.forEach(prom => {
+  const queue = [...failedQueue];
+  failedQueue = [];
+  queue.forEach(({ resolve, reject, unsubscribe }) => {
     if (error) {
-      prom.reject(error);
+      reject(error);
     } else {
-      prom.resolve(token);
+      resolve(token);
     }
   });
-  failedQueue = [];
 };
 
 // Endpoints that don't require authentication
@@ -66,74 +67,94 @@ axiosInstance.interceptors.request.use(
 );
 
 export const setupAxiosInterceptors = (refreshTokenFn, logoutFn) => {
-    // Store the interceptor to be able to remove it later
-    const interceptor = axiosInstance.interceptors.response.use(
-      (response) => response,
-      async (error) => {
-        const originalRequest = error.config;
-        
-        // If error is not 401 or it's a refresh token request, reject
-        if (error.response?.status !== 401 || 
-            NO_TOKEN_ENDPOINTS.some(endpoint => originalRequest.url.includes(endpoint))) {
-          return Promise.reject(error);
-        }
+    // Remove any existing interceptors to prevent duplicates
+    axiosInstance.interceptors.response.eject(0);
+    axiosInstance.interceptors.request.eject(0);
 
-        // If already refreshing, add to queue
-        if (isRefreshing) {
-          return new Promise((resolve, reject) => {
-            const retryPromise = new Promise((retryResolve, retryReject) => {
-              failedQueue.push({ resolve: retryResolve, reject: retryReject });
-            });
+    // Request interceptor to add auth token to requests
+    axiosInstance.interceptors.request.use(
+        (config) => {
+            const requestUrl = config.url || '';
+            const shouldSkipToken = NO_TOKEN_ENDPOINTS.some(endpoint => 
+                requestUrl.includes(endpoint)
+            );
             
-            retryPromise.then((token) => {
-              if (token) {
-                originalRequest.headers.Authorization = `Bearer ${token}`;
-                return axiosInstance(originalRequest);
-              }
-              return Promise.reject(error);
-            }).catch(reject);
-          });
+            if (!shouldSkipToken) {
+                const token = localStorage.getItem('token');
+                if (token) {
+                    config.headers.Authorization = `Bearer ${token}`;
+                }
+            }
+            
+            return config;
+        },
+        (error) => {
+            return Promise.reject(error);
         }
-
-        isRefreshing = true;
-        
-        try {
-          // Call the refresh token function
-          const newToken = await refreshTokenFn();
-          
-          if (newToken) {
-            // Update the original request with the new token
-            originalRequest.headers.Authorization = `Bearer ${newToken}`;
-            
-            // Process any queued requests with the new token
-            processQueue(null, newToken);
-            
-            // Retry the original request
-            return axiosInstance(originalRequest);
-          }
-
-          // If refresh token failed, logout the user
-          if (logoutFn) {
-            logoutFn();
-          }
-          processQueue(error, null);
-          return Promise.reject(error);
-        } catch (refreshError) {
-          // If refresh token failed, logout the user
-          if (logoutFn) {
-            logoutFn();
-          }
-          processQueue(refreshError, null);
-          return Promise.reject(refreshError);
-        } finally {
-          isRefreshing = false;
-          // Clear the queue after refresh
-          failedQueue = [];
-        }
-      }
     );
 
-    // Return the interceptor ID so it can be cleaned up
+    // Response interceptor to handle token refresh
+    const interceptor = axiosInstance.interceptors.response.use(
+        (response) => response,
+        async (error) => {
+            const originalRequest = error.config;
+            
+            // If error is not 401 or it's a refresh token request, reject
+            if (error.response?.status !== 401 || 
+                originalRequest._retry ||
+                NO_TOKEN_ENDPOINTS.some(endpoint => originalRequest.url.includes(endpoint))) {
+                return Promise.reject(error);
+            }
+
+            // Mark this request as a retry
+            originalRequest._retry = true;
+
+            // If already refreshing, add to queue
+            if (isRefreshing) {
+                return new Promise((resolve, reject) => {
+                    const unsubscribe = () => {
+                        const token = localStorage.getItem('token');
+                        if (token) {
+                            originalRequest.headers.Authorization = `Bearer ${token}`;
+                            resolve(axiosInstance(originalRequest));
+                        } else {
+                            reject(error);
+                        }
+                    };
+                    failedQueue.push({ resolve: unsubscribe, unsubscribe });
+                });
+            }
+
+            isRefreshing = true;
+            
+            try {
+                const newToken = await refreshTokenFn();
+                if (newToken) {
+                    // Update the original request with the new token
+                    originalRequest.headers.Authorization = `Bearer ${newToken}`;
+                    
+                    // Process any queued requests with the new token
+                    processQueue(null, newToken);
+                    
+                    // Retry the original request
+                    return axiosInstance(originalRequest);
+                }
+                
+                // If no new token, logout
+                throw new Error('No new token received');
+            } catch (refreshError) {
+                console.error('Token refresh failed:', refreshError);
+                processQueue(refreshError, null);
+                if (logoutFn) {
+                    logoutFn();
+                }
+                return Promise.reject(refreshError);
+            } finally {
+                isRefreshing = false;
+            }
+        }
+    );
+
     return interceptor;
   };
 
