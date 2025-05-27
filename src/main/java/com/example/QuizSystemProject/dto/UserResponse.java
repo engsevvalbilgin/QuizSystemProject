@@ -2,6 +2,7 @@ package com.example.QuizSystemProject.dto; // Paket adınızın doğru olduğund
 
 import com.example.QuizSystemProject.Model.User; // Entity'den dönüşüm için User Entity'sini import edin
 import java.time.LocalDateTime;
+import com.example.QuizSystemProject.Model.Teacher;
 // Bu DTO, API yanıtlarında temel kullanıcı bilgilerini taşır (örn: kullanıcı listeleri).
 // Hassas bilgiler (parola gibi) dahil EDİLMEZ.
 public class UserResponse {
@@ -14,6 +15,8 @@ public class UserResponse {
     private String role; // Kullanıcı rolü
     private boolean isActive; // Hesabın aktif (silinmemiş) olup olmadığı
     private boolean enabled; // Hesabın etkinleştirilmiş (e-posta doğrulaması yapılmış) olup olmadığı
+    private String diplomaNumber; // Diplomalar için diploma numarası
+    private String graduateSchool; // Mezun olduğu okul
     private LocalDateTime createdAt; // Kullanıcının oluşturulma tarihi
 
     // Yaş, oluşturulma/güncellenme tarihleri gibi alanları liste DTO'suna dahil etmeyebiliriz
@@ -34,6 +37,10 @@ public class UserResponse {
         this.role = user.getRole();
         this.isActive = user.isActive(); // Getter metodu isActive()
         this.enabled = user.isEnabled(); // Getter metodu isEnabled()
+        if (user instanceof Teacher) {
+            this.diplomaNumber = ((Teacher) user).getDiplomaNumber();
+            this.graduateSchool = ((Teacher) user).getGraduateSchool();
+        }
         this.createdAt = user.getCreatedDate(); // Kullanıcının oluşturulma tarihi
     }
 
@@ -52,7 +59,6 @@ public class UserResponse {
     public String getSurname() { return surname; }
     public void setSurname(String surname) { this.surname = surname; }
 
-    
     public String getEmail() { return email; }
     public void setEmail(String email) { this.email = email; }
 
@@ -65,6 +71,12 @@ public class UserResponse {
     public boolean isEnabled() { return enabled; }
     public void setEnabled(boolean enabled) { this.enabled = enabled; }
     
+    public String getDiplomaNumber() { return diplomaNumber; }
+    public void setDiplomaNumber(String diplomaNumber) { this.diplomaNumber = diplomaNumber; }
+
+    public String getGraduateSchool() { return graduateSchool; }
+    public void setGraduateSchool(String graduateSchool) { this.graduateSchool = graduateSchool; }
+
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 
