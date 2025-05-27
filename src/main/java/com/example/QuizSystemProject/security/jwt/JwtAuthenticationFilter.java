@@ -35,37 +35,74 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             @NonNull FilterChain filterChain
     ) throws ServletException, IOException {
         String requestURI = request.getRequestURI();
+        String method = request.getMethod();
+        
+        logger.debug("Processing request: " + method + " " + requestURI);
+        
+        // Skip authentication for OPTIONS requests (preflight)
+        if ("OPTIONS".equalsIgnoreCase(method)) {
+            logger.debug("Skipping authentication for OPTIONS request");
+            filterChain.doFilter(request, response);
+            return;
+        }
         
         // Public endpoint'leri kontrol et
-        if (isPublicEndpoint(request.getMethod(), requestURI)) {
+        if (isPublicEndpoint(method, requestURI)) {
+            logger.debug("Public endpoint accessed: " + requestURI);
             // Özellikle refresh-token endpoint'i için ek başlık ayarları
-            if (requestURI.equals("/api/auth/refresh-token") && request.getMethod().equals("POST")) {
+            if (requestURI.equals("/api/auth/refresh-token") && method.equals("POST")) {
+                logger.debug("Refresh token endpoint accessed");
                 response.setHeader("Access-Control-Allow-Origin", "http://localhost:5173");
                 response.setHeader("Access-Control-Allow-Credentials", "true");
-                response.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
-                response.setHeader("Access-Control-Expose-Headers", "Authorization");
+                response.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With, X-XSRF-TOKEN");
+                response.setHeader("Access-Control-Expose-Headers", "Authorization, X-XSRF-TOKEN");
+                response.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
             }
             filterChain.doFilter(request, response);
             return;
         }
+        
+        // Special handling for logout endpoint
+        if (requestURI.equals("/api/auth/logout") && method.equals("POST")) {
+            logger.debug("Logout endpoint accessed");
+            // Clear the authentication
+            SecurityContextHolder.clearContext();
+            // Clear any existing tokens
+            response.setHeader("Authorization", "");
+            response.setStatus(HttpServletResponse.SC_OK);
+            return;
+        }
 
         final String authHeader = request.getHeader("Authorization");
+        logger.debug("Authorization header: " + (authHeader != null ? "present" : "missing"));
         
         // 2. Authorization başlığını kontrol et
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Yetkilendirme başlığı eksik veya geçersiz");
+            logger.warn("Missing or invalid Authorization header for request: " + method + " " + requestURI);
+            // For API endpoints, return 401 Unauthorized
+            if (requestURI.startsWith("/api/")) {
+                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Yetkilendirme başlığı eksik veya geçersiz");
+                return;
+            }
+            // For non-API endpoints, continue the filter chain
+            filterChain.doFilter(request, response);
             return;
         }
 
         // 3. Token'ı ayıkla ve doğrula
         try {
             String jwt = authHeader.substring(7);
+            logger.debug("JWT token extracted");
+            
             String username = jwtUtil.extractUsername(jwt);
+            logger.debug("Extracted username from token: " + username);
             
             if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                logger.debug("Loading user details for: " + username);
                 UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
                 
                 if (jwtUtil.isTokenValid(jwt, userDetails)) {
+                    logger.debug("Token is valid for user: " + username);
                     UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                             userDetails,
                             null,
@@ -96,14 +133,24 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             logger.error("Authentication error: " + e.getMessage(), e);
             
             if (e instanceof UsernameNotFoundException) {
+                logger.error("User not found: " + e.getMessage());
                 response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Kullanıcı bulunamadı");
             } else if (e instanceof io.jsonwebtoken.ExpiredJwtException) {
+                logger.warn("JWT token expired: " + e.getMessage());
                 response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Token süresi dolmuş");
-            } else if (e instanceof io.jsonwebtoken.JwtException) {
-                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Geçersiz token");
+            } else if (e instanceof io.jsonwebtoken.MalformedJwtException) {
+                logger.warn("Malformed JWT token: " + e.getMessage());
+                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Geçersiz token formatı");
+            } else if (e instanceof io.jsonwebtoken.security.SignatureException) {
+                logger.warn("Invalid JWT signature: " + e.getMessage());
+                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Geçersiz token imzası");
             } else {
-                response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Bir hata oluştu: " + e.getMessage());
+                logger.error("Unexpected authentication error: " + e.getMessage(), e);
+                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Kimlik doğrulama başarısız: " + e.getMessage());
             }
+            
+            // Clear the security context to ensure no authentication remains
+            SecurityContextHolder.clearContext();
         }
     }
     
