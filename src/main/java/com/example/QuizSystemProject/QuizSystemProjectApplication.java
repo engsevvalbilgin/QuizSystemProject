@@ -1,69 +1,119 @@
 package com.example.QuizSystemProject;
 
-import com.example.QuizSystemProject.Model.User;
+import com.example.QuizSystemProject.Model.User; // Bu importlar aslında 'Model' paketinden geliyor
+import com.example.QuizSystemProject.Model.Teacher;
+import com.example.QuizSystemProject.Model.Student;
+import com.example.QuizSystemProject.Model.Admin;
+import com.example.QuizSystemProject.Model.QuestionType;
 import com.example.QuizSystemProject.Repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.example.QuizSystemProject.Repository.QuestionTypeRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
-import org.springframework.security.crypto.password.PasswordEncoder; // PasswordEncoder importu
+import org.springframework.context.annotation.DependsOn; // Önemli: @DependsOn importu
+import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-import java.time.LocalDateTime;
 
-
+/**
+ * QuizSystemProjectApplication
+ */
 @SpringBootApplication
 public class QuizSystemProjectApplication {
 
-    // PasswordEncoder'ı inject etmek için alan
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder;
+    private final UserRepository userRepository;
+    private final QuestionTypeRepository questionTypeRepository;
 
-    // UserRepository'yi inject etmek için alan
-    @Autowired
-    private UserRepository userRepository;
-
+    // Constructor Injection (Autowired yerine daha modern ve önerilen yöntem)
+    public QuizSystemProjectApplication(PasswordEncoder passwordEncoder,
+                                        UserRepository userRepository,
+                                        QuestionTypeRepository questionTypeRepository) {
+        this.passwordEncoder = passwordEncoder;
+        this.userRepository = userRepository;
+        this.questionTypeRepository = questionTypeRepository;
+    }
 
     public static void main(String[] args) {
         SpringApplication.run(QuizSystemProjectApplication.class, args);
     }
 
+    @Bean
+    // Bu CommandLineRunner'ın demoUser'dan önce çalışmasını sağlayabiliriz.
+    // Ancak her ikisi de @DependsOn("entityManagerFactory") kullandığı için
+    // Spring bunların oluşturulduktan sonra çalışmasını garantileyecektir.
+    public CommandLineRunner initQuestionTypes() {
+        return args -> {
+            // Soru tiplerini kontrol et, yoksa ekle
+            if (questionTypeRepository.count() == 0) {
+                System.out.println("Varsayılan soru tipleri oluşturuluyor...");
+
+                // Çoktan seçmeli soru tipi (ID: 1) - Frontend'de de 1 olarak kullanılıyor
+                QuestionType multipleChoice = new QuestionType();
+                multipleChoice.setId(1); // ID'yi manuel olarak ayarlıyoruz, dikkatli kullanılmalı
+                multipleChoice.setTypeName("Çoktan Seçmeli");
+                questionTypeRepository.save(multipleChoice);
+
+                // Açık uçlu soru tipi (ID: 2) - Frontend'de de 2 olarak kullanılıyor
+                QuestionType openEnded = new QuestionType();
+                openEnded.setId(2); // ID'yi manuel olarak ayarlıyoruz, dikkatli kullanılmalı
+                openEnded.setTypeName("Açık Uçlu");
+                questionTypeRepository.save(openEnded);
+
+                System.out.println("Soru tipleri başarıyla oluşturuldu.");
+            } else {
+                System.out.println("Soru tipleri zaten mevcut.");
+            }
+        };
+    }
 
     @Bean
-    public CommandLineRunner demoUser() { // UserRepository parametresini kaldırdık, yukarıda inject ediliyor
+    // @DependsOn ile entityManagerFactory ve dataSource bean'lerine bağımlılık belirtiyoruz.
+    // Bu, DDL (tablo oluşturma) işlemlerinin bu metod çalışmadan önce tamamlanmasını sağlar.
+    @DependsOn({"entityManagerFactory", "dataSource"})
+    public CommandLineRunner demoUser() {
         return (args) -> {
-             // TODO: Bu metodun yalnızca bir kere çalışmasını sağlamak için kontrol ekleyebilirsiniz.
-             // Örneğin, eğer Admin kullanıcısı veritabanında yoksa ekle gibi.
-             // Basit bir kontrol ekleyelim: Eğer varsayılan kullanıcılardan herhangi biri (örn: admin) zaten varsa, ekleme.
-             if (userRepository.findByUsername("adminuser").isPresent()) {
-                 System.out.println("\nVarsayılan kullanıcılar zaten mevcut, tekrar eklenmiyor.");
-                 // Temel okuma testlerini yine de çalıştırabilirsiniz isterseniz:
-                 // runInitialReadTests(); // Eğer bu testleri ayrı bir metoda taşırsanız
-                 return; // Kullanıcılar zaten varsa metodu sonlandır
-             }
+
+            if (userRepository.findByUsername("adminuser").isPresent()) {
+                System.out.println("\nVarsayılan kullanıcılar zaten mevcut, tekrar eklenmiyor.");
+                return; // Kullanıcılar zaten varsa metodu sonlandır
+            }
 
             System.out.println("\nVarsayılan kullanıcılar ekleniyor...");
 
             // -- Kullanıcı Oluşturma ve Kaydetme (CREATE) --
 
-            // Kullanıcıları oluştururken parolayı passwordEncoder.encode() ile ŞİFRELE!
-            // enabled durumunu email akışına uygun ayarla.
-
-            // Admin Kullanıcısı
-            User adminUser = new User("Admin", "Soyadi", 45, "admin@example.com", "adminuser", passwordEncoder.encode("adminpassword"), "ROLE_ADMIN"); // <-- Parola şifrelendi
-            adminUser.setEnabled(true); // Admin genellikle başlangıçta etkin
+            // Admin user
+            Admin adminUser = new Admin();
+            adminUser.setName("Admin");
+            adminUser.setSurname("Soyadi");
+            adminUser.setAge(45);
+            adminUser.setEmail("admin@example.com");
+            adminUser.setUsername("adminuser");
+            adminUser.setPassword(passwordEncoder.encode("adminpassword")); // Parola şifreleniyor
+            adminUser.setRole("ROLE_ADMIN");
+            adminUser.setEnabled(true);
             adminUser.setActive(true);
             adminUser.setCreatedDate(LocalDateTime.now());
             adminUser.setUpdatedDate(LocalDateTime.now());
             userRepository.save(adminUser);
-            System.out.println("Kaydedilen Admin: " + adminUser.getUsername());
+            System.out.println("Kaydedilen Yönetici: " + adminUser.getUsername());
 
 
             // Öğrenci Kullanıcısı
-            User studentUser = new User("Ogrenci", "Soyadi", 20, "student@example.com", "studentuser", passwordEncoder.encode("studentpassword"), "ROLE_STUDENT"); // <-- Parola şifrelendi
-            studentUser.setEnabled(false); // <-- Email doğrulama için başlangıçta etkin değil
+            Student studentUser = new Student();
+            studentUser.setName("Ogrenci");
+            studentUser.setSurname("Soyadi");
+            studentUser.setAge(20);
+            studentUser.setEmail("student@example.com");
+            studentUser.setUsername("studentuser");
+            studentUser.setPassword(passwordEncoder.encode("studentpassword")); // Parola şifreleniyor
+            studentUser.setRole("ROLE_STUDENT");
+            studentUser.setSchoolName("Default School");
+            studentUser.setEnabled(false); // Varsayılan olarak etkin değil
             studentUser.setActive(true);
             studentUser.setCreatedDate(LocalDateTime.now());
             studentUser.setUpdatedDate(LocalDateTime.now());
@@ -72,29 +122,40 @@ public class QuizSystemProjectApplication {
 
 
             // Öğretmen Kullanıcısı
-            User teacherUser = new User("Ogretmen", "Soyadi", 35, "teacher@example.com", "teacheruser", passwordEncoder.encode("teacherpassword"), "ROLE_TEACHER"); // <-- Parola şifrelendi
-            teacherUser.setEnabled(false); // <-- Email doğrulama için başlangıçta etkin değil
+            Teacher teacherUser = new Teacher();
+            teacherUser.setName("Ogretmen");
+            teacherUser.setSurname("Soyadi");
+            teacherUser.setAge(35);
+            teacherUser.setEmail("teacher@example.com");
+            teacherUser.setUsername("teacheruser");
+            teacherUser.setPassword(passwordEncoder.encode("teacherpassword")); // Parola şifreleniyor
+            teacherUser.setRole("ROLE_TEACHER");
+            teacherUser.setEnabled(false); // Varsayılan olarak etkin değil
             teacherUser.setActive(true);
             teacherUser.setCreatedDate(LocalDateTime.now());
             teacherUser.setUpdatedDate(LocalDateTime.now());
+            teacherUser.setSubject("Matematik");
+            teacherUser.setGraduateSchool("Ankara Üniversitesi");
+            teacherUser.setDiplomaNumber("T12345");
             userRepository.save(teacherUser);
             System.out.println("Kaydedilen Öğretmen: " + teacherUser.getUsername());
 
 
             System.out.println("Varsayılan kullanıcı ekleme tamamlandı.");
 
-
             // --- Temel CRUD/Okuma testleri (İsteğe bağlı, burada kalabilir veya silinebilir) ---
-            // Bu kısım parolaların şifrelenmesiyle ilgili BadCredentialsException'ı etkilemez
 
             System.out.println("\nBaşlangıç Veri Ekleme ve Temel Okuma Testleri:");
 
             System.out.println("\nTüm Kullanıcılar:");
             List<User> users = userRepository.findAll(); // Tüm kullanıcıları çekme
-            users.forEach(user -> System.out.println(user.getUsername() + " - " + user.getRole() + " - Enabled: " + user.isEnabled())); // Daha sade çıktı
+            users.forEach(user -> System.out.println(user.getUsername() + " - " + user.getRole() + " - Enabled: " + user.isEnabled()));
 
-            System.out.println("\nID'si 1 olan Kullanıcı:");
-            Optional<User> userById = userRepository.findById(users.stream().filter(u -> u.getUsername().equals("studentuser")).findFirst().get().getId()); // studentuser'in ID'sini dinamik bul
+            System.out.println("\nKullanıcı adı 'studentuser' olan Kullanıcı:");
+            // Kullanıcı adı 'studentuser' olan kullanıcıyı bulmak için filtreleme
+            Optional<User> userById = users.stream()
+                                            .filter(u -> u.getUsername().equals("studentuser"))
+                                            .findFirst();
             userById.ifPresent(user -> System.out.println(user.getUsername()));
 
             System.out.println("\nKullanıcı adı 'teacheruser' olan Kullanıcı:");
@@ -106,15 +167,6 @@ public class QuizSystemProjectApplication {
             students.forEach(user -> System.out.println(user.getUsername()));
 
             System.out.println("\nBaşlangıç testleri tamamlandı.");
-
-        }; // CommandLineRunner body sonu
-    } // demoUser Bean metodu sonu
-
-    // İsteğe bağlı: Eğer önceki loglarda gördüğünüz CRUD testlerini ayrı bir metoda taşımak isterseniz buraya ekleyebilirsiniz.
-    // private void runInitialReadTests() {
-    //    System.out.println("\nTemel Okuma Testleri (Kullanıcılar Mevcutsa):");
-    //    // Yukarıdaki okuma testlerini buraya kopyalayın
-    // }
-
-    // ... diğer metotlar (varsa) ...
+        };
+    }
 }

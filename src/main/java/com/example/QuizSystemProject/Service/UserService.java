@@ -1,372 +1,518 @@
 package com.example.QuizSystemProject.Service;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.example.QuizSystemProject.Model.Admin;
+import com.example.QuizSystemProject.Model.Student;
+import com.example.QuizSystemProject.Model.Teacher;
 import com.example.QuizSystemProject.Model.User;
 import com.example.QuizSystemProject.Repository.UserRepository;
+import com.example.QuizSystemProject.dto.UserCreationRequest;
 import com.example.QuizSystemProject.dto.EmailChangeRequest;
 import com.example.QuizSystemProject.dto.PasswordChangeRequest;
 import com.example.QuizSystemProject.dto.RoleChangeRequest;
 import com.example.QuizSystemProject.dto.UserDetailsResponse;
 import com.example.QuizSystemProject.dto.UserResponse;
 import com.example.QuizSystemProject.dto.UserUpdateRequest;
+import com.example.QuizSystemProject.dto.TeacherRegistrationRequest; // Added import
 import com.example.QuizSystemProject.exception.DuplicateEmailException;
 import com.example.QuizSystemProject.exception.UserNotFoundException;
+// MailService is in the same package or Spring handles injection without explicit import here
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors; // Collectors importu
 
+import java.util.stream.Collectors;
 
-@Service // Spring'e bu sınıfın bir Service bileşeni olduğunu belirtir
-@Transactional // Bu annotation'ı sınıf seviyesine koyarak tüm public metotlara uygulayabiliriz.
+@Service
+@Transactional
 public class UserService {
 
-    // Bu servisin ihtiyaç duyacağı Repository'ler ve diğer Servisler
+    private static final Logger logger = LoggerFactory.getLogger(UserService.class);
     private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder; // Parola işlemleri için
+    private final PasswordEncoder passwordEncoder;
+    private final MailService mailService; // Added MailService field
 
     // Bağımlılıkların enjekte edildiği constructor
-    @Autowired
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, MailService mailService) { // Added MailService to constructor
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.mailService = mailService; // Assigned MailService
+    }
+
+    // --- Kullanıcı Oluşturma Metodu ---
+    public User createUser(UserCreationRequest creationRequest) {
+        logger.info("UserService: Yeni kullanıcı oluşturuluyor - Email: {}", creationRequest.getEmail());
+
+        // E-posta adresinin zaten kullanımda olup olmadığını kontrol et
+        if (userRepository.findByEmail(creationRequest.getEmail()).isPresent()) {
+            logger.warn("UserService: Kullanıcı oluşturma başarısız - E-posta adresi zaten kullanımda: {}", creationRequest.getEmail());
+            throw new DuplicateEmailException("E-posta adresi zaten kullanımda: " + creationRequest.getEmail());
+        }
+
+        User newUser;
+        String role = creationRequest.getRole();
+        if ("ROLE_ADMIN".equalsIgnoreCase(role)) {
+            newUser = new Admin();
+        } else if ("ROLE_TEACHER".equalsIgnoreCase(role)) {
+            newUser = new Teacher();
+        } else if ("ROLE_STUDENT".equalsIgnoreCase(role)) {
+            newUser = new Student();
+        } else {
+            logger.warn("UserService: Geçersiz rol belirtildi: {}. Varsayılan olarak STUDENT atanıyor.", role);
+            newUser = new Student(); // Default to student or throw error
+            role = "ROLE_STUDENT";
+        }
+
+        newUser.setName(creationRequest.getName());
+        newUser.setSurname(creationRequest.getSurname());
+        newUser.setEmail(creationRequest.getEmail());
+        newUser.setPassword(passwordEncoder.encode(creationRequest.getPassword()));
+        newUser.setRole(role.toUpperCase()); // Ensure role is stored in uppercase
+        newUser.setAge(creationRequest.getAge());
+        newUser.setCreatedDate(LocalDateTime.now());
+        newUser.setUpdatedDate(LocalDateTime.now());
+        newUser.setActive(true); // Yeni kullanıcılar varsayılan olarak aktif
+        newUser.setEnabled(true); // E-posta doğrulaması yoksa varsayılan olarak etkin
+                                 // Eğer e-posta doğrulaması varsa bu false olmalı ve doğrulama süreci başlatılmalı
+
+        User savedUser = userRepository.save(newUser);
+        logger.info("UserService: Kullanıcı başarıyla oluşturuldu - ID: {}, Email: {}", savedUser.getId(), savedUser.getEmail());
+        return savedUser;
+    }
+
+    // --- Yeni Öğretmen Kayıt Metodu ---
+    public User submitTeacherRegistration(TeacherRegistrationRequest registrationRequest) {
+        logger.info("UserService: Yeni öğretmen kaydı talebi - Email: {}", registrationRequest.getEmail());
+
+        if (userRepository.findByEmail(registrationRequest.getEmail()).isPresent()) {
+            logger.warn("UserService: Öğretmen kaydı başarısız - E-posta adresi zaten kullanımda: {}", registrationRequest.getEmail());
+            throw new DuplicateEmailException("E-posta adresi zaten kullanımda: " + registrationRequest.getEmail());
+        }
+
+        Teacher newTeacher = new Teacher();
+        newTeacher.setName(registrationRequest.getName());
+        newTeacher.setSurname(registrationRequest.getSurname());
+        newTeacher.setEmail(registrationRequest.getEmail());
+        newTeacher.setUsername(registrationRequest.getUsername()); // Add username assignment
+        newTeacher.setPassword(passwordEncoder.encode(registrationRequest.getPassword()));
+        newTeacher.setRole("ROLE_TEACHER"); // Explicitly set role
+        newTeacher.setAge(registrationRequest.getAge());
+
+        // Set teacher-specific fields
+        newTeacher.setSubject(registrationRequest.getSubject());
+        newTeacher.setGraduateSchool(registrationRequest.getGraduateSchool());
+        newTeacher.setDiplomaNumber(registrationRequest.getDiplomaNumber());
+
+        newTeacher.setCreatedDate(LocalDateTime.now());
+        newTeacher.setUpdatedDate(LocalDateTime.now());
+        newTeacher.setActive(true);
+        newTeacher.setEnabled(false); // IMPORTANT: Teacher is not enabled until admin approval
+
+        User savedTeacher = userRepository.save(newTeacher);
+        logger.info("UserService: Öğretmen kayıt talebi başarıyla alındı - ID: {}, Email: {}", savedTeacher.getId(), savedTeacher.getEmail());
+
+        // Send pending review email
+        String emailSubject = "Öğretmenlik Başvurunuz Alındı";
+        String emailBody = "Merhaba " + savedTeacher.getName() + ",\n\nÖğretmenlik başvurunuz alınmıştır ve değerlendirme sürecindedir. " +
+                           "Onaylandığında veya reddedildiğinde size bilgi verilecektir.\n\nTeşekkürler,\nQuiz Sistemi Ekibi";
+        sendTeacherStatusUpdateEmail(savedTeacher.getEmail(), emailSubject, emailBody, "kayıt beklemede");
+
+        return savedTeacher;
+    }
+
+    // --- Öğretmen Kayıt Talebini İnceleme Metodu ---
+    @Transactional
+    public User reviewTeacherRequest(int userId, boolean approve) {
+        logger.info("UserService: Öğretmen başvurusu inceleniyor - ID: {}, Onay: {}", userId, approve);
+        User teacherToReview = userRepository.findById(userId)
+                                .orElseThrow(() -> 
+                                    new UserNotFoundException("ID " + userId + " olan öğretmen bulunamadı.")
+                                );
+
+        if (!teacherToReview.getRole().equals("ROLE_TEACHER")) {
+            logger.warn("UserService: Kullanıcı öğretmen değil - ID: {}", userId);
+            throw new IllegalArgumentException("ID " + userId + " olan kullanıcı bir öğretmen değil.");
+        }
+
+        if (approve) {
+            teacherToReview.setEnabled(true);
+            teacherToReview.setUpdatedDate(LocalDateTime.now());
+            String emailSubject = "Öğretmenlik Başvurunuz Onaylandı";
+            String emailBody = "Merhaba " + teacherToReview.getName() + ",\n\nÖğretmenlik başvurunuz incelenmiş ve onaylanmıştır. Artık sisteme giriş yapabilir ve öğretmen fonksiyonlarını kullanabilirsiniz.\n\nTeşekkürler,\nQuiz Sistemi Ekibi";
+            sendTeacherStatusUpdateEmail(teacherToReview.getEmail(), emailSubject, emailBody, "onay");
+            logger.info("UserService: Öğretmen başvurusu onaylandı - ID: {}", userId);
+        } else {
+            // Teacher remains enabled = false
+            teacherToReview.setUpdatedDate(LocalDateTime.now()); // Update timestamp even on rejection
+            String emailSubject = "Öğretmenlik Başvurunuz Reddedildi";
+            String emailBody = "Merhaba " + teacherToReview.getName() + ",\n\nÖğretmenlik başvurunuz incelenmiş ve maalesef reddedilmiştir.\n\nDaha fazla bilgi için lütfen iletişime geçin.\n\nTeşekkürler,\nQuiz Sistemi Ekibi";
+            sendTeacherStatusUpdateEmail(teacherToReview.getEmail(), emailSubject, emailBody, "ret");
+            logger.info("UserService: Öğretmen başvurusu reddedildi - ID: {}", userId);
+        }
+
+        return userRepository.save(teacherToReview);
+    }
+
+    // Helper method for sending teacher status update emails
+    private void sendTeacherStatusUpdateEmail(String toEmail, String subject, String body, String actionTypeLog) {
+        try {
+            mailService.sendEmail(toEmail, subject, body);
+            logger.info("UserService: Öğretmen başvuru {} e-postası gönderildi - Email: {}", actionTypeLog, toEmail);
+        } catch (Exception e) {
+            logger.error("UserService: Öğretmen başvuru {} e-postası gönderilemedi - Email: {}: {}", actionTypeLog, toEmail, e.getMessage());
+        }
     }
 
     // --- Kullanıcı Yönetimi Metotları (Genellikle Admin yetkisi gerektirir) ---
-    // Sizin Admin.java template'indeki addUser*, updateUser*, showAllUsers* metotlarının mantığı burada.
 
- // Tüm kullanıcıları listeleme (Admin yetkisi gerektirecek)
-    public List<UserResponse> getAllUsers() { // Dönüş tipi List<UserResponse> olarak değişti
-        System.out.println("UserService: Tüm kullanıcılar getiriliyor.");
+    @Transactional(readOnly = true)
+    public List<UserResponse> getPendingTeacherRequests() {
+        logger.info("UserService: Bekleyen öğretmen kayıt talepleri getiriliyor.");
+        List<User> teachers = userRepository.findAllByRole("ROLE_TEACHER");
+        List<UserResponse> pendingTeachers = teachers.stream()
+                .filter(user -> !user.isEnabled())
+                .filter(user -> user instanceof Teacher)
+                .map(UserResponse::new)
+                .collect(Collectors.toList());
+        logger.info("UserService: {} adet bekleyen öğretmen kaydı bulundu.", pendingTeachers.size());
+        return pendingTeachers;
+    }
 
-        // Repository'den tüm User Entity'lerini çek
+    // ID'ye göre kullanıcı getirme (Admin veya kullanıcı kendi profilini getirebilir)
+    @Transactional(readOnly = true)
+    public UserDetailsResponse getUserById(int id) {
+        logger.info("UserService: ID ile kullanıcı getiriliyor - ID: {}", id);
+        
+        // Kullanıcıyı ID'ye göre bul
+        User user = userRepository.findById(id)
+            .orElseThrow(() -> new UserNotFoundException("Kullanıcı bulunamadı - ID: " + id));
+            
+        // Kullanıcıyı DTO'ya dönüştür ve döndür
+        return convertToUserDetailsResponse(user);
+    }
+    
+    /**
+     * Kullanıcı adına göre kullanıcı bilgilerini getirir
+     * @param username Aranacak kullanıcı adı
+     * @return Kullanıcı bilgilerini içeren UserDetailsResponse nesnesi
+     * @throws UserNotFoundException Eğer kullanıcı bulunamazsa
+     */
+    public UserDetailsResponse getUserByUsername(String username) {
+        logger.info("UserService: Kullanıcı adı ile kullanıcı getiriliyor - Kullanıcı Adı: {}", username);
+        
+        // Kullanıcıyı kullanıcı adına göre bul
+        User user = userRepository.findByUsername(username)
+            .orElseThrow(() -> new UserNotFoundException("Kullanıcı bulunamadı - Kullanıcı Adı: " + username));
+            
+        // Kullanıcıyı DTO'ya dönüştür ve döndür
+        return convertToUserDetailsResponse(user);
+    }
+    
+    /**
+     * User nesnesini UserDetailsResponse DTO'suna dönüştürür
+     * @param user Dönüştürülecek User nesnesi
+     * @return Dönüştürülmüş UserDetailsResponse nesnesi
+     */
+    private UserDetailsResponse convertToUserDetailsResponse(User user) {
+        if (user == null) {
+            return null;
+        }
+        
+        UserDetailsResponse response = new UserDetailsResponse();
+        response.setId(user.getId());
+        response.setUsername(user.getUsername());
+        response.setName(user.getName());
+        response.setSurname(user.getSurname());
+        response.setEmail(user.getEmail());
+        response.setRole(user.getRole());
+        response.setActive(user.isActive());
+        response.setEnabled(user.isEnabled());
+        response.setAge(user.getAge());
+        response.setCreatedDate(user.getCreatedDate());
+        response.setUpdatedDate(user.getUpdatedDate());
+        
+        // Öğrenci için okul ismini ekle
+        if (user instanceof Student) {
+            Student student = (Student) user;
+            response.setSchoolName(student.getSchoolName());
+            logger.debug("UserService: Öğrencinin okul bilgisi eklendi - Kullanıcı ID: {}, Okul: {}", 
+                    user.getId(), student.getSchoolName());
+        }
+        
+        // Öğretmen için özel alanları ekle
+        if (user instanceof Teacher) {
+            Teacher teacher = (Teacher) user;
+            response.setSubject(teacher.getSubject());
+            response.setGraduateSchool(teacher.getGraduateSchool());
+            response.setDiplomaNumber(teacher.getDiplomaNumber());
+            logger.debug("UserService: Öğretmen özel bilgileri eklendi - Kullanıcı ID: {}, Ders: {}", 
+                    user.getId(), teacher.getSubject());
+        }
+        
+        return response;
+    }
+
+    // Tüm kullanıcıları getirme (Admin yetkisi gerektirir)
+    @Transactional(readOnly = true)
+    public List<UserResponse> getAllUsers() {
+        logger.info("UserService: Tüm kullanıcılar getiriliyor.");
         List<User> users = userRepository.findAll();
-
-        // Çekilen User Entity'lerini UserResponse DTO'larına dönüştür ve liste olarak döndür
         return users.stream()
-                    .map(UserResponse::new) // Her User Entity'sini UserResponse DTO'sunun constructor'ı ile dönüştür
-                    .collect(Collectors.toList()); // Sonuçları liste olarak topla
+                .map(UserResponse::new)
+                .collect(Collectors.toList());
     }
 
- // Kullanıcıları role göre listeleme (Admin yetkisi gerektirecek)
-    // Dönüş tipi List<UserResponse> olarak değişti
+    // Kullanıcıları role göre listeleme (Admin yetkisi gerektirecek)
+    @Transactional(readOnly = true)
     public List<UserResponse> getUsersByRole(String role) {
-        System.out.println("UserService: Rolü '" + role + "' olan kullanıcılar getiriliyor.");
-
-        // 1. Gelen rol değerini doğrula (Geçerli bir rol mü?)
-        // Tıpkı changeUserRole metodundaki gibi kontrol edelim.
-        boolean isValidRole = role.equals("ROLE_ADMIN") ||
-                              role.equals("ROLE_TEACHER") ||
-                              role.equals("ROLE_STUDENT");
+        logger.info("UserService: Rolü '{}' olan kullanıcılar getiriliyor.", role);
+        String upperCaseRole = role.toUpperCase();
+        boolean isValidRole = upperCaseRole.equals("ROLE_ADMIN") ||
+                              upperCaseRole.equals("ROLE_TEACHER") ||
+                              upperCaseRole.equals("ROLE_STUDENT");
 
         if (!isValidRole) {
-            System.err.println("UserService: Geçersiz rol belirtildi: " + role);
-            throw new IllegalArgumentException("Geçersiz rol belirtildi: " + role); // Geçersiz rol için hata fırlat
+            logger.warn("UserService: Geçersiz rol belirtildi: {}", role);
+            throw new IllegalArgumentException("Geçersiz rol belirtildi: " + role);
         }
 
-        // 2. Repository'deki findAllByRole metodunu kullanarak kullanıcıları role göre filtrele
-        List<User> users = userRepository.findAllByRole(role);
-
-        System.out.println("UserService: Rolü '" + role + "' olan " + users.size() + " kullanıcı bulundu.");
-
-        // 3. Çekilen User Entity'lerini UserResponse DTO'larına dönüştür ve liste olarak döndür
+        List<User> users = userRepository.findAllByRole(upperCaseRole);
+        logger.info("UserService: Rolü '{}' olan {} kullanıcı bulundu.", upperCaseRole, users.size());
         return users.stream()
-                   .map(UserResponse::new) // Her User Entity'sini UserResponse DTO'sunun constructor'ı ile dönüştür
-                   .collect(Collectors.toList()); // Sonuçları liste olarak topla
+                   .map(UserResponse::new)
+                   .collect(Collectors.toList());
     }
 
-
-  /// ID'ye göre kullanıcı getirme (Admin veya kullanıcı kendi profilini getirebilir)
-    // Dönüş tipi UserDetailsResponse olarak değişti, artık Optional dönmeyecek
-    public UserDetailsResponse getUserById(int userId) {
-        System.out.println("UserService: Kullanıcı getiriliyor - ID: " + userId);
-
-        // Repository'den kullanıcıyı ID'ye göre bul
-        User user = userRepository.findById(userId)
-                                // Eğer kullanıcı bulunamazsa, UserNotFoundException fırlat
-                                // Lambda ifadesi () -> new UserNotFoundException(...) şeklinde olmalı
-                                .orElseThrow(() -> new UserNotFoundException("ID " + userId + " olan kullanıcı bulunamadı."));
-
-        System.out.println("UserService: Kullanıcı bulundu - Kullanıcı Adı: " + user.getUsername());
-
-        // Bulunan User Entity'sini UserDetailsResponse DTO'suna dönüştür ve döndür
-        return new UserDetailsResponse(user);
-    }
-
-    // Kullanıcı bilgilerini güncelleme (Admin yetkisi gerektirecek, veya kullanıcı kendi bilgilerini güncelleyebilir - rol hariç)
-    // Sizin Admin.java template'indeki updateUser metodunun mantığı burada.
- // Kullanıcı bilgilerini güncelleme (Admin yetkisi gerektirecek, veya kullanıcı kendi bilgilerini güncelleyebilir - rol, email ve parola hariç)
-    // UserUpdateRequest DTO'su kullanılacak
-    public User updateUser(int userId, UserUpdateRequest updateRequest) { // Metot imzası UserUpdateRequest alacak şekilde değişti
-        System.out.println("UserService: Kullanıcı güncelleniyor - ID: " + userId);
-
-        // 1. Güncellenmek istenen kullanıcıyı ID'ye göre bul
+    // Kullanıcı rolünü değiştirme (Sadece Admin yetkisi gerektirecek)
+    public User changeUserRole(int userId, RoleChangeRequest roleChangeRequest) {
+        logger.info("UserService: Kullanıcı rolü değiştiriliyor - ID: {}, Yeni Rol: {}", userId, roleChangeRequest.getNewRole());
         User userToUpdate = userRepository.findById(userId)
-                                          .orElseThrow(() -> new UserNotFoundException("ID " + userId + " olan kullanıcı bulunamadı."));
+                                          .orElseThrow(() -> {
+                                              logger.warn("UserService: Rolü değiştirilecek kullanıcı bulunamadı - ID: {}", userId);
+                                              return new UserNotFoundException("ID " + userId + " olan kullanıcı bulunamadı.");
+                                          });
 
-        // 2. UserUpdateRequest DTO'sundan gelen verilerle kullanıcı Entity'sini güncelle
-        // Not: Bu metod rol, parola veya email gibi alanları güncellememeli.
-        // Bu alanlar için ayrı change... metotları kullanılmalı. isActive alanı softDelete tarafından yönetiliyor.
-        if (updateRequest.getName() != null && !updateRequest.getName().trim().isEmpty()) {
-            userToUpdate.setName(updateRequest.getName().trim());
-        }
-        if (updateRequest.getSurname() != null && !updateRequest.getSurname().trim().isEmpty()) {
-            userToUpdate.setSurname(updateRequest.getSurname().trim());
-        }
-         // Yaş (int olduğu için null kontrolü yerine 0 veya negatif olmayan kontrolü yapılabilir, ama DTO validasyonu zaten var)
-         if (updateRequest.getAge() >= 0) { // DTO'da @Min(0) olduğu için >=0 kontrolü yeterli
-             userToUpdate.setAge(updateRequest.getAge());
-         }
-        // username ve email alanlarının güncellenmesi:
-        // Bu alanlar benzersizlik kontrolü gerektirdiği ve hassas olduğu için,
-        // ayrı changeUserEmail/changeUserUsername metotları (eğer username değiştirme eklenirse)
-        // veya bu metod içinde detaylı kontrol ile yapılmalıdır.
-        // Basitlik için şimdilik sadece ad, soyad, yaş güncelleniyor.
-
-        // 3. Güncellenme tarihini set et
-        userToUpdate.setUpdatedDate(LocalDateTime.now());
-
-        // 4. Güncellenen kullanıcıyı veritabanına kaydet
-        User updatedUser = userRepository.save(userToUpdate);
-
-        System.out.println("UserService: Kullanıcı başarıyla güncellendi - ID: " + updatedUser.getId());
-
-        // 5. Güncellenen kullanıcı Entity'sini döndür
-        // Controller katmanı bu Entity'yi UserDetailsResponse DTO'suna dönüştürecektir.
-        return updatedUser;
-    }
-
- // Kullanıcı rolünü değiştirme (Sadece Admin yetkisi gerektirecek)
-    // RoleChangeRequest DTO'su kullanılacak
-    public User changeUserRole(int userId, RoleChangeRequest roleChangeRequest) { // Metot imzası RoleChangeRequest alacak şekilde
-        System.out.println("UserService: Kullanıcı rolü değiştiriliyor - ID: " + userId + ", Yeni Rol: " + roleChangeRequest.getNewRole());
-
-        // 1. Rolü değiştirilmek istenen kullanıcıyı ID'ye göre bul
-        User userToUpdate = userRepository.findById(userId)
-                                          .orElseThrow(() -> new UserNotFoundException("ID " + userId + " olan kullanıcı bulunamadı."));
-
-        // 2. Yeni rol değerini DTO'dan al
-        String newRole = roleChangeRequest.getNewRole();
-
-        // 3. Yeni rol değerini doğrula (Geçerli bir rol mü?)
-        // Bizim rollerimiz "ROLE_ADMIN", "ROLE_TEACHER", "ROLE_STUDENT".
-        // Gelen rolün bu değerlerden biri olup olmadığını kontrol edelim.
+        String newRole = roleChangeRequest.getNewRole().toUpperCase();
         boolean isValidRole = newRole.equals("ROLE_ADMIN") ||
-                              newRole.equals("ROLE_TEACHER") ||
-                              newRole.equals("ROLE_STUDENT");
+                             newRole.equals("ROLE_TEACHER") ||
+                             newRole.equals("ROLE_STUDENT");
 
         if (!isValidRole) {
-            System.err.println("UserService: Geçersiz rol belirtildi: " + newRole);
-            throw new IllegalArgumentException("Geçersiz rol belirtildi: " + newRole); // Geçersiz rol için hata fırlat
+            logger.warn("UserService: Geçersiz rol belirtildi: {}", newRole);
+            throw new IllegalArgumentException("Geçersiz rol belirtildi: " + newRole);
         }
 
-
-        // 4. Kullanıcının rolünü güncelle
         userToUpdate.setRole(newRole);
-
-        // 5. Güncellenme tarihini set et
         userToUpdate.setUpdatedDate(LocalDateTime.now());
-
-        // 6. Güncellenen kullanıcıyı veritabanına kaydet
-        User updatedUser = userRepository.save(userToUpdate);
-
-        System.out.println("UserService: Kullanıcı rolü başarıyla değiştirildi - ID: " + updatedUser.getId() + ", Yeni Rol: " + updatedUser.getRole());
-
-        // 7. Güncellenen kullanıcı Entity'sini döndür
-        return updatedUser;
+        User savedUser = userRepository.save(userToUpdate);
+        logger.info("UserService: Kullanıcı rolü başarıyla değiştirildi - ID: {}, Yeni Rol: {}", userId, newRole);
+        return savedUser;
     }
 
+    // Kullanıcı bilgilerini güncelleme (Admin yetkisi gerektirecek, veya kullanıcı kendi bilgilerini güncelleyebilir - rol, email ve parola hariç)
+    public User updateUser(int userId, UserUpdateRequest updateRequest) {
+        logger.info("UserService: Kullanıcı güncelleniyor - ID: {}", userId);
+        User userToUpdate = userRepository.findById(userId)
+                                          .orElseThrow(() -> {
+                                              logger.warn("UserService: Güncellenecek kullanıcı bulunamadı - ID: {}", userId);
+                                              return new UserNotFoundException("ID " + userId + " olan kullanıcı bulunamadı.");
+                                          });
 
- // Kullanıcının parolasını değiştirme (Admin yetkisi gerektirecek veya kullanıcı kendi parolasını değiştirebilir)
-    // PasswordChangeRequest DTO'su kullanılacak
-    // isAdminAction: İsteği yapan ADMIN ise true, kullanıcı kendi parolasını değiştiriyorsa false.
+        // Gelen bilgileri kontrol et ve varsa güncelle
+        boolean hasUpdate = false;
+
+        if (updateRequest.getName() != null && !updateRequest.getName().isEmpty()) {
+            userToUpdate.setName(updateRequest.getName());
+            hasUpdate = true;
+        }
+
+        if (updateRequest.getSurname() != null && !updateRequest.getSurname().isEmpty()) {
+            userToUpdate.setSurname(updateRequest.getSurname());
+            hasUpdate = true;
+        }
+
+        if (updateRequest.getAge() != null) {
+            userToUpdate.setAge(updateRequest.getAge());
+            hasUpdate = true;
+        }
+
+        if (hasUpdate) {
+            userToUpdate.setUpdatedDate(LocalDateTime.now());
+            userToUpdate = userRepository.save(userToUpdate);
+            logger.info("UserService: Kullanıcı başarıyla güncellendi - ID: {}", userId);
+        } else {
+            logger.info("UserService: Güncellenecek bir bilgi bulunamadı - ID: {}", userId);
+        }
+        return userToUpdate;
+    }
+
+    // Kullanıcının parolasını değiştirme (Admin yetkisi gerektirecek veya kullanıcı kendi parolasını değiştirebilir)
     public User changeUserPassword(int userId, PasswordChangeRequest passwordChangeRequest, boolean isAdminAction) {
-        System.out.println("UserService: Kullanıcı parolası değiştiriliyor - ID: " + userId);
-
-        // 1. Parolası değiştirilmek istenen kullanıcıyı ID'ye göre bul
+        logger.info("UserService: Kullanıcı parolası değiştiriliyor - ID: {}", userId);
         User userToUpdate = userRepository.findById(userId)
-                                          .orElseThrow(() -> new UserNotFoundException("ID " + userId + " olan kullanıcı bulunamadı."));
+                                          .orElseThrow(() -> {
+                                              logger.warn("UserService: Parolası değiştirilecek kullanıcı bulunamadı - ID: {}", userId);
+                                              return new UserNotFoundException("ID " + userId + " olan kullanıcı bulunamadı.");
+                                          });
 
-        // 2. İsteği yapanın Admin olup olmadığını kontrol et (Mantık bu metodun içinde)
-        //    Eğer kullanıcı kendi parolasını değiştiriyorsa (isAdminAction == false), mevcut parolasını doğrula.
         if (!isAdminAction) {
-            System.out.println("UserService: Kullanıcı kendi parolasını değiştiriyor - ID: " + userId);
-            // PasswordEncoder'ı kullanarak kullanıcının girdiği mevcut parolayı (ham)
-            // veritabanındaki şifrelenmiş parola (hash) ile karşılaştır.
-            if (!passwordEncoder.matches(passwordChangeRequest.getCurrentPassword(), userToUpdate.getPassword())) {
-                System.err.println("UserService: Parola değiştirme başarısız - Mevcut parola yanlis!");
-                // Mevcut parola yanlışsa BadCredentialsException fırlat (Spring Security'de yaygın hata türü)
-                throw new org.springframework.security.authentication.BadCredentialsException("Mevcut parola yanlis!");
+            logger.info("UserService: Kullanıcı kendi parolasını değiştiriyor - ID: {}", userId);
+            if (passwordChangeRequest.getCurrentPassword() == null || !passwordEncoder.matches(passwordChangeRequest.getCurrentPassword(), userToUpdate.getPassword())) {
+                logger.warn("UserService: Parola değiştirme başarısız - Mevcut parola yanlış veya sağlanmadı - ID: {}", userId);
+                throw new org.springframework.security.authentication.BadCredentialsException("Mevcut parola yanlış veya sağlanmadı!");
             }
-            System.out.println("UserService: Mevcut parola doğrulandı.");
+            logger.info("UserService: Mevcut parola doğrulandı - ID: {}", userId);
         } else {
-             System.out.println("UserService: ADMIN, kullanıcı parolasını değiştiriyor - ID: " + userId + " (Mevcut parola kontrolü atlanıyor)");
-             // Admin değiştiriyorsa, mevcut parola kontrolü atlanır.
-             // Admin yetkisi Spring Security katmanında kontrol edilmelidir.
+            logger.info("UserService: ADMIN, kullanıcı parolasını değiştiriyor - ID: {} (Mevcut parola kontrolü atlanıyor)", userId);
         }
 
-        // 3. Yeni parolayı şifrele
         String encodedNewPassword = passwordEncoder.encode(passwordChangeRequest.getNewPassword());
-        System.out.println("UserService: Yeni parola şifrelendi.");
-
-
-        // 4. Kullanıcının parolasını güncelle
         userToUpdate.setPassword(encodedNewPassword);
-
-        // 5. Güncellenme tarihini set et
         userToUpdate.setUpdatedDate(LocalDateTime.now());
-
-        // 6. Güncellenen kullanıcıyı veritabanına kaydet
-        User updatedUser = userRepository.save(userToUpdate);
-
-        System.out.println("UserService: Kullanıcı parolası başarıyla değiştirildi - ID: " + updatedUser.getId());
-
-        // 7. Güncellenen kullanıcı Entity'sini döndür
-        return updatedUser;
+        User savedUser = userRepository.save(userToUpdate);
+        logger.info("UserService: Kullanıcı parolası başarıyla değiştirildi - ID: {}", userId);
+        return savedUser;
+        
     }
-
- // Kullanıcının e-posta adresini değiştirme (Admin yetkisi gerektirecek veya kullanıcı kendi e-postasını değiştirebilir)
-    // EmailChangeRequest DTO'su kullanılacak
-    // isAdminAction: İsteği yapan ADMIN ise true, kullanıcı kendi e-postasını değiştiriyorsa false.
+        // Kullanıcının e-posta adresini değiştirme (Admin yetkisi gerektirecek veya kullanıcı kendi e-postasını değiştirebilir)
     public User changeUserEmail(int userId, EmailChangeRequest emailChangeRequest, boolean isAdminAction) {
-        System.out.println("UserService: Kullanıcı e-postası değiştiriliyor - ID: " + userId + ", Yeni Email: " + emailChangeRequest.getNewEmail());
-
-        // 1. E-posta adresi değiştirilmek istenen kullanıcıyı ID'ye göre bul
+        logger.info("UserService: Kullanıcı e-postası değiştiriliyor - ID: {}, Yeni E-posta: {}", userId, emailChangeRequest.getNewEmail());
         User userToUpdate = userRepository.findById(userId)
-                                          .orElseThrow(() -> new UserNotFoundException("ID " + userId + " olan kullanıcı bulunamadı."));
+                                          .orElseThrow(() -> {
+                                              logger.warn("UserService: E-postası değiştirilecek kullanıcı bulunamadı - ID: {}", userId);
+                                              return new UserNotFoundException("ID " + userId + " olan kullanıcı bulunamadı.");
+                                          });
 
-        // 2. Yeni e-posta adresini DTO'dan al
-        String newEmail = emailChangeRequest.getNewEmail().trim(); // Başındaki/sonundaki boşlukları kaldır
-
-        // 3. Yeni e-posta adresinin benzersiz olduğunu kontrol et
-        // Kendi mevcut e-posta adresini girmiş olabilir, bu durumda hata vermemeliyiz.
-        Optional<User> existingUserWithNewEmail = userRepository.findByEmail(newEmail);
-
-        // Eğer bu email başka bir kullanıcı tarafından kullanılıyorsa VE bu kullanıcı şu an güncellediğimiz kullanıcı değilse
-        if (existingUserWithNewEmail.isPresent() && existingUserWithNewEmail.get().getId()!=userId) {
-            System.err.println("UserService: E-posta değiştirme başarısız - '" + newEmail + "' e-posta adresi zaten kullanımda.");
-            throw new DuplicateEmailException("'" + newEmail + "' e-posta adresi zaten kullanımda."); // Çakışma hatası fırlat
+        // Admin değilse, mevcut parola doğrulaması yap
+        if (!isAdminAction && !passwordEncoder.matches(emailChangeRequest.getPassword(), userToUpdate.getPassword())) {
+            logger.warn("UserService: Parola doğrulanamadı - ID: {}", userId);
+            throw new IllegalArgumentException("Parola hatalı.");
         }
 
-        // Eğer yeni email, kullanıcının mevcut email'inden farklıysa devam et
-        if (!userToUpdate.getEmail().equalsIgnoreCase(newEmail)) {
-             System.out.println("UserService: E-posta adresi '" + userToUpdate.getEmail() + "' -> '" + newEmail + "' olarak değiştiriliyor.");
-
-             // 4. Kullanıcının e-posta adresini güncelle
-             userToUpdate.setEmail(newEmail);
-
-             // 5. E-posta doğrulama durumunu sıfırla (yeniden doğrulama gereksin)
-             // ADMIN değiştirse bile, güvenlik için e-posta doğrulamasını sıfırlamak iyi bir practice olabilir.
-             userToUpdate.setEnabled(false);
-             System.out.println("UserService: Kullanıcının etkinlik durumu 'false' olarak ayarlandı (e-posta doğrulaması gerekli).");
-
-
-             // TODO: E-posta doğrulama token'ı oluştur ve MailService kullanarak doğrulama maili gönder
-             // Bu mantık MailService implemente edildiğinde ve User Entity'sine token alanı eklendiğinde tamamlanacak.
-             System.out.println("UserService: TODO - Yeni e-posta için doğrulama maili gönderme mantığı eklenecek.");
-             // userToUpdate.setConfirmationToken(generateNewConfirmationToken()); // Yeni token oluştur
-             // mailService.sendConfirmationEmail(userToUpdate.getEmail(), userToUpdate.getConfirmationToken()); // Mail gönder
-
-             // 6. Güncellenme tarihini set et
-             userToUpdate.setUpdatedDate(LocalDateTime.now());
-
-             // 7. Güncellenen kullanıcıyı veritabanına kaydet
-             User updatedUser = userRepository.save(userToUpdate);
-
-             System.out.println("UserService: Kullanıcı e-postası başarıyla değiştirildi - ID: " + updatedUser.getId());
-
-            // 8. Güncellenen kullanıcı Entity'sini döndür
-            return updatedUser;
-
-        } else {
-             System.out.println("UserService: Belirtilen e-posta adresi mevcut e-posta ile ayni. Güncelleme yapilmadi.");
-             // E-posta değişmediyse mevcut kullanıcı objesini döndür
-             return userToUpdate;
+        // Yeni e-posta adresi zaten kullanımda mı kontrol et
+        if (userRepository.findByEmail(emailChangeRequest.getNewEmail()).isPresent()) {
+            logger.warn("UserService: E-posta değiştirme başarısız - E-posta adresi zaten kullanımda: {}", emailChangeRequest.getNewEmail());
+            throw new DuplicateEmailException("E-posta adresi zaten kullanımda: " + emailChangeRequest.getNewEmail());
         }
+
+        userToUpdate.setEmail(emailChangeRequest.getNewEmail());
+        userToUpdate.setUpdatedDate(LocalDateTime.now());
+        User savedUser = userRepository.save(userToUpdate);
+        logger.info("UserService: Kullanıcı e-postası başarıyla değiştirildi - ID: {}, Yeni E-posta: {}", userId, emailChangeRequest.getNewEmail());
+        return savedUser;
     }
-
 
     // Kullanıcıyı silme (mantıksal silme: isActive = false yapma) (Admin yetkisi gerektirecek)
-    // Sizin Admin.java template'indeki addUser, User.java template'indeki deleteUser metotlarının mantığı burada.
- // Kullanıcıyı silme (mantıksal silme: isActive = false yapma) (Admin yetkisi gerektirecek)
     public void softDeleteUser(int userId) {
-        System.out.println("UserService: Kullanıcı siliniyor (mantıksal) - ID: " + userId);
+        logger.info("UserService: Kullanıcı siliniyor (soft delete) - ID: {}", userId);
+        User userToDelete = userRepository.findById(userId)
+                                          .orElseThrow(() -> {
+                                              logger.warn("UserService: Silinecek kullanıcı bulunamadı - ID: {}", userId);
+                                              return new UserNotFoundException("ID " + userId + " olan kullanıcı bulunamadı.");
+                                          });
 
-        // 1. Silinmek istenen kullanıcıyı ID'ye göre bul
-        User userToUpdate = userRepository.findById(userId)
-                                          .orElseThrow(() -> new UserNotFoundException("ID " + userId + " olan kullanıcı bulunamadı."));
-
-        // 2. Kullanıcının isActive alanını false yaparak mantıksal silme işlemini gerçekleştir
-        userToUpdate.setActive(false);
-
-        // 3. Güncellenme tarihini set et
-        userToUpdate.setUpdatedDate(LocalDateTime.now());
-
-        // 4. Güncellenen kullanıcıyı veritabanına kaydet
-        userRepository.save(userToUpdate);
-
-        System.out.println("UserService: Kullanıcı başarıyla mantıksal olarak silindi (pasif yapıldı) - ID: " + userToUpdate.getId());
-
-        // Bu metod void döndürdüğü için bir şey return etmiyoruz.
+        userToDelete.setActive(false);
+        userToDelete.setUpdatedDate(LocalDateTime.now());
+        userRepository.save(userToDelete);
+        logger.info("UserService: Kullanıcı başarıyla silindi (soft delete) - ID: {}", userId);
     }
-
- // Öğretmen olma isteğini gözden geçirme (Admin yetkisi gerektirecek)
-    // userId: İsteği yapan kullanıcının ID'si (isteği kimin yaptığını kontrol etmek için gerekebilir, ancak Security ile de kontrol edilebilir)
-    // approve: İsteğin onaylanıp onaylanmadığı (true = onaylandı, false = reddedildi)
-    public boolean reviewTeacherRequest(int userId, boolean approve) {
-        System.out.println("UserService: Öğretmen isteği gözden geçiriliyor - Kullanıcı ID: " + userId + ", Onay: " + approve);
-
-        // 1. İsteği yapılan kullanıcıyı ID'ye göre bul
-        // NOT: Normalde burada, kullanıcının gerçekten bir öğretmenlik "isteği" olup olmadığını da kontrol etmek gerekebilir.
-        // Ancak şu an basit bir modelimiz olduğu için, sadece kullanıcıyı bulup devam ediyoruz.
-        User userToReview = userRepository.findById(userId)
-                                           .orElseThrow(() -> new UserNotFoundException("ID " + userId + " olan kullanıcı bulunamadı."));
-
-        // 2. İsteğin onaylanıp onaylanmadığına göre işlem yap
-        if (approve) {
-            System.out.println("UserService: Öğretmen isteği ONAYLANDI. Kullanıcının rolü TEACHER olarak değiştiriliyor - ID: " + userId);
-            // İsteği onaylandıysa, kullanıcının rolünü ROLE_TEACHER olarak değiştir.
-            // Daha önce yazdığımız changeUserRole metodunu tekrar kullanabiliriz.
-            // Bunun için bir RoleChangeRequest objesi oluşturmamız gerekiyor.
-             RoleChangeRequest teacherRoleRequest = new RoleChangeRequest("ROLE_TEACHER");
-             // changeUserRole metodu kullanıcıyı bulup günceller ve kaydeder.
-             // isAdminAction true geçiyoruz çünkü bu Admin eylemi. Ancak changeUserRole içindeki isAdminAction şifre/email özelindeydi.
-             // Rol değişimi kendi içinde basit bir işlemdi. changeUserRole metodunu doğrudan kullanmak yerine,
-             // rol değiştirme mantığını burada tekrar kullanmak daha temiz olabilir, çünkü changeUserRole metodu DTO bekliyor.
-             // Veya changeUserRole metodunu role string ve isAdminAction/yetki kontrolüyle kullanabiliriz.
-             // En basit yaklaşım, rol değiştirme mantığını burada doğrudan uygulamak.
-
-             userToReview.setRole("ROLE_TEACHER"); // Rolü TEACHER olarak ayarla
-             userToReview.setUpdatedDate(LocalDateTime.now()); // Güncellenme tarihini set et
-             userRepository.save(userToReview); // Kullanıcıyı kaydet
-
-
-             System.out.println("UserService: Kullanıcı rolü başarıyla TEACHER olarak ayarlandı - ID: " + userToReview.getId());
-            // TODO: Kullanıcıya isteğinin onaylandığına dair e-posta gönderme (isteğe bağlı)
-
-        } else {
-            System.out.println("UserService: Öğretmen isteği REDDEDİLDİ - Kullanıcı ID: " + userId);
-            // İsteği reddedildiyse, kullanıcının rolü değişmez (genellikle STUDENT olarak kalır).
-            // Eğer bir "reddedildi" durumu saklamak istersek, User Entity'sine veya ayrı bir TeacherRequest Entity'sine alan eklememiz gerekir.
-             // userToReview.setTeacherRequestStatus("DENIED"); // Eğer böyle bir alan olsaydı
-             // userToReview.setUpdatedDate(LocalDateTime.now());
-             // userRepository.save(userToReview);
-            System.out.println("UserService: Kullanıcının rolü değiştirilmedi.");
-             // TODO: Kullanıcıya isteğinin reddedildiğine dair e-posta gönderme (isteğe bağlı)
+    
+    /**
+     * Kullanıcı adına göre kullanıcı entity'sini getirir
+     * @param username Aranacak kullanıcı adı
+     * @return Kullanıcı entity'si
+     * @throws UserNotFoundException Kullanıcı bulunamazsa
+     */
+    public User findUserByUsername(String username) {
+        logger.info("UserService: Kullanıcı adı ile kullanıcı entity'si getiriliyor - Kullanıcı Adı: {}", username);
+        
+        return userRepository.findByUsername(username)
+            .orElseThrow(() -> {
+                logger.warn("UserService: Kullanıcı bulunamadı - Kullanıcı Adı: {}", username);
+                return new UserNotFoundException("Kullanıcı bulunamadı - Kullanıcı Adı: " + username);
+            });
+    }
+    
+    /**
+     * Email adresinin kullanımda olup olmadığını kontrol eder
+     * @param email Kontrol edilecek email adresi
+     * @return Email adresi kullanımdaysa true, değilse false
+     */
+    public boolean existsByEmail(String email) {
+        logger.info("UserService: Email adresi kullanımda mı kontrol ediliyor - Email: {}", email);
+        return userRepository.findByEmail(email).isPresent();
+    }
+    
+    /**
+     * Kullanıcı entity'sini kaydeder
+     * @param user Kaydedilecek kullanıcı entity'si
+     * @return Kaydedilen kullanıcı entity'si
+     */
+    public User saveUser(User user) {
+        logger.info("UserService: Kullanıcı kaydediliyor - ID: {}", user.getId());
+        return userRepository.save(user);
+    }
+    
+    /**
+     * Email adresine göre kullanıcıyı bulur
+     * @param email Aranacak email adresi
+     * @return Bulunan kullanıcı veya null
+     */
+    public User findUserByEmail(String email) {
+        logger.info("UserService: Email adresine göre kullanıcı aranıyor - Email: {}", email);
+        return userRepository.findByEmail(email).orElse(null);
+    }
+    
+    /**
+     * Şifre sıfırlama token'ina göre kullanıcıyı bulur
+     * @param token Aranacak token
+     * @return Bulunan kullanıcı veya null
+     */
+    public User findUserByResetPasswordToken(String token) {
+        logger.info("UserService: Şifre sıfırlama token'ina göre kullanıcı aranıyor - Token: {}", token);
+        return userRepository.findByResetPasswordToken(token).orElse(null);
+    }
+    
+    /**
+     * Kullanıcının aktiflik durumunu değiştirir (Admin hariç)
+     * @param userId Aktiflik durumu değiştirilecek kullanıcı ID'si
+     * @return Güncellenmiş kullanıcı
+     * @throws UserNotFoundException Kullanıcı bulunamazsa
+     * @throws IllegalArgumentException Admin kullanıcı devre dışı bırakılmaya çalışılırsa
+     */
+    @Transactional
+    public User toggleUserActivation(int userId) {
+        logger.info("UserService: Kullanıcı aktiflik durumu değiştiriliyor - ID: {}", userId);
+        
+        // Kullanıcıyı bul
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> {
+                logger.warn("UserService: Kullanıcı bulunamadı - ID: {}", userId);
+                return new UserNotFoundException("ID " + userId + " olan kullanıcı bulunamadı.");
+            });
+        
+        // Admin kullanıcıyı devre dışı bırakmaya çalışıyorsa hata fırlat
+        if (user.getRole().equals("ROLE_ADMIN")) {
+            logger.warn("UserService: Admin kullanıcı devre dışı bırakılamaz - ID: {}", userId);
+            throw new IllegalArgumentException("Admin kullanıcılar devre dışı bırakılamaz.");
         }
-
-        // İşlemin başarılı olduğunu belirtmek için true döndür.
-        // Kullanıcı bulunamazsa zaten exception fırlatıldığı için buraya gelinmez.
-        return true;
+        
+        // Kullanıcının aktiflik durumunu tersine çevir
+        boolean newStatus = !user.isEnabled();
+        user.setEnabled(newStatus);
+        user.setUpdatedDate(LocalDateTime.now());
+        
+        User updatedUser = userRepository.save(user);
+        logger.info("UserService: Kullanıcı aktiflik durumu güncellendi - ID: {}, Yeni Durum: {}", 
+                   userId, newStatus ? "Aktif" : "Pasif");
+        
+        return updatedUser;
     }
-
-    // --- Template'teki diğer User metotları ---
-    // signIn, logIn, logOut -> AuthenticationService ve Spring Security'ye taşındı.
-    // showUserDetails -> Genellikle DTO'lar aracılığıyla Controller katmanında veriyi sunma işidir. GetUserById metodu veriyi çeker.
 }
-

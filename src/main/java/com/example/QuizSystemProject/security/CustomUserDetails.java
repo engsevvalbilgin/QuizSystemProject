@@ -1,42 +1,33 @@
-package com.example.QuizSystemProject.security; // Paket adınızı kontrol edin
+package com.example.QuizSystemProject.security;
 
-import com.example.QuizSystemProject.Model.User; // Kendi User Entity'mizi import edin
+import com.example.QuizSystemProject.Model.User;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails; // Spring Security UserDetails
+import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.Collection; // Collection için
+import java.util.Collection;
+import java.util.Objects;
 
-// Spring Security'nin UserDetails arayüzünü implemente ediyoruz
-// Bu sınıf, SecurityContext'te kullanıcı bilgilerini tutacak.
+/**
+ * Custom UserDetails implementation that wraps our User entity.
+ * This allows us to access the full User object in the security context.
+ */
 public class CustomUserDetails implements UserDetails {
+    private static final long serialVersionUID = 1L;
 
-    private int id; // Kullanıcının veritabanı ID'si
-    private String username; // Kullanıcı adı
-    private String password; // Şifre (null olabilir eğer parola bilgisine JWT sonrası ihtiyacımız yoksa)
-    private boolean enabled; // Hesap etkin mi?
-    private boolean accountNonExpired; // Hesap süresi dolmamış mı?
-    private boolean credentialsNonExpired; // Şifre süresi dolmamış mı?
-    private boolean accountNonLocked; // Hesap kilitli değil mi?
-    private Collection<? extends GrantedAuthority> authorities; // Kullanıcının rolleri/yetkileri
+    private final User user;
+    private final Collection<? extends GrantedAuthority> authorities;
 
-    // Kendi User Entity objemizden CustomUserDetails oluşturacak constructor
     public CustomUserDetails(User user, Collection<? extends GrantedAuthority> authorities) {
-        this.id = user.getId(); // ID'yi set ediyoruz!
-        this.username = user.getUsername();
-        this.password = user.getPassword(); // Parola şifrelenmiş olmalı
-        this.enabled = user.isEnabled();
-        // isAccountNonExpired, isCredentialsNonExpired, isAccountNonLocked için mantık
-        // Sizin UserDetailsServiceImpl'deki gibi true veya user.isActive() kullanabilirsiniz.
-        // UserDetailsServiceImpl'deki User objesi oluştururken kullandığınız mantığı buraya taşıyın.
-        this.accountNonExpired = true; // UserDetailsServiceImpl'deki gibi true
-        this.credentialsNonExpired = true; // UserDetailsServiceImpl'deki gibi true
-        this.accountNonLocked = user.isActive(); // UserDetailsServiceImpl'deki gibi user.isActive()
+        Objects.requireNonNull(user, "User cannot be null");
+        Objects.requireNonNull(authorities, "Authorities cannot be null");
+        
+        this.user = user;
         this.authorities = authorities;
+        
+        System.out.println("CustomUserDetails created for user: " + user.getUsername() + 
+                         " with roles: " + authorities);
     }
 
-    // --- Get Metotları ---
-
-    // Spring Security arayüz metotları
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return authorities;
@@ -44,36 +35,69 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public String getPassword() {
-        return password; // Eğer password null set edilirse, null döner
+        return user.getPassword();
     }
 
     @Override
     public String getUsername() {
-        return username;
+        return user.getUsername();
     }
 
     @Override
     public boolean isAccountNonExpired() {
-        return accountNonExpired;
+        return true;
     }
 
     @Override
     public boolean isAccountNonLocked() {
-        return accountNonLocked;
+        return user.isActive();
     }
 
     @Override
     public boolean isCredentialsNonExpired() {
-        return credentialsNonExpired;
+        return true;
     }
 
     @Override
     public boolean isEnabled() {
-        return enabled;
+        return user.isActive();
     }
-
-    // --- Ekstra Get Metodu (Kullanıcı ID'si için) ---
+    
+    /**
+     * Get the underlying User entity
+     * @return the User entity
+     */
+    public User getUser() {
+        return user;
+    }
+    
+    /**
+     * Get the user ID
+     * @return the user ID
+     */
     public int getId() {
-        return id;
+        return user.getId();
+    }
+    
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof CustomUserDetails)) return false;
+        CustomUserDetails that = (CustomUserDetails) o;
+        return user.getId() == that.user.getId();
+    }
+    
+    @Override
+    public int hashCode() {
+        return Objects.hash(user.getId());
+    }
+    
+    @Override
+    public String toString() {
+        return "CustomUserDetails{" +
+               "id=" + user.getId() +
+               ", username='" + user.getUsername() + '\'' +
+               ", roles=" + authorities +
+               '}';
     }
 }

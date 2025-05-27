@@ -17,17 +17,17 @@ const ProtectedRoutes = ({ requiredRoles }) => {
 
   // Check if token exists
   if (!token) {
-    console.log("ProtectedRoutes: Token bulunamadı, login sayfasına yönlendiriliyor.");
-    return <Navigate to="/login" replace />;
+    console.log("ProtectedRoutes: Token bulunamadı, erişim reddedildi.");
+    return null; // Do not render anything
   }
 
   // Check if user data and roles exist
   if (!user || !user.roles || !Array.isArray(user.roles)) {
-      console.log("ProtectedRoutes: Kullanıcı bilgileri veya roller eksik/geçersiz, login sayfasına yönlendiriliyor.");
+      console.log("ProtectedRoutes: Kullanıcı bilgileri veya roller eksik/geçersiz, erişim reddedildi.");
        // Clear potentially incomplete data
        localStorage.removeItem('token');
        localStorage.removeItem('user');
-      return <Navigate to="/login" replace />;
+      return null; // Do not render anything
   }
 
   // Check if user has at least one of the required roles

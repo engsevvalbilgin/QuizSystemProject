@@ -2,12 +2,11 @@ package com.example.QuizSystemProject.security;
 
 import com.example.QuizSystemProject.security.jwt.JwtAuthenticationEntryPoint;
 import com.example.QuizSystemProject.security.jwt.JwtAuthenticationFilter;
-import com.example.QuizSystemProject.security.CustomAccessDeniedHandler;
 
-import org.springframework.beans.factory.annotation.Autowired;
+
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -19,7 +18,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
-import org.springframework.security.web.authentication.AnonymousAuthenticationFilter;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -36,15 +35,26 @@ public class SecurityConfig {
 // CORS Yapılandırma Bean'i (Frontend'den gelecek çapraz kaynak isteklere izin verir)
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowCredentials(true); // Çerezlerin ve kimlik doğrulama başlıklarının (Authorization gibi) gönderilmesine izin ver
-
-        config.addAllowedOrigin("http://localhost:5173"); // Frontend adresiniz (Curl testinde kullandığımız port)
-
-        config.addAllowedHeader("*"); // Tüm başlıklara izin ver (Authorization, Content-Type vb.)
-        config.addAllowedMethod("*"); // Tüm HTTP metotlarına izin ver (GET, POST, PUT, DELETE, OPTIONS vb.)
-        source.registerCorsConfiguration("/**", config); // Tüm (/**) URL desenlerine bu CORS konfigürasyonunu uygula
+        config.setAllowCredentials(true);
+        
+        // Frontend URL'lerini ekle
+        config.addAllowedOrigin("http://localhost:5173");
+        
+        // Gerekli başlıkları ekle
+        config.addAllowedHeader("*");
+        config.addAllowedMethod("*");
+        
+        // CORS preflight isteklerinin süresini ayarla (saniye cinsinden)
+        config.setMaxAge(3600L);
+        
+        // Gerekli başlıkları expose et
+        config.addExposedHeader("Authorization");
+        config.addExposedHeader("Content-Type");
+        
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", config);
+        
         return source;
     }
     
@@ -65,7 +75,7 @@ public class SecurityConfig {
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
     private final CustomAccessDeniedHandler customAccessDeniedHandler;
 
-    @Autowired
+    
     public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter,
                           JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint,
                           CustomAccessDeniedHandler customAccessDeniedHandler) {
@@ -83,31 +93,31 @@ public class SecurityConfig {
                 .authenticationEntryPoint(jwtAuthenticationEntryPoint)
                 .accessDeniedHandler(customAccessDeniedHandler)
             )
-            .authorizeHttpRequests(authorizeRequests -> authorizeRequests
-                .requestMatchers("/api/auth/**").permitAll()
-                .requestMatchers("/h2-console/**").permitAll()
-                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/statistics/overall").hasRole("ADMIN")
-                .requestMatchers("/api/users/**").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.PUT, "/api/users/{id}/role").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.PUT, "/api/users/{id}/review-teacher-request").hasRole("ADMIN")
-                .requestMatchers("/api/quizzes/**").hasAnyRole("TEACHER", "ADMIN")
-                .requestMatchers("/api/quizzes/{quizId}/questions/**").hasAnyRole("TEACHER", "ADMIN")
-                .requestMatchers("/api/quizzes/{quizId}/questions/{questionId}/options/**").hasAnyRole("TEACHER", "ADMIN")
-                .requestMatchers(HttpMethod.GET, "/api/statistics/quizzes/**").hasAnyRole("TEACHER", "ADMIN")
-                .requestMatchers(HttpMethod.POST, "/api/sessions/start/**").hasRole("STUDENT")
-                .requestMatchers(HttpMethod.POST, "/api/sessions/{sessionId}/answer").hasRole("STUDENT")
-                .requestMatchers(HttpMethod.POST, "/api/sessions/{sessionId}/complete").hasRole("STUDENT")
-                .requestMatchers(HttpMethod.GET, "/api/statistics/students/**").hasAnyRole("TEACHER", "ADMIN")
-                .requestMatchers(HttpMethod.GET, "/api/sessions/student/**").hasAnyRole("TEACHER", "ADMIN")
-                .requestMatchers(HttpMethod.GET, "/api/sessions/{sessionId}").authenticated()
-                .requestMatchers(HttpMethod.GET, "/api/quizzes").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/quizzes/{id}").permitAll()
-                .requestMatchers(HttpMethod.GET, "/api/quizzes/{quizId}/questions").permitAll()
+            .sessionManagement(session -> session
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+            )
+            .authorizeHttpRequests(authorize -> authorize
+                // Public endpoints
+                .requestMatchers(
+                    "/api/auth/**",
+                    "/api/public/**",
+                    "/h2-console/**",
+                    "/v2/api-docs",
+                    "/swagger-resources/**",
+                    "/swagger-ui/**",
+                    "/webjars/**",
+                    "/api/teachers/register"
+                ).permitAll()
+                
+                // Role-based access control
+                .requestMatchers("/student/**").hasRole("STUDENT")
+                .requestMatchers("/teacher/**").hasRole("TEACHER")
+                .requestMatchers("/admin/**").hasRole("ADMIN")
+                
+                // Default - require authentication for all other requests
                 .anyRequest().authenticated()
             )
-            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .addFilterBefore(jwtAuthenticationFilter, AnonymousAuthenticationFilter.class)
+            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
             .httpBasic(httpBasic -> httpBasic.disable())
             .formLogin(formLogin -> formLogin.disable());
 

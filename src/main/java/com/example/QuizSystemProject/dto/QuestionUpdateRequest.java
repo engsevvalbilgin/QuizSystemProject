@@ -22,7 +22,11 @@ public class QuestionUpdateRequest {
     private String correctAnswerText;
 
     @NotNull(message = "Soru tipi ID'si boş olamaz")
-    private Long questionTypeId; // İlişkili QuestionType ID'si
+    private int questionTypeId; // İlişkili QuestionType ID'si
+    
+    @NotNull(message = "Soru puanı boş olamaz")
+    @Min(value = 1, message = "Soru puanı en az 1 olmalı")
+    private int points = 1; // Varsayılan puan değeri
 
     // Çoktan seçmeli sorular için güncel şık listesi
      @Valid // Listedeki her OptionUpdateRequest objesini de doğrula
@@ -41,9 +45,12 @@ public class QuestionUpdateRequest {
     public String getCorrectAnswerText() { return correctAnswerText; }
     public void setCorrectAnswerText(String correctAnswerText) { this.correctAnswerText = correctAnswerText; }
 
-    public Long getQuestionTypeId() { return questionTypeId; }
-    public void setQuestionTypeId(Long questionTypeId) { this.questionTypeId = questionTypeId; }
-
+    public int getQuestionTypeId() { return questionTypeId; }
+    public void setQuestionTypeId(int questionTypeId) { this.questionTypeId = questionTypeId; }
+    
+    public int getPoints() { return points; }
+    public void setPoints(int points) { this.points = points; }
+    
      public List<OptionUpdateRequest> getOptions() { return options; }
      public void setOptions(List<OptionUpdateRequest> options) { this.options = options; }
 }

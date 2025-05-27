@@ -1,75 +1,140 @@
-// C:\Users\Hakan\Desktop\devam\front\QuizLandFrontend\src\api\axiosInstance.js
+// axiosInstance.js
 import axios from 'axios';
 
-// Backend API'mizin temel URL'si
-const API_BASE_URL = 'http://localhost:8080/api'; // Backend'inizin çalıştığı adres ve API path'i
+const API_BASE_URL = 'http://localhost:8080';
 
-// Özel bir Axios instance'ı oluştur
+// Create Axios instance
 const axiosInstance = axios.create({
-  baseURL: API_BASE_URL,
+  baseURL: `${API_BASE_URL}/api`,
+  withCredentials: true,
   headers: {
-    'Content-Type': 'application/json', // İsteklerin JSON formatında olacağını belirtir
+    'Content-Type': 'application/json',
   },
 });
 
-// İstek Interceptor'ı: Her istek gönderilmeden önce çalışır
+// Token refresh state
+let isRefreshing = false;
+let failedQueue = [];
+
+// Process queued requests
+const processQueue = (error, token = null) => {
+  failedQueue.forEach(prom => {
+    if (error) {
+      prom.reject(error);
+    } else {
+      prom.resolve(token);
+    }
+  });
+  failedQueue = [];
+};
+
+// Endpoints that don't require authentication
+const NO_TOKEN_ENDPOINTS = [
+  '/api/auth/login',
+  '/api/auth/register',
+  '/api/auth/register/teacher',
+  '/api/teachers/register',
+  '/api/auth/forgot-password',
+  '/api/auth/reset-password',
+  '/api/auth/verify-email',
+  '/api/users/password-reset/request',
+  '/api/users/password-reset/complete',
+  '/api/auth/refresh-token'
+];
+
+// Request interceptor
 axiosInstance.interceptors.request.use(
   (config) => {
-    // localStorage'dan JWT token'ı al
-    const token = localStorage.getItem('token'); // <-- Token'ı 'token' anahtarıyla alıyoruz
-
-    // Token varsa ve istek login veya register endpoint'ine gitmiyorsa
-    // Authorization başlığına token'ı ekle
-    // Login ve Register endpoint'leri token gerektirmez, bu yüzden hariç tutulurlar.
-    const isLoginOrRegister = config.url.includes('/auth/login') || config.url.includes('/auth/register');
-
-    if (token && !isLoginOrRegister) {
-      config.headers['Authorization'] = `Bearer ${token}`;
-      console.log(`Axios Interceptor: Token eklendi - ${config.method.toUpperCase()} ${config.url}`);
-    } else {
-       // Token yoksa veya login/register isteği ise token eklenmez
-       if (!token && !isLoginOrRegister) {
-           console.log(`Axios Interceptor: Token yok, eklenmedi - ${config.method.toUpperCase()} ${config.url}`);
-       } else {
-           console.log(`Axios Interceptor: Login/Register isteği, token eklenmedi - ${config.method.toUpperCase()} ${config.url}`);
-       }
+    const requestUrl = config.url || '';
+    const shouldSkipToken = NO_TOKEN_ENDPOINTS.some(endpoint => 
+      requestUrl.includes(endpoint)
+    );
+    
+    // Add token to request if needed
+    if (!shouldSkipToken) {
+      const token = localStorage.getItem('token');
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
     }
-
-    return config; // Güncellenmiş istek yapılandırmasını döndür
+    
+    return config;
   },
   (error) => {
-    // İstek hatası durumunda yapılacaklar
-    console.error('Axios Interceptor (Request Error):', error);
-    return Promise.reject(error); // Hatayı yay
+    return Promise.reject(error);
   }
 );
 
-// Yanıt Interceptor'ı: Her yanıt alındıktan sonra çalışır
-axiosInstance.interceptors.response.use(
-  (response) => {
-    // Başarılı yanıtlar için yapılacaklar
-    console.log(`Axios Interceptor: ${response.status} yanıtı alındı - ${response.config.method.toUpperCase()} ${response.config.url}`);
-    return response; // Yanıtı döndür
-  },
-  (error) => {
-    // Hatalı yanıtlar için yapılacaklar
-    console.error('Axios Interceptor (Response Error):', error.response || error.message || error);
+export const setupAxiosInterceptors = (refreshTokenFn, logoutFn) => {
+    // Store the interceptor to be able to remove it later
+    const interceptor = axiosInstance.interceptors.response.use(
+      (response) => response,
+      async (error) => {
+        const originalRequest = error.config;
+        
+        // If error is not 401 or it's a refresh token request, reject
+        if (error.response?.status !== 401 || 
+            NO_TOKEN_ENDPOINTS.some(endpoint => originalRequest.url.includes(endpoint))) {
+          return Promise.reject(error);
+        }
 
-    // Örneğin, 401 Unauthorized hatası alınırsa (token süresi dolmuş olabilir)
-    if (error.response && error.response.status === 401) {
-      console.log('Axios Interceptor: 401 Unauthorized yanıtı alındı. Muhtemelen token süresi dolmuş veya geçersiz.');
-      // TODO: Kullanıcıyı login sayfasına yönlendirme veya token yenileme işlemleri yapılabilir
-      // Örnek: window.location.href = '/login'; // Sayfayı login sayfasına yönlendir
-    }
-     // 403 Forbidden hatası alınırsa (yetkisiz erişim)
-     if (error.response && error.response.status === 403) {
-         console.log('Axios Interceptor: 403 Forbidden yanıtı alındı. Yetkiniz yok.');
-         // TODO: Kullanıcıya yetkisiz erişim mesajı gösterme veya farklı bir sayfaya yönlendirme
-     }
+        // If already refreshing, add to queue
+        if (isRefreshing) {
+          return new Promise((resolve, reject) => {
+            const retryPromise = new Promise((retryResolve, retryReject) => {
+              failedQueue.push({ resolve: retryResolve, reject: retryReject });
+            });
+            
+            retryPromise.then((token) => {
+              if (token) {
+                originalRequest.headers.Authorization = `Bearer ${token}`;
+                return axiosInstance(originalRequest);
+              }
+              return Promise.reject(error);
+            }).catch(reject);
+          });
+        }
 
-    return Promise.reject(error); // Hatayı yay
-  }
-);
+        isRefreshing = true;
+        
+        try {
+          // Call the refresh token function
+          const newToken = await refreshTokenFn();
+          
+          if (newToken) {
+            // Update the original request with the new token
+            originalRequest.headers.Authorization = `Bearer ${newToken}`;
+            
+            // Process any queued requests with the new token
+            processQueue(null, newToken);
+            
+            // Retry the original request
+            return axiosInstance(originalRequest);
+          }
 
-// Oluşturulan instance'ı dışa aktar
+          // If refresh token failed, logout the user
+          if (logoutFn) {
+            logoutFn();
+          }
+          processQueue(error, null);
+          return Promise.reject(error);
+        } catch (refreshError) {
+          // If refresh token failed, logout the user
+          if (logoutFn) {
+            logoutFn();
+          }
+          processQueue(refreshError, null);
+          return Promise.reject(refreshError);
+        } finally {
+          isRefreshing = false;
+          // Clear the queue after refresh
+          failedQueue = [];
+        }
+      }
+    );
+
+    // Return the interceptor ID so it can be cleaned up
+    return interceptor;
+  };
+
 export default axiosInstance;

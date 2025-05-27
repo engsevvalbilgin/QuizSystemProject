@@ -1,4 +1,4 @@
-package com.example.QuizSystemProject.dto; // Paket adınızın doğru olduğundan emin olun
+package com.example.QuizSystemProject.dto;
 
 import com.example.QuizSystemProject.Model.QuizSession; // Entity'den dönüşüm için
 import com.example.QuizSystemProject.Model.User; // Öğrenci bilgisi için
@@ -9,15 +9,12 @@ import java.util.stream.Collectors; // Akış işlemleri için
 // Bu DTO, API yanıtlarında bir öğrencinin tüm quiz oturumu sonuçlarını özetler.
 public class StudentOverallResultsResponse {
 
-    private int studentId; // Öğrenci ID'si
-    private String studentUsername; // Öğrenci kullanıcı adı
-    private int totalSessions; // Tamamlanan toplam oturum sayısı
-    private Double overallAverageScore; // Tüm oturumların ortalama puanı
-
-    // Oturum listesini de buraya dahil edebiliriz veya ayrı bir endpointten çekilebilir.
-    // Buraya listeyi dahil etmek, tek istekte tüm detayları getirmeyi sağlar.
-    private List<QuizSessionResponse> sessions; // Oturumların temel bilgileri (QuizSessionResponse DTO'su)
-
+    private int id; // Öğrenci ID'si
+    private String name; // Öğrenci adı
+    private String surname; // Öğrenci soyadı
+    private int totalQuizzes; // Tamamlanan toplam quiz sayısı
+    private double averageScore; // Tüm quizlerin ortalama puanı
+    private int successfulQuizzes; // Başarılı quiz sayısı
 
     // JPA için argümansız constructor
     public StudentOverallResultsResponse() {
@@ -27,14 +24,16 @@ public class StudentOverallResultsResponse {
     public StudentOverallResultsResponse(User student, List<QuizSession> sessions) {
         // Öğrenci bilgileri
         if (student != null) {
-            this.studentId = student.getId();
-            this.studentUsername = student.getUsername();
+            this.id = student.getId();
+            this.name = student.getName();
+            this.surname = student.getSurname();
         } else {
-            this.studentId = -1;
-            this.studentUsername = "Bilinmeyen Öğrenci";
+            this.id = -1;
+            this.name = "Bilinmeyen";
+            this.surname = "Öğrenci";
         }
 
-        this.totalSessions = sessions != null ? sessions.size() : 0;
+        this.totalQuizzes = sessions != null ? sessions.size() : 0;
 
         // Ortalama puanı hesapla (Service'ten gelen listeyi kullan)
         double calculatedAverageScore = 0.0;
@@ -42,36 +41,36 @@ public class StudentOverallResultsResponse {
             int totalScore = sessions.stream().mapToInt(QuizSession::getScore).sum();
             calculatedAverageScore = (double) totalScore / sessions.size();
         }
-        this.overallAverageScore = calculatedAverageScore;
+        this.averageScore = calculatedAverageScore;
 
-        // Oturum Entity'lerini QuizSessionResponse DTO'larına dönüştür
+        // Başarılı quiz sayısı hesapla
+        int successfulQuizzesCount = 0;
         if (sessions != null) {
-            this.sessions = sessions.stream()
-                                    .map(QuizSessionResponse::new) // Her QuizSession Entity'sini QuizSessionResponse DTO'suna dönüştür
-                                    .collect(Collectors.toList());
-        } else {
-            this.sessions = List.of(); // Liste boşsa boş liste
+            successfulQuizzesCount = (int) sessions.stream()
+                    .filter(QuizSession::isCompleted)
+                    .count();
         }
+        this.successfulQuizzes = successfulQuizzesCount;
     }
 
     // Getter ve Setterlar
     // IDE ile otomatik oluşturabilirsiniz.
 
-    public int getStudentId() { return studentId; }
-    public void setStudentId(int studentId) { this.studentId = studentId; }
+    public int getId() { return id; }
+    public void setId(int id) { this.id = id; }
 
-    public String getStudentUsername() { return studentUsername; }
-    public void setStudentUsername(String studentUsername) { this.studentUsername = studentUsername; }
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
 
-    public int getTotalSessions() { return totalSessions; }
-    public void setTotalSessions(int totalSessions) { this.totalSessions = totalSessions; }
+    public String getSurname() { return surname; }
+    public void setSurname(String surname) { this.surname = surname; }
 
-    public Double getOverallAverageScore() { return overallAverageScore; }
-    public void setOverallAverageScore(Double overallAverageScore) { this.overallAverageScore = overallAverageScore; }
+    public int getTotalQuizzes() { return totalQuizzes; }
+    public void setTotalQuizzes(int totalQuizzes) { this.totalQuizzes = totalQuizzes; }
 
-    public List<QuizSessionResponse> getSessions() { return sessions; }
-    public void setSessions(List<QuizSessionResponse> sessions) { this.sessions = sessions; }
+    public double getAverageScore() { return averageScore; }
+    public void setAverageScore(double averageScore) { this.averageScore = averageScore; }
 
-
-    // İsteğe bağlı olarak toString, equals, hashCode metotları eklenebilir.
+    public int getSuccessfulQuizzes() { return successfulQuizzes; }
+    public void setSuccessfulQuizzes(int successfulQuizzes) { this.successfulQuizzes = successfulQuizzes; }
 }

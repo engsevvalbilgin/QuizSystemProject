@@ -5,9 +5,9 @@ import java.util.Map; // Map'ten dönüşüm için (Service'ten Map dönüyorsa)
 // Bu DTO, API yanıtlarında programın genel istatistiklerini taşır.
 public class OverallStatsResponse {
 
-    private Long totalUsers; // Toplam kullanıcı sayısı
-    private Long totalQuizzes; // Toplam quiz sayısı
-    private Long totalQuizSessions; // Toplam quiz oturumu sayısı
+    private int totalUsers; // Toplam kullanıcı sayısı
+    private int totalQuizzes; // Toplam quiz sayısı
+    private int totalQuizSessions; // Toplam quiz oturumu sayısı
     private Double averageScore; // Tüm oturumların genel ortalama puanı
 
     // İstenirse Adminler için aktif/pasif kullanıcı sayıları gibi ek alanlar eklenebilir.
@@ -18,7 +18,7 @@ public class OverallStatsResponse {
     }
 
     // Alanları alan constructor
-    public OverallStatsResponse(Long totalUsers, Long totalQuizzes, Long totalQuizSessions, Double averageScore) {
+    public OverallStatsResponse(int totalUsers, int totalQuizzes, int totalQuizSessions, Double averageScore) {
         this.totalUsers = totalUsers;
         this.totalQuizzes = totalQuizzes;
         this.totalQuizSessions = totalQuizSessions;
@@ -27,9 +27,9 @@ public class OverallStatsResponse {
 
     // Service'ten Map dönüyorsa, Map'ten dönüşüm yapmayı kolaylaştıran constructor (isteğe bağlı)
     public OverallStatsResponse(Map<String, Object> statsMap) {
-        this.totalUsers = (Long) statsMap.get("totalUsers");
-        this.totalQuizzes = (Long) statsMap.get("totalQuizzes");
-        this.totalQuizSessions = (Long) statsMap.get("totalQuizSessions");
+        this.totalUsers = ((Number) statsMap.get("totalUsers")).intValue();
+        this.totalQuizzes = ((Number) statsMap.get("totalQuizzes")).intValue();
+        this.totalQuizSessions = ((Number) statsMap.get("totalQuizSessions")).intValue();
         this.averageScore = (Double) statsMap.get("averageScore");
     }
 
@@ -37,14 +37,14 @@ public class OverallStatsResponse {
     // Getter ve Setterlar
     // IDE ile otomatik oluşturabilirsiniz.
 
-    public Long getTotalUsers() { return totalUsers; }
-    public void setTotalUsers(Long totalUsers) { this.totalUsers = totalUsers; }
+    public int getTotalUsers() { return totalUsers; }
+    public void setTotalUsers(int totalUsers) { this.totalUsers = totalUsers; }
 
-    public Long getTotalQuizzes() { return totalQuizzes; }
-    public void setTotalQuizzes(Long totalQuizzes) { this.totalQuizzes = totalQuizzes; }
+    public int getTotalQuizzes() { return totalQuizzes; }
+    public void setTotalQuizzes(int totalQuizzes) { this.totalQuizzes = totalQuizzes; }
 
-    public Long getTotalQuizSessions() { return totalQuizSessions; }
-    public void setTotalQuizSessions(Long totalQuizSessions) { this.totalQuizSessions = totalQuizSessions; }
+    public int getTotalQuizSessions() { return totalQuizSessions; }
+    public void setTotalQuizSessions(int totalQuizSessions) { this.totalQuizSessions = totalQuizSessions; }
 
     public Double getAverageScore() { return averageScore; }
     public void setAverageScore(Double averageScore) { this.averageScore = averageScore; }

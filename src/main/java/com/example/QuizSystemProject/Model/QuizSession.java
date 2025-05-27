@@ -34,7 +34,19 @@ public class QuizSession {
     private LocalDateTime endTime; // Quiz'in bitiş tarihi/saati
 
     @Column(nullable = false) // Boş olamaz, varsayılan 0
-    private int score = 0; // Öğrencinin bu oturumda aldığı puan (Analiz sonucunda eklendi)
+    private int score = 0; // Öğrencinin bu oturumda aldığı puan (100 üzerinden)
+    
+    @Column(nullable = false) // Boş olamaz, varsayılan 0
+    private int earnedPoints = 0; // Öğrencinin kazandığı toplam puan
+    
+    @Column(nullable = false) // Boş olamaz, varsayılan 0
+    private int correctAnswers = 0; // Doğru cevap sayısı
+    
+    @Column(nullable = false) // Boş olamaz, varsayılan false
+    private boolean completed = false; // Sınavın tamamlanıp tamamlanmadığı
+    
+    @Column
+    private Integer timeSpentSeconds; // Sınavın süresi (saniye cinsinden)
 
     // Bir quiz oturumunda, öğrencinin birden çok soruya verdiği cevap olabilir
     // Sizin 'QuestionAnswer' template'inize karşılık gelen 'AnswerAttempt' Entity'si ile ilişki
@@ -77,6 +89,37 @@ public class QuizSession {
 
     public int getScore() { return score; }
     public void setScore(int score) { this.score = score; }
+    
+    public int getEarnedPoints() { return earnedPoints; }
+    public void setEarnedPoints(int earnedPoints) { this.earnedPoints = earnedPoints; }
+    
+    public int getCorrectAnswers() { return correctAnswers; }
+    public void setCorrectAnswers(int correctAnswers) { this.correctAnswers = correctAnswers; }
+    
+    public boolean isCompleted() { return completed; }
+    public void setCompleted(boolean completed) { this.completed = completed; }
+    
+    public Integer getTimeSpentSeconds() { return timeSpentSeconds; }
+    public void setTimeSpentSeconds(Integer timeSpentSeconds) { this.timeSpentSeconds = timeSpentSeconds; }
+    
+    /**
+     * Get the time spent in seconds for this quiz session
+     * @return Time spent in seconds, or 0 if the session is not completed
+     */
+    public int calculateTimeSpentSeconds() {
+        if (startTime == null || endTime == null) {
+            return 0;
+        }
+        return (int) java.time.Duration.between(startTime, endTime).getSeconds();
+    }
+    
+    /**
+     * Check if this session has been submitted
+     * @return true if the session has an endTime (completed), false otherwise
+     */
+    public boolean isSubmitted() {
+        return endTime != null;
+    }
 
     public List<AnswerAttempt> getAnswers() { return answers; }
     public void setAnswers(List<AnswerAttempt> answers) { this.answers = answers; }

@@ -3,34 +3,37 @@ package com.example.QuizSystemProject.dto;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class OptionUpdateRequest {
 
-    // ID'yi DTO'ya dahil etmek genellikle iyi bir practice değildir,
-    // çünkü ID genellikle URL yolundan gelir. Ancak, eğer şıklar listesi gönderiliyorsa
-    // hangi şıkkın güncellendiğini belirtmek için DTO'da ID'ye ihtiyaç duyulabilir.
-    // Şimdilik, ID'yi DTO'ya eklemeyelim ve Service katmanında ID'ye göre şıkkı bulup güncelleyelim.
-    // @NotNull(message = "Şık ID'si boş olamaz")
-    // private Long id;
+    @NotNull(message = "Option ID cannot be null")
+    private Integer id;
 
     @NotBlank(message = "Şık metni boş olamaz")
     @Size(max = 500, message = "Şık metni 500 karakterden uzun olamaz")
     private String text;
 
     @NotNull(message = "Doğru cevap bilgisi boş olamaz")
-    private Boolean isCorrect;
+    @JsonProperty(value = "isCorrect") // JSON field name will always be isCorrect
+    private Boolean correct; // Renamed to avoid serialization issues
 
     // Getter ve Setterlar
     public OptionUpdateRequest() {}
 
-    // Eğer ID'yi eklediyseniz:
-    // public Long getId() { return id; }
-    // public void setId(Long id) { this.id = id; }
-
+    public Integer getId() { return id; }
+    public void setId(Integer id) { this.id = id; }
 
     public String getText() { return text; }
     public void setText(String text) { this.text = text; }
 
-    public Boolean isCorrect() { return isCorrect; }
-    public void setCorrect(Boolean correct) { isCorrect = correct; }
+    // Standard JavaBean getter with JsonProperty annotation to control the property name in JSON
+    @JsonProperty("isCorrect") 
+    public Boolean isCorrect() { return correct; }
+    
+    // Single setter with JsonProperty annotation to ensure it maps to "isCorrect" in JSON
+    @JsonProperty("isCorrect")
+    public void setCorrect(Boolean correct) { this.correct = correct; }
+    
+    // REMOVED duplicate setter to avoid Jackson conflict
 }

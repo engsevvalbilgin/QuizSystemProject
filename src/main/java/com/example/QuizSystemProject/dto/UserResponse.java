@@ -1,7 +1,7 @@
 package com.example.QuizSystemProject.dto; // Paket adınızın doğru olduğundan emin olun
 
 import com.example.QuizSystemProject.Model.User; // Entity'den dönüşüm için User Entity'sini import edin
-
+import java.time.LocalDateTime;
 // Bu DTO, API yanıtlarında temel kullanıcı bilgilerini taşır (örn: kullanıcı listeleri).
 // Hassas bilgiler (parola gibi) dahil EDİLMEZ.
 public class UserResponse {
@@ -14,6 +14,7 @@ public class UserResponse {
     private String role; // Kullanıcı rolü
     private boolean isActive; // Hesabın aktif (silinmemiş) olup olmadığı
     private boolean enabled; // Hesabın etkinleştirilmiş (e-posta doğrulaması yapılmış) olup olmadığı
+    private LocalDateTime createdAt; // Kullanıcının oluşturulma tarihi
 
     // Yaş, oluşturulma/güncellenme tarihleri gibi alanları liste DTO'suna dahil etmeyebiliriz
     // veya isteğe bağlı olarak ekleyebiliriz. Şimdilik temel alanları alalım.
@@ -33,6 +34,7 @@ public class UserResponse {
         this.role = user.getRole();
         this.isActive = user.isActive(); // Getter metodu isActive()
         this.enabled = user.isEnabled(); // Getter metodu isEnabled()
+        this.createdAt = user.getCreatedDate(); // Kullanıcının oluşturulma tarihi
     }
 
     // Getter ve Setterlar (Setterlar API'den veri almadığı için zorunlu değildir ama eklenebilir)
@@ -50,6 +52,7 @@ public class UserResponse {
     public String getSurname() { return surname; }
     public void setSurname(String surname) { this.surname = surname; }
 
+    
     public String getEmail() { return email; }
     public void setEmail(String email) { this.email = email; }
 
@@ -61,6 +64,9 @@ public class UserResponse {
 
     public boolean isEnabled() { return enabled; }
     public void setEnabled(boolean enabled) { this.enabled = enabled; }
+    
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 
     // İsteğe bağlı olarak toString, equals, hashCode metotları eklenebilir.
 }

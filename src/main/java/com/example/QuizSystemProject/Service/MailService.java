@@ -1,8 +1,8 @@
 package com.example.QuizSystemProject.Service; // Paket adınızın doğru olduğundan emin olun
 
-import org.springframework.beans.factory.annotation.Autowired; // Bağımlılık enjeksiyonu için
+
 import org.springframework.beans.factory.annotation.Value; // application.properties'ten değer okumak için <-- BU IMPORTU EKLEYİN
-import jakarta.annotation.PostConstruct; // <-- BU IMPORTU EKLEYİN
+
 
 import org.springframework.mail.MailException; // Mail gönderme hataları için <-- BU IMPORTU EKLEYİN
 import org.springframework.mail.SimpleMailMessage; // Basit metin e-postalar için
@@ -21,7 +21,7 @@ public class MailService {
 
 
     // JavaMailSender bağımlılığının enjekte edildiği constructor
-    @Autowired
+    
     public MailService(JavaMailSender mailSender) {
         this.mailSender = mailSender;
     }
@@ -34,6 +34,10 @@ public class MailService {
     // Genel amaçlı e-posta gönderme metodu - ŞİMDİ GERÇEK GÖNDERME YAPACAK
     // Sizin template'inizdeki sendMail metoduna karşılık gelir
     public void sendEmail(String toEmail, String subject, String body) throws MailException { // <-- throws MailException eklendi
+        if (toEmail == null || toEmail.trim().isEmpty()) {
+            System.err.println("MailService: E-posta gönderme hatası -> 'toEmail' adresi boş olamaz.");
+            throw new IllegalArgumentException("'toEmail' adresi boş olamaz.");
+        }
         System.out.println("MailService: E-posta gönderme başlatıldı -> Kime: " + toEmail + ", Konu: " + subject);
 
         SimpleMailMessage message = new SimpleMailMessage(); // Basit metin tabanlı mail objesi
@@ -83,13 +87,39 @@ public class MailService {
     }
     
  // Parola sıfırlama başarı maili gönderme metodu
-    public void sendPasswordResetSuccessMail(String toEmail) throws MailException { // <-- BU METOTU EKLEYİNİZ
+    public void sendPasswordResetSuccessMail(String toEmail) throws MailException {
         System.out.println("MailService: Parola sifirlama basari maili gonderiliyor -> Kime: " + toEmail);
 
         String subject = "Parolanız Başarıyla Sıfırlandı";
         String body = "Merhaba,\n\nQuiz sistemi parolanız başarıyla sıfırlandı.\n\nEğer parolanızı siz sıfırlamadıysanız, lütfen hemen hesabınızı kontrol edin veya bizimle iletişime geçin.\n\nTeşekkürler,\nQuiz Sistemi Ekibi";
 
         sendEmail(toEmail, subject, body); // Genel gönderme metodunu kullan
+    }
+    
+    // Şifre değişimi bildirim maili gönderme metodu
+    public void sendPasswordChangeNotification(String toEmail) throws MailException {
+        System.out.println("MailService: Şifre değişimi bildirim maili gönderiliyor -> Kime: " + toEmail);
+
+        String subject = "Şifreniz Değiştirildi";
+        String body = "Merhaba,\n\nQuiz sistemindeki hesabınızın şifresi başarıyla değiştirildi.\n\nEğer bu işlemi siz yapmadıysanız, lütfen derhal bizimle iletişime geçin.\n\nTeşekkürler,\nQuiz Sistemi Ekibi";
+
+        sendEmail(toEmail, subject, body);
+    }
+    
+    // E-posta değişikliği doğrulama maili gönderme metodu
+    public void sendEmailChangeVerification(String toEmail, String verificationToken, String baseUrl) throws MailException {
+        System.out.println("MailService: E-posta değişikliği doğrulama maili gönderiliyor -> Kime: " + toEmail);
+
+        // Use the exact route path that matches the React application's router configuration
+        String verificationLink = baseUrl + "/verify-email?token=" + verificationToken;
+        System.out.println("MailService: E-posta doğrulama linki oluşturuldu: " + verificationLink);
+        
+        String subject = "E-posta Adresinizi Değiştirme Talebi";
+        String body = "Merhaba,\n\nQuiz sistemindeki hesabınızın e-posta adresini değiştirme talebinde bulundunuz.\n\nYeni e-posta adresinizi doğrulamak için lütfen aşağıdaki bağlantıya tıklayın:\n" 
+                + verificationLink
+                + "\n\nEğer bu talebi siz yapmadıysanız, güvenliğiniz için lütfen bu bağlantıyı tıklamayın ve bizimle iletişime geçin.\n\nTeşekkürler,\nQuiz Sistemi Ekibi";
+
+        sendEmail(toEmail, subject, body);
     }
 
     // --- Template'teki statik alanlar (sender_mail_address, sender_password) buraya gelmez.

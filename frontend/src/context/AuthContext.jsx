@@ -1,128 +1,196 @@
-// C:\Users\Hakan\Desktop\devam\front\QuizLandFrontend\src\context\AuthContext.jsx
-import React, { createContext, useState, useContext, useEffect } from 'react';
+// AuthContext.jsx
+import React, { createContext, useState, useContext, useEffect, useCallback } from 'react';
+import axios from 'axios';
+import axiosInstance, { setupAxiosInterceptors } from '../api/axiosInstance';
 
-// Authentication Context'ini oluştur
 const AuthContext = createContext(null);
 
-// AuthProvider Komponenti: Uygulama ağacını sarmalar ve kimlik doğrulama durumunu sağlar
 export const AuthProvider = ({ children }) => {
-  // localStorage'dan başlangıç değerlerini oku
-  // Sayfa yenilendiğinde veya uygulama ilk yüklendiğinde kullanıcıyı login kalmış gibi başlatmak için
-  const initialToken = localStorage.getItem('token');
-  const initialUserString = localStorage.getItem('user');
-  const initialUser = initialUserString ? JSON.parse(initialUserString) : null;
+    const initialToken = localStorage.getItem('token');
+    const initialUserString = localStorage.getItem('user');
+    const initialUser = initialUserString ? JSON.parse(initialUserString) : null;
 
-  console.log("AuthContext (Initial Load): localStorage token:", initialToken ? 'Mevcut' : 'Yok', "localStorage user:", initialUser ? initialUser.username : 'Yok');
+    const [token, setToken] = useState(initialToken);
+    const [user, setUser] = useState(initialUser);
 
-
-  // Kimlik doğrulama durumu için state
-  const [token, setToken] = useState(initialToken);
-  const [user, setUser] = useState(initialUser);
-
-  // Token veya kullanıcı bilgisi değiştiğinde localStorage'ı güncelle
-  // Bu useEffect, state değişikliklerini localStorage ile senkronize eder
-  // Bu useEffect artık sadece başlangıç yüklemesi ve logout durumları için bir fallback görevi görecek.
-  // Login sırasında token'ın localStorage'a yazılması login fonksiyonu içinde senkron olarak yapılacak.
-  useEffect(() => {
-    console.log("AuthContext: useEffect çalıştı.");
-    console.log("AuthContext: useEffect anında Token state:", token ? 'Mevcut' : 'Yok', "User state:", user ? user.username : 'Yok');
-    console.log("AuthContext: useEffect anında localStorage token:", localStorage.getItem('token') ? 'Mevcut' : 'Yok', "localStorage user:", localStorage.getItem('user') ? 'Mevcut' : 'Yok');
-
-
-    // Eğer token state'i null ise (logout durumu veya başlangıçta yoksa) localStorage'ı temizle
-    if (!token) {
-       localStorage.removeItem('token');
-       console.log("AuthContext: useEffect - Token state null, localStorage token temizlendi.");
-    } else {
-        // Token state'i mevcutsa, localStorage'da da olduğundan emin ol (login fonksiyonu zaten yazmalı)
-        if (!localStorage.getItem('token')) {
-             localStorage.setItem('token', token);
-             console.log("AuthContext: useEffect - Token state mevcut ama localStorage boş, localStorage'a yazıldı.");
+    // Update localStorage when token or user changes
+    useEffect(() => {
+        if (token && user) {
+            localStorage.setItem('token', token);
+            localStorage.setItem('user', JSON.stringify(user));
+        } else {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            localStorage.removeItem('refreshToken');
         }
-    }
+    }, [token, user]);
 
-    // Eğer user state'i null ise (logout durumu veya başlangıçta yoksa) localStorage'ı temizle
-    if (!user) {
-       localStorage.removeItem('user');
-       console.log("AuthContext: useEffect - User state null, localStorage user temizlendi.");
-    } else {
-         // User state'i mevcutsa, localStorage'da da olduğundan emin ol (login fonksiyonu zaten yazmalı)
-         if (!localStorage.getItem('user')) {
-             localStorage.setItem('user', JSON.stringify(user));
-             console.log("AuthContext: useEffect - User state mevcut ama localStorage boş, localStorage'a yazıldı.");
-         }
-    }
+    // Login function
+    const login = useCallback((newToken, refreshToken, userData) => {
+        if (!newToken) {
+            console.error('Login requires a token');
+            return;
+        }
 
-     console.log("AuthContext: localStorage güncellendi (useEffect sonu). Token:", localStorage.getItem('token') ? 'Mevcut' : 'Yok', "Kullanıcı:", localStorage.getItem('user') ? 'Mevcut' : 'Yok');
+        // Prepare user data with roles
+        const userWithRoles = userData ? {
+            ...userData,
+            // Ensure roles is always an array
+            roles: userData.roles || (userData.role ? [userData.role] : ['ROLE_USER'])
+        } : null;
 
-  }, [token, user]); // token veya user state'i değiştiğinde çalışır
+        // Store tokens and user info
+        localStorage.setItem('token', newToken);
+        if (refreshToken) {
+            localStorage.setItem('refreshToken', refreshToken);
+        }
+        if (userWithRoles) {
+            localStorage.setItem('user', JSON.stringify(userWithRoles));
+        }
 
-  // Login fonksiyonu: Token ve kullanıcı bilgilerini alır, state'i ve localStorage'ı günceller
-  const login = (newToken, newUser) => {
-    console.log("AuthContext: login fonksiyonu başladı. Gelen newToken:", newToken ? 'Mevcut' : 'Yok', "Gelen newUser:", newUser ? newUser.username : 'Yok');
+        // Update state
+        setToken(newToken);
+        setUser(userWithRoles);
 
-    // Token'ı localStorage'a senkron olarak hemen kaydet
-    if (newToken) {
-        localStorage.setItem('token', newToken); // <-- Token localStorage'a hemen yazıldı
-        console.log("AuthContext: login fonksiyonu - Token localStorage'a senkron olarak yazıldı.");
-    } else {
-        localStorage.removeItem('token');
-        console.log("AuthContext: login fonksiyonu - Token localStorage'dan temizlendi (login null token).");
-    }
+        console.log('Login successful', { 
+            hasUserData: !!userData,
+            roles: userWithRoles?.roles 
+        });
+    }, []);
 
-     // User'ı localStorage'a senkron olarak hemen kaydet
-     if (newUser) {
-         localStorage.setItem('user', JSON.stringify(newUser)); // <-- User localStorage'a hemen yazıldı
-         console.log("AuthContext: login fonksiyonu - User localStorage'a senkron olarak yazıldı.");
-     } else {
-         localStorage.removeItem('user');
-         console.log("AuthContext: login fonksiyonu - User localStorage'dan temizlendi (login null user).");
-     }
+    // Logout function
+    const logout = useCallback(async () => {
+        try {
+            // Call the backend logout endpoint
+            await axiosInstance.post('/auth/logout');
+        } catch (error) {
+            console.error('Logout error:', error);
+        } finally {
+            // Clear state and storage
+            setToken(null);
+            setUser(null);
+            localStorage.clear();
+            // Redirect to login page
+            window.location.href = '/login';
+        }
+    }, []);
 
+    // Token refresh function
+    const refreshToken = useCallback(async () => {
+        const currentRefreshToken = localStorage.getItem('refreshToken');
+        if (!currentRefreshToken) {
+            console.log('No refresh token available');
+            return null;
+        }
 
-    // State'leri güncelle (asenkrondur)
-    setToken(newToken);
-    setUser(newUser);
+        try {
+            console.log('Attempting to refresh token...');
+            
+            const response = await axios.post(
+                'http://localhost:8080/api/auth/refresh-token',
+                {},
+                {
+                    headers: {
+                        'Authorization': `Bearer ${currentRefreshToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    withCredentials: true
+                }
+            );
 
-    console.log("AuthContext: login fonksiyonu bitti. setToken ve setUser çağrıldı.");
-  };
+            const { token: newAccessToken, refreshToken: newRefreshToken, user: userData } = response.data;
+            
+            if (!newAccessToken) {
+                throw new Error('Invalid token response from server');
+            }
+            
+            // Update tokens and user data in storage
+            localStorage.setItem('token', newAccessToken);
+            
+            // Update refresh token if a new one was provided
+            if (newRefreshToken) {
+                localStorage.setItem('refreshToken', newRefreshToken);
+            }
+            
+            // Update user data if provided
+            if (userData) {
+                console.log('Updating user data from refresh token response:', userData);
+                const userWithRoles = {
+                    ...userData,
+                    // Ensure roles is always an array
+                    roles: userData.roles || (userData.role ? [userData.role] : ['ROLE_USER'])
+                };
+                localStorage.setItem('user', JSON.stringify(userWithRoles));
+                setUser(userWithRoles);
+            } else {
+                console.log('No user data in refresh token response');
+                // If no user data in response, try to preserve existing user data
+                const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
+                if (currentUser) {
+                    setUser(currentUser);
+                } else {
+                    // If no user data is available, we might need to fetch it
+                    console.log('No user data available after refresh');
+                }
+            }
+            
+            // Update state
+            setToken(newAccessToken);
+            
+            console.log('Token refresh successful');
+            return newAccessToken;
+            
+        } catch (error) {
+            console.error('Token refresh failed:', error);
+            
+            // If refresh token is invalid or expired, logout the user
+            if (error.response?.status === 401 || error.response?.status === 403) {
+                console.log('Refresh token expired or invalid, logging out...');
+                logout();
+            }
+            
+            return null;
+        }
+    }, [logout]);
 
-  // Logout fonksiyonu: State'i ve localStorage'ı temizler
-  const logout = () => {
-    setToken(null);
-    setUser(null);
-    // localStorage zaten useEffect içinde temizlenecek, ama burada da açıkça yapabiliriz
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    console.log("AuthContext: Logout işlemi yapıldı.");
-  };
+    // Set up axios interceptors
+    // In AuthContext.jsx, update the useEffect for setting up interceptors
+useEffect(() => {
+    console.log("Setting up axios interceptors...");
+    const interceptorId = setupAxiosInterceptors(refreshToken, logout);
+    
+    return () => {
+      console.log("Cleaning up axios interceptors...");
+      if (interceptorId !== undefined) {
+        axiosInstance.interceptors.response.eject(interceptorId);
+      }
+    };
+  }, [refreshToken, logout]);
 
-  // Context değerini sağla
-  const contextValue = {
-    token, // JWT token
-    user, // Kullanıcı bilgileri objesi { id, username, roles }
-    login, // Login fonksiyonu
-    logout, // Logout fonksiyonu
-    isAuthenticated: !!token && !!user, // Kullanıcının login olup olmadığını kontrol et
-    isAdmin: user && user.roles && user.roles.includes('ROLE_ADMIN'), // Admin rolü var mı?
-    isStudent: user && user.roles && user.roles.includes('ROLE_STUDENT'), // Student rolü var mı?
-    isTeacher: user && user.roles && user.roles.includes('ROLE_TEACHER'), // Teacher rolü var mı?
-  };
+    // Context value
+    const contextValue = {
+        token,
+        user,
+        login,
+        logout,
+        refreshToken,
+        isAuthenticated: !!token && !!user,
+        isAdmin: user?.roles?.includes('ROLE_ADMIN'),
+        isStudent: user?.roles?.includes('ROLE_STUDENT'),
+        isTeacher: user?.roles?.includes('ROLE_TEACHER'),
+    };
 
-  return (
-    <AuthContext.Provider value={contextValue}>
-      {children}
-    </AuthContext.Provider>
-  );
+    return (
+        <AuthContext.Provider value={contextValue}>
+            {children}
+        </AuthContext.Provider>
+    );
 };
 
-// Context'i kullanmak için custom hook
 export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
+    const context = useContext(AuthContext);
+    if (!context) {
+        throw new Error('useAuth must be used within an AuthProvider');
+    }
+    return context;
 };
-
-export default AuthContext; // Context objesini de dışa aktar

@@ -9,7 +9,7 @@ import java.util.Optional; // Optional import
 
 @Repository // Indicates that this interface is a Spring Data JPA Repository
 // Extends JpaRepository to inherit basic CRUD methods
-// <User, Long>: The first parameter is the Entity type (User), the second is the type of its Primary Key (Long).
+// <User, Integer>: The first parameter is the Entity type (User), the second is the type of its Primary Key (Integer).
 public interface UserRepository extends JpaRepository<User, Integer> {
 
     // Spring Data JPA automatically provides methods like save(), findById(), findAll(), delete(), etc.
@@ -37,9 +37,12 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     List<User> findAllByIsActiveFalse();
 
     // You can combine conditions as well, e.g.:
-    // List<User> findAllByRoleAndIsActiveTrue(String role); // Find all active users with a specific role
+    List<User> findAllByRoleAndIsActiveTrue(String role); // Find all active users with a specific role
     // --- Yeni Metot: Confirmation Token ile Kullanıcı Bulma ---
     Optional<User> findByConfirmationToken(String confirmationToken);
+    
+    // --- Yeni Metot: Reset Password Token ile Kullanıcı Bulma ---
+    Optional<User> findByResetPasswordToken(String resetPasswordToken);
     
     // Kullanıcı adına veya email'e göre arama yaparken büyük/küçük harf duyarlılığını kapatmak için
     // Aşağıdaki gibi JPQL sorguları yazılabilir:
@@ -51,7 +54,6 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     // @Query("SELECT u FROM User u WHERE LOWER(u.username) = LOWER(:username) OR LOWER(u.email) = LOWER(:email)")
     // Optional<User> findByUsernameOrEmailIgnoreCase(@Param("username") String username, @Param("email") String email);
     
-    Optional<User> findByResetPasswordToken(String resetPasswordToken);
     Optional<User> findById(int Id);
 }
 

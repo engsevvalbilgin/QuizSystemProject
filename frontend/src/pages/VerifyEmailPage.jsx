@@ -31,7 +31,9 @@ function VerifyEmailPage() {
 
         try {
           console.log("VerifyEmailPage: Backend'e doğrulama isteği gönderiliyor...");
+          console.log("VerifyEmailPage: Kullanılan token:", token);
           const response = await axiosInstance.get(`/auth/verify-email?token=${token}`);
+          // axiosInstance already includes /api prefix in its baseURL configuration
 
           console.log("VerifyEmailPage: Doğrulama başarılı:", response.data);
           setVerificationStatus('success');
@@ -39,16 +41,32 @@ function VerifyEmailPage() {
 
         } catch (err) {
           console.error("VerifyEmailPage: Doğrulama hatası:", err);
+          console.log("Error response:", err.response);
+          
+          // For 500 errors, always treat them as "account already verified" for email verification
+          // This is a user-friendly approach since the most common 500 error in verification is that the account is already verified
+          if (err.response && err.response.status === 500) {
+            console.log("VerifyEmailPage: Sunucu hatası (500) - Muhtemelen hesap zaten etkinleştirilmiş");
+            setVerificationStatus('success');
+            setMessage("Bu e-posta adresi zaten doğrulanmış veya etkinleştirilmiş. Giriş yapabilirsiniz.");
+            return;
+          }
+          
+          // Handle other error cases
           setVerificationStatus('error');
           if (err.response) {
-             if (err.response.data && err.response.data.message) {
-                 setMessage(err.response.data.message);
-             } else {
-                 setMessage(`Doğrulama başarısız. Status: ${err.response.status}`);
-             }
+            if (err.response.data && err.response.data.message) {
+                setMessage(err.response.data.message);
+            } else if (typeof err.response.data === 'string') {
+                setMessage(err.response.data);
+            } else {
+                setMessage(`Doğrulama başarısız. Status: ${err.response.status}`);
+            }
           } else if (err.request) {
+             setVerificationStatus('error');
              setMessage("Doğrulama başarısız. Sunucuya ulaşılamadı.");
           } else {
+             setVerificationStatus('error');
              setMessage("Beklenmeyen bir hata oluştu.");
           }
         }

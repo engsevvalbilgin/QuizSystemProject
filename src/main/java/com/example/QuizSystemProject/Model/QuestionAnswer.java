@@ -22,13 +22,12 @@ public class QuestionAnswer {
     private boolean isCorrect;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "take_quiz_id", nullable = false)
+    @JoinColumn(name = "take_quiz_id", nullable = true) // nullable = true yapıyoruz
     private TakeQuiz takeQuiz;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "question_id", nullable = false)
+    @OneToOne // @ManyToOne yerine @OneToOne kullanmalıyız
+    @JoinColumn(name = "question_id")
     private Question question;
-
     
     public void checkAndSetCorrectAnswer(String correctAnswer) {
         this.isCorrect = this.answer != null && this.answer.equals(correctAnswer);

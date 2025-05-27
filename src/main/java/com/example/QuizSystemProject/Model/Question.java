@@ -5,6 +5,9 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.BatchSize;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "questions")
@@ -16,6 +19,10 @@ import lombok.Setter;
 @AllArgsConstructor
 public class Question {
 
+    // JPA relationships often benefit from toString/equalsAndHashCode exclusions
+    // Consider adding @ToString(exclude = {"quiz", "options"})
+    // and @EqualsAndHashCode(exclude = {"quiz", "options"}) if @Data or similar is used.
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
@@ -25,21 +32,60 @@ public class Question {
 
     @Column(name = "question_sentence", nullable = false, length = 1000)
     private String questionSentence;
-
     
+    @Column(name = "points", nullable = false)
+    private int points = 1; // Default value of 1 point
+
+    @Column(name = "correct_answer_text", length = 1000) 
+    private String correctAnswerText;
+
     @ManyToOne(fetch = FetchType.LAZY) // Consider EAGER if type is always needed with Question
     @JoinColumn(name = "question_type_id", nullable = false) // Foreign key column in 'questions' table
     private QuestionType type;
     
-    @OneToOne(cascade = CascadeType.ALL) 
-    @JoinColumn(name = "question_answer_id", referencedColumnName = "id")
+    @OneToOne(mappedBy = "question", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private QuestionAnswer answer;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "quiz_id", nullable = false)
     private Quiz quiz;
 
+    @OneToMany(mappedBy = "question", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @BatchSize(size = 20)
+    private List<Option> options = new ArrayList<>();
+
+
+
+
     public static Question createQuestion() {
         return new Question();
+    }
+
+    // Helper methods for managing the bidirectional relationship with Option
+    public void addOption(Option option) {
+        if (this.options == null) {
+            this.options = new ArrayList<>();
+        }
+        this.options.add(option);
+        if (option != null) { // Add null check for safety
+            option.setQuestion(this); // Assuming Option has setQuestion
+        }
+    }
+
+    public void removeOption(Option option) {
+        if (this.options != null) {
+            this.options.remove(option);
+        }
+        if (option != null) { // Add null check for safety
+            option.setQuestion(null); // Assuming Option has setQuestion
+        }
+    }
+
+    public String getCorrectAnswerText() {
+        return correctAnswerText;
+    }
+
+    public void setCorrectAnswerText(String correctAnswerText) {
+        this.correctAnswerText = correctAnswerText;
     }
 }

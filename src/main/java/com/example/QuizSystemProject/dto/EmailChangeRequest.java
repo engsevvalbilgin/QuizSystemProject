@@ -12,6 +12,9 @@ public class EmailChangeRequest {
     @Size(max = 100, message = "Email 100 karakterden uzun olamaz") // Maksimum uzunluk
     private String newEmail;
 
+    @NotBlank(message = "Parola boş olamaz")
+    private String password;
+
     // Getter ve Setterlar
     public EmailChangeRequest() {}
 
@@ -21,5 +24,13 @@ public class EmailChangeRequest {
 
     public void setNewEmail(String newEmail) {
         this.newEmail = newEmail;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 }

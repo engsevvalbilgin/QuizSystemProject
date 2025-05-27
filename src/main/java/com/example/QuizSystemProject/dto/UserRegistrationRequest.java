@@ -3,7 +3,6 @@ package com.example.QuizSystemProject.dto; // Paket adınızın doğru olduğund
 import jakarta.validation.constraints.Email; // Email formatı için
 import jakarta.validation.constraints.Min; // Minimum değer için
 import jakarta.validation.constraints.NotBlank; // Boş olamaz kontrolü için
-import jakarta.validation.constraints.NotNull; // Null olamaz kontrolü (primitive int için gereksiz ama Integer için lazım olurdu)
 import jakarta.validation.constraints.Size; // Uzunluk kontrolü için
 
 // Bu bir DTO (Data Transfer Object) sınıfıdır. Entity değildir.
@@ -36,6 +35,9 @@ public class UserRegistrationRequest {
     // Eğer yaş alanı zorunlu ise ve primitive int yerine Integer kullansaydık @NotNull da ekleyebilirdik.
     private int age; // Yaş alanı
 
+    @NotBlank(message = "Okul ismi boş olamaz")
+    @Size(max = 100, message = "Okul ismi 100 karakterden uzun olamaz")
+    private String schoolName; // Öğrencinin okul ismi
 
     // --- Constructorlar ---
     // Argümansız constructor (Spring'in JSON'ı objeye dönüştürmesi için gerekli)
@@ -43,15 +45,15 @@ public class UserRegistrationRequest {
     }
 
     // Alanları alan constructor (isteğe bağlı, testlerde veya manuel oluştururken faydalı)
-    public UserRegistrationRequest(String username, String password, String email, String name, String surname, int age) {
+    public UserRegistrationRequest(String username, String password, String email, String name, String surname, int age, String schoolName) {
         this.username = username;
         this.password = password;
         this.email = email;
         this.name = name;
         this.surname = surname;
         this.age = age;
+        this.schoolName = schoolName;
     }
-
 
     // --- Getter ve Setter Metotları ---
     // IDE ile otomatik oluşturabilirsiniz.
@@ -73,6 +75,9 @@ public class UserRegistrationRequest {
 
     public int getAge() { return age; }
     public void setAge(int age) { this.age = age; }
+
+    public String getSchoolName() { return schoolName; }
+    public void setSchoolName(String schoolName) { this.schoolName = schoolName; }
 
     // İsteğe bağlı olarak toString, equals, hashCode metotları eklenebilir.
 }

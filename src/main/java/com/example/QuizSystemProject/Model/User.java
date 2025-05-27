@@ -1,98 +1,133 @@
-package com.example.QuizSystemProject.Model; // Paket adınızın doğru olduğundan emin olun
+package com.example.QuizSystemProject.Model;
+
+import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
-import lombok.NoArgsConstructor;
-import jakarta.persistence.*; // JPA anotasyonları için
-import java.time.LocalDateTime; // Tarih/saat için modern Java API'si
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects; // equals/hashCode için
+import lombok.*;
+import java.time.LocalDateTime;
+import java.util.Objects;
 
-@Entity // Bu sınıfın bir JPA Entity'si olduğunu ve veritabanı tablosuna karşılık geldiğini belirtir
-@Table(name = "users")
+/**
+ * Base User class for all user types in the system.
+ * Uses SINGLE_TABLE inheritance strategy with a discriminator column 'dtype'.
+ */
+@Entity
+@Table(name = "users",
+    indexes = {
+        @Index(name = "idx_username", columnList = "username", unique = true),
+        @Index(name = "idx_email", columnList = "email", unique = true)
+    })
+@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
+@DiscriminatorColumn(name = "dtype", discriminatorType = DiscriminatorType.STRING)
+@Getter
+@Setter
 @NoArgsConstructor
-// Veritabanındaki tablonun adı 'users' olacak
-public class User {
+@AllArgsConstructor
+public abstract class User {
 
-    @Id // Bu alanın birincil anahtar (Primary Key) olduğunu belirtir
-    @GeneratedValue(strategy = GenerationType.IDENTITY) // ID'nin veritabanı tarafından otomatik artan olarak üretileceğini belirtir
-    private int id; // JPA'de ID'ler için Long kullanmak yaygın ve önerilir
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id", updatable = false, nullable = false)
+    private int id;
 
-    @Column(nullable = false, length = 50) // Boş olamaz ve maksimum 50 karakter olabilir
+    @Column(name = "name", nullable = false, length = 50)
     private String name;
 
-    @Column(nullable = false, length = 50) // Boş olamaz ve maksimum 50 karakter olabilir
+    @Column(name = "surname", nullable = false, length = 50)
     private String surname;
 
-    @Column(nullable = false) // Boş olamaz
-    private int age; // Yaş
+    @Column(name = "age", nullable = false)
+    private int age;
 
-    @Column(nullable = false, unique = true, length = 100) // Boş olamaz, benzersiz olmalı ve maksimum 100 karakter olabilir
+    @Column(name = "email", nullable = false, unique = true, length = 100)
     private String email;
 
-    @Column(nullable = false, unique = true, length = 50) // Boş olamaz, benzersiz olmalı ve maksimum 50 karakter olabilir
+    @Column(name = "username", nullable = false, unique = true, length = 50)
     private String username;
 
-    @Column(nullable = false) // Boş olamaz. Parolanın hash'i burada saklanacak.
-    // Length'i BCrypt gibi bir hash algoritması için yeterli uzunlukta ayarlamak gerekir.
-    // BCrypt genellikle 60 karakterdir, biraz fazlasını verelim.
-    @Size(max = 60) // Parola hash'inin maksimum uzunluğu
-    private String password; // NOT: Bu alanda parolanın şifrelenmiş (hashed) hali saklanacak!
+    @Column(name = "password", nullable = false, length = 100)
+    @Size(max = 100) // BCrypt hash is typically 60 chars, but leaving extra space
+    @com.fasterxml.jackson.annotation.JsonIgnore
+    private String password;
 
-    @Column(nullable = false) // Boş olamaz. Kullanıcının rolü (Student, Teacher, Admin)
-    private String role; // Örn: "ROLE_STUDENT", "ROLE_TEACHER", "ROLE_ADMIN"
+    @Column(name = "role", nullable = false, length = 20)
+    private String role;
 
-    @Column(nullable = false) // E-posta doğrulaması veya Admin tarafından devre dışı bırakılma durumu
-    private boolean enabled = false; // Başlangıçta varsayılan olarak pasif (e-posta doğrulaması gerekebilir)
-
-    // Oluşturulma tarihi (otomatik olarak veritabanında veya uygulamada ayarlanabilir)
-    @Column(nullable = false)
-    private LocalDateTime createdDate; // java.util.Date yerine LocalDateTime kullanıyoruz
-
-    // Son güncellenme tarihi (otomatik olarak veritabanında veya uygulamada ayarlanabilir)
-    @Column(nullable = false)
-    private LocalDateTime updatedDate; // java.util.Date yerine LocalDateTime kullanıyoruz
-
-    @Column(nullable = false) // Kullanıcının aktif mi (silinmemiş mi) durumu
-    private boolean isActive = true; // Varsayılan olarak aktif
-
-    // --- Yeni Alanlar: E-posta Doğrulama ve Parola Sıfırlama Tokenları ---
-
-    @Column(nullable = true) // Bu token her zaman olmayacağı için boş bırakılabilir (nullable)
-    private String confirmationToken; // E-posta doğrulama token'ı
-
-    @Column(nullable = true) // Bu token'ın son kullanma tarihi (null olabilir)
-    private LocalDateTime confirmationTokenExpiryDate; // E-posta doğrulama token'ının son kullanma tarihi
-
-    @Column(nullable = true) // Parola sıfırlama token'ı (null olabilir)
-    private String resetPasswordToken; // Parola sıfırlama token'ı
-
-    @Column(nullable = true) // Parola sıfırlama token'ının son kullanma tarihi (null olabilir)
-    private LocalDateTime resetPasswordTokenExpiryDate; // Parola sıfırlama token'ının son kullanma tarihi
-
-
-    // JPA, argümansız (boş) bir constructor gerektirir
+    @Column(name = "enabled", nullable = false, columnDefinition = "boolean default false")
+    private boolean enabled = false;
     
-    // Temel alanları alan constructor (Yeni alanlar hariç)
-    // Güvenlik için parola DTO'dan gelip Service'te şifrelenmeli.
+    @Column(name = "is_active", nullable = false, columnDefinition = "boolean default true")
+    private boolean isActive = true;
+    
+    @Column(name = "created_date", nullable = false, updatable = false)
+    @com.fasterxml.jackson.annotation.JsonIgnore
+    private LocalDateTime createdDate = LocalDateTime.now();
+    
+    @Column(name = "updated_date", nullable = false)
+    @com.fasterxml.jackson.annotation.JsonIgnore
+    private LocalDateTime updatedDate = LocalDateTime.now();
+    
+    @Column(name = "confirmation_token", length = 255)
+    @com.fasterxml.jackson.annotation.JsonIgnore
+    private String confirmationToken;
+    
+    @Column(name = "confirmation_token_expiry_date")
+    @com.fasterxml.jackson.annotation.JsonIgnore
+    private LocalDateTime confirmationTokenExpiryDate;
+    
+    @Column(name = "reset_password_token", length = 100)
+    @com.fasterxml.jackson.annotation.JsonIgnore
+    private String resetPasswordToken;
+    
+    @Column(name = "reset_password_token_expiry_date")
+    @com.fasterxml.jackson.annotation.JsonIgnore
+    private LocalDateTime resetPasswordTokenExpiryDate;
+    
+    @Column(name = "pending_email", length = 100)
+    private String pendingEmail;
+    
+    @Column(name = "refresh_token", length = 500)
+    @com.fasterxml.jackson.annotation.JsonIgnore
+    private String refreshToken;
+
+
+    
+
+    /**
+     * All-args constructor for User
+     * @param name User's first name
+     * @param surname User's last name
+     * @param age User's age
+     * @param email User's email (must be unique)
+     * @param username User's username (must be unique)
+     * @param password User's hashed password (should be hashed before setting)
+     * @param role User's role (e.g., ROLE_STUDENT, ROLE_TEACHER, ROLE_ADMIN)
+     */
     public User(String name, String surname, int age, String email, String username, String password, String role) {
         this.name = name;
         this.surname = surname;
         this.age = age;
         this.email = email;
         this.username = username;
-        this.password = password; // NOT: Bu constructoru kullanırken parolanın şifrelenmiş hali gelmeli veya burada şifrelenmeli
+        this.password = password; // Password should be hashed before setting
         this.role = role;
-        this.enabled = false; // Varsayılan
-        this.isActive = true; // Varsayılan
-        this.createdDate = LocalDateTime.now(); // Oluşturulma anı
-        this.updatedDate = LocalDateTime.now(); // Güncellenme anı
-        // Yeni token alanları bu constructor'da set edilmez, ilgili akışlarda set edilir.
+        this.enabled = false; // Default
+        this.isActive = true; // Default
+        // createdDate and updatedDate are automatically set to now by default
     }
 
 
     // Getter ve Setter Metotları (Tüm alanlar için - yeni eklenenler dahil)
     // IDE ile otomatik olarak Generate Getters and Setters diyerek tüm alanlar için oluşturun.
     // Aşağıda yeni eklenenlerin getter/setterları örnek olarak verilmiştir.
+    
+    // PendingEmail için getter ve setter
+    public String getPendingEmail() {
+        return pendingEmail;
+    }
+    
+    public void setPendingEmail(String pendingEmail) {
+        this.pendingEmail = pendingEmail;
+    }
 
     public int getId() { return id; }
     public void setId(int id) { this.id = id; } // ID setter'ı genellikle kullanılmaz (otomatik üretilir)
@@ -119,6 +154,8 @@ public class User {
     public void setRole(String role) { this.role = role; }
 
     public boolean isEnabled() { return enabled; }
+
+    
     public void setEnabled(boolean enabled) { this.enabled = enabled; }
 
     public LocalDateTime getCreatedDate() { return createdDate; }
@@ -128,7 +165,7 @@ public class User {
     public void setUpdatedDate(LocalDateTime updatedDate) { this.updatedDate = updatedDate; }
 
     public boolean isActive() { return isActive; }
-    public void setActive(boolean active) { isActive = active; }
+    public void setActive(boolean active) { this.isActive = active; }
 
     // --- Yeni Alanlar Getter/Setterları ---
     public String getConfirmationToken() { return confirmationToken; }
@@ -142,6 +179,9 @@ public class User {
 
     public LocalDateTime getResetPasswordTokenExpiryDate() { return resetPasswordTokenExpiryDate; }
     public void setResetPasswordTokenExpiryDate(LocalDateTime resetPasswordTokenExpiryDate) { this.resetPasswordTokenExpiryDate = resetPasswordTokenExpiryDate; }
+    
+    public String getRefreshToken() { return refreshToken; }
+    public void setRefreshToken(String refreshToken) { this.refreshToken = refreshToken; }
 
 
     // equals() ve hashCode() metotları (ID üzerinden yapılır)
@@ -176,17 +216,17 @@ public class User {
     }
 
 	public void logIn(User user) {
-		// TODO Auto-generated method stub
+		
 		
 	}
 
 	public void signIn(User user) {
-		// TODO Auto-generated method stub
+		
 		
 	}
 
 	public void logOut(User user) {
-		// TODO Auto-generated method stub
+		
 		
 	}
 

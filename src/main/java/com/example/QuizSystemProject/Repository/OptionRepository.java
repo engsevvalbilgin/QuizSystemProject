@@ -1,21 +1,30 @@
 package com.example.QuizSystemProject.Repository;
 
+import java.util.List;
 
-import com.example.QuizSystemProject.Model.Option; // Import the Option Entity
-import org.springframework.data.jpa.repository.JpaRepository; // Import JpaRepository
-import org.springframework.stereotype.Repository; // Import the Repository annotation
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 
-@Repository // Indicates that this interface is a Spring Data JPA Repository
-// Extends JpaRepository to inherit basic CRUD methods
-// <Option, Long>: The first parameter is the Entity type (Option), the second is the type of its Primary Key (Long).
+import com.example.QuizSystemProject.Model.Option;
+import com.example.QuizSystemProject.Model.Question;
+
+@Repository
 public interface OptionRepository extends JpaRepository<Option, Integer> {
 
-    // Spring Data JPA automatically provides methods like save(), findById(), findAll(), delete(), etc.
-
-    // You can define custom query methods here if needed later.
-    // For example:
-    // List<Option> findByQuestion(Question question); // Find options for a specific question
-    // List<Option> findByQuestionId(Long questionId); // Find options by question ID
-
+    /**
+     * Find all options for a specific question
+     * @param question The question to find options for
+     * @return List of options for the question
+     */
+    List<Option> findByQuestion(Question question);
+    
+    /**
+     * Find all options for a list of question IDs
+     * @param questionIds List of question IDs to find options for
+     * @return List of options for the specified questions
+     */
+    @Query("SELECT o FROM Option o WHERE o.question.id IN :questionIds")
+    List<Option> findByQuestionIdIn(@Param("questionIds") List<Integer> questionIds);
 }
-

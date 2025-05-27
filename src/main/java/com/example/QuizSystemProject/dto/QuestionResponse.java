@@ -1,7 +1,6 @@
 package com.example.QuizSystemProject.dto; // Paket adınızın doğru olduğundan emin olun
 
 import com.example.QuizSystemProject.Model.Question; // Entity'den dönüşüm için Question Entity'sini import edin
-import com.example.QuizSystemProject.Model.TestQuestion;
 
 import java.util.List; // Şık listesi için
 import java.util.stream.Collectors; // Akış işlemleri için
@@ -14,6 +13,7 @@ public class QuestionResponse {
     private int number; // Quiz içindeki soru numarası
     private String questionSentence; // Soru metni
     private String questionType; // Soru tipi adı (örn: "Çoktan Seçmeli", "Açık Uçlu")
+    private int points; // Soru puanı
 
     private List<OptionResponse> options; // Çoktan seçmeli sorular için şıklar (İleride tanımlanacak OptionResponse DTO'su)
 
@@ -28,10 +28,12 @@ public class QuestionResponse {
         this.questionSentence = question.getQuestionSentence();
         // QuestionType ilişkisinden sadece tip adını alalım
         this.questionType = question.getType() != null ? question.getType().getTypeName() : null;
+        // Soru puanını alalım
+        this.points = question.getPoints();
 
-        // Eğer soru çoktan seçmeli ise şıkları DTO'ya dönüştürüp ekleyelim
-        if (((TestQuestion)question).getOptions() != null && !((TestQuestion)question).getOptions().isEmpty()) {
-             this.options = ((TestQuestion)question).getOptions().stream()
+        // Güvenli bir şekilde options listesini kontrol edip dönüştürelim
+        if (question.getOptions() != null && !question.getOptions().isEmpty()) {
+             this.options = question.getOptions().stream()
                                    .map(OptionResponse::new) // Her Option Entity'sini OptionResponse DTO'suna dönüştür
                                    .collect(Collectors.toList());
         } else {
@@ -53,6 +55,9 @@ public class QuestionResponse {
 
     public String getQuestionType() { return questionType; }
     public void setQuestionType(String questionType) { this.questionType = questionType; }
+
+    public int getPoints() { return points; }
+    public void setPoints(int points) { this.points = points; }
 
     public List<OptionResponse> getOptions() { return options; }
     public void setOptions(List<OptionResponse> options) { this.options = options; }

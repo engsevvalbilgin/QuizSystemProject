@@ -30,6 +30,8 @@ public class AnswerAttempt {
     @Column(columnDefinition = "TEXT") // Boş olabilir (Çoktan seçmeli sorularda bu alan kullanılmayabilir)
     private String submittedAnswerText; // Öğrencinin açık uçlu veya kısa cevaplı soruya verdiği metin cevabı (Sizin 'answer' / 'text' alanlarına karşılık gelir)
 
+    
+    
     // Çoktan seçmeli sorularda öğrencinin seçtiği şıklar
     // Sizin 'Answer.java' template'inizdeki 'selectedOptions' listesine karşılık gelir.
     // Bir cevap denemesi, birden çok şık seçebilir (örn: çoklu doğru şıklı sorular)
@@ -45,6 +47,15 @@ public class AnswerAttempt {
 
     @Column(nullable = false) // Boş olamaz, varsayılan false
     private boolean isCorrect = false; // Bu cevap denemesi doğru muydu? (Puanlama sonrası set edilecek)
+    
+    @Column(nullable = false) // Boş olamaz, varsayılan 0
+    private int earnedPoints = 0; // Bu cevap denemesinden kazanılan puan
+    
+    @Column(columnDefinition = "TEXT") // AI tarafından verilen açıklama (Açık uçlu sorular için)
+    private String aiExplanation; // AI tarafından yapılan değerlendirme açıklaması
+    
+    @Column
+    private Integer aiScore; // AI tarafından verilen puan
 
     // JPA için argümansız constructor
     public AnswerAttempt() {
@@ -88,6 +99,23 @@ public class AnswerAttempt {
 
     public boolean isCorrect() { return isCorrect; }
     public void setCorrect(boolean correct) { isCorrect = correct; }
+    
+    public int getEarnedPoints() { return earnedPoints; }
+    public void setEarnedPoints(int points) { this.earnedPoints = points; }
+    
+    // AI değerlendirmesi için yeni getter ve setter metotları
+    public String getAiExplanation() { return aiExplanation; }
+    public void setAiExplanation(String aiExplanation) { this.aiExplanation = aiExplanation; }
+    
+    public Integer getAiScore() { return aiScore; }
+    public void setAiScore(Integer aiScore) { this.aiScore = aiScore; }
+    
+    // CompatibilityMethod: isCorrect metodu için uyumluluk
+    public void setIsCorrect(boolean correct) { isCorrect = correct; }
+    
+    // CompatibilityMethod: textAnswer metotları için uyumluluk
+    public String getTextAnswer() { return submittedAnswerText; }
+    public void setTextAnswer(String text) { this.submittedAnswerText = text; }
 
     // Seçilen şık eklemek için yardımcı metot (ManyToMany ilişkisi için)
     public void addSelectedOption(Option option) {

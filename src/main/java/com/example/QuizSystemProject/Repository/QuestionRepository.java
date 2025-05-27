@@ -1,28 +1,31 @@
 package com.example.QuizSystemProject.Repository;
-import com.example.QuizSystemProject.Model.Question; // Question Entity'sini import edin
-import com.example.QuizSystemProject.Model.TakeQuiz;
-import com.example.QuizSystemProject.Model.Quiz; // Quiz Entity'sini import edin (Custom sorgu için gerekebilir)
-import org.springframework.data.jpa.repository.JpaRepository; // JpaRepository'yi import edin
-import org.springframework.stereotype.Repository; // Repository anotasyonunu import edin
+import com.example.QuizSystemProject.Model.Question;
+import com.example.QuizSystemProject.Model.Quiz;
 
-import java.util.List; // Liste importu
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
 
-@Repository // Spring'e bu arayüzün bir Repository olduğunu belirtir
-// JpaRepository'den türeyerek temel CRUD metotlarını alır
-// <Question, Long>: İlk parametre Entity tipi (Question), ikinci parametre Entity'nin Primary Key (ID) tipidir (Long).
+import java.util.List;
+
+@Repository
 public interface QuestionRepository extends JpaRepository<Question, Integer> {
 
-    // Spring Data JPA, JpaRepository'den türediğimiz için
-    // save(), findById(), findAll(), delete() gibi temel metotları otomatik sağlar.
+    // Bir quiz'e ait tüm soruları getir
+    List<Question> findAllByQuiz(Quiz quiz);
+    
+    // Quiz ID'sine göre soruları getir
+    List<Question> findAllByQuizId(Integer quizId);
+    
+    // Quiz ID'sine göre soruları numara sırasına göre getir
+    List<Question> findAllByQuizIdOrderByNumberAsc(Integer quizId);
 
-    // İhtiyaç duyulursa buraya özel sorgu metotları tanımlanabilir.
-    // Örneğin:
-    // Bir Quize ait tüm soruları getirmek için (Question Entity'sinde @ManyToOne Quiz quiz alanı olduğu için)
-    List<Question> findAllByQuiz(TakeQuiz quiz);
-    // veya Quiz ID'sine göre
-    List<Question> findAllByQuizId(int quizId);
-
-    // Quiz içindeki soru numarasına göre bulmak için (quiz ve number alanları olduğu için)
-    // Optional<Question> findByQuizAndNumber(Quiz quiz, int number); // Eğer soru numarası benzersizse quiz içinde
-
+    // Bir quiz'in soru sayısını native SQL sorgusu ile hesapla
+    @Query(value = "SELECT COUNT(*) FROM questions WHERE quiz_id = :quizId", nativeQuery = true)
+    long countByQuizId(@Param("quizId") int quizId);
+    
+    // Quiz ID'sine göre soruları ve şıkları tek sorguda getir
+    @Query("SELECT DISTINCT q FROM Question q LEFT JOIN FETCH q.options WHERE q.quiz.id = :quizId ORDER BY q.number ASC")
+    List<Question> findQuestionsWithOptionsByQuizId(@Param("quizId") int quizId);
 }
