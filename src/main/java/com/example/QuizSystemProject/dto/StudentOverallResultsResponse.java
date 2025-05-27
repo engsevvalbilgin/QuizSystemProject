@@ -33,7 +33,12 @@ public class StudentOverallResultsResponse {
             this.surname = "Öğrenci";
         }
 
-        this.totalQuizzes = sessions != null ? sessions.size() : 0;
+        // Count unique quizzes by getting distinct quiz IDs
+        this.totalQuizzes = sessions != null ? 
+            (int) sessions.stream()
+                .map(session -> session.getQuiz().getId())
+                .distinct()
+                .count() : 0;
 
         // Ortalama puanı hesapla (Service'ten gelen listeyi kullan)
         double calculatedAverageScore = 0.0;
