@@ -66,6 +66,9 @@ function TeacherRequestsPage() {
                                 <p><strong>Hesap Durumu:</strong> {request.isActive ? 'Aktif' : 'Pasif'}</p>
                                 <p><strong>Doğrulama Durumu:</strong> {request.enabled ? 'Doğrulandı' : 'Doğrulanmadı'}</p>
                                 <p><strong>Kayıt Tarihi:</strong> {new Date(request.createdAt).toLocaleDateString('tr-TR')}</p>
+                                <p><strong>Mezun olduğu Okul:</strong> {request.graduateSchool}</p>
+                                <p><strong>Diploma Numarası:</strong> {request.diplomaNumber}</p>
+                                
                             </div>
                             <div className="request-actions">
                                 <button
