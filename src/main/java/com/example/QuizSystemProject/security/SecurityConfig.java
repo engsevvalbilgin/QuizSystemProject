@@ -51,6 +51,11 @@ public class SecurityConfig {
         // Gerekli başlıkları expose et
         config.addExposedHeader("Authorization");
         config.addExposedHeader("Content-Type");
+        config.addExposedHeader("X-Requested-With");
+        config.addExposedHeader("X-XSRF-TOKEN");
+        
+        // Allow credentials
+        config.setAllowCredentials(true);
         
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);
@@ -101,18 +106,20 @@ public class SecurityConfig {
                 .requestMatchers(
                     "/api/auth/**",
                     "/api/public/**",
+                    "/api/users/password-reset/**",
                     "/h2-console/**",
                     "/v2/api-docs",
                     "/swagger-resources/**",
                     "/swagger-ui/**",
                     "/webjars/**",
-                    "/api/teachers/register"
+                    "/api/teachers/register",
+                    "/error"
                 ).permitAll()
                 
                 // Role-based access control
-                .requestMatchers("/student/**").hasRole("STUDENT")
-                .requestMatchers("/teacher/**").hasRole("TEACHER")
-                .requestMatchers("/admin/**").hasRole("ADMIN")
+                .requestMatchers("/api/student/**").hasRole("STUDENT")
+                .requestMatchers("/api/teacher/**").hasRole("TEACHER")
+                .requestMatchers("/api/admin/**").hasRole("ADMIN")
                 
                 // Default - require authentication for all other requests
                 .anyRequest().authenticated()
@@ -120,6 +127,26 @@ public class SecurityConfig {
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
             .httpBasic(httpBasic -> httpBasic.disable())
             .formLogin(formLogin -> formLogin.disable());
+
+        // Configure security headers
+        http.headers(headers -> {
+            // For H2 console in development
+            headers.frameOptions(frame -> frame.disable());
+            
+            // Add other security headers
+            headers.httpStrictTransportSecurity(hsts -> hsts
+                .maxAgeInSeconds(31536000) // 1 year
+                .includeSubDomains(true)
+                .preload(true)
+            );
+            
+            // Disable content type sniffing
+            headers.contentTypeOptions(opt -> {});
+            
+            // Enable XSS protection with block mode
+            headers.xssProtection(protect -> {})
+                  .contentSecurityPolicy(csp -> csp.policyDirectives("default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'"));
+        });
 
         return http.build();
     }
