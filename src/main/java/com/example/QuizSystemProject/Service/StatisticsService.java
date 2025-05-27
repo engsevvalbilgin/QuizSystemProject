@@ -1,16 +1,30 @@
-package com.example.QuizSystemProject.Service; // Paket adınızın doğru olduğundan emin olun
+package com.example.QuizSystemProject.Service;
 
-import com.example.QuizSystemProject.Model.*; // Model katmanındaki Entity'leri import edin
-import com.example.QuizSystemProject.Repository.*; // Repository katmanındaki Repository'leri import edin
-import com.example.QuizSystemProject.exception.*; // Özel exception'ları import edin (UserNotFoundException, UserNotAuthorizedException vb.) <-- Bu satır tüm özel exception'ları içermeli
-import com.example.QuizSystemProject.dto.OverallStatsResponse; // OverallStatsResponse DTO'yu import edin
-import com.example.QuizSystemProject.dto.QuizStatsResponse; // QuizStatsResponse DTO'yu import edin
-// Gerekirse diğer DTO'ları da import edin (AnswerAttemptResponse vb.)
+import com.example.QuizSystemProject.Model.AnswerAttempt;
+import com.example.QuizSystemProject.Model.Quiz;
+import com.example.QuizSystemProject.Model.QuizSession;
+import com.example.QuizSystemProject.Model.User;
+import com.example.QuizSystemProject.Repository.AnswerAttemptRepository;
+import com.example.QuizSystemProject.Repository.QuizRepository;
+import com.example.QuizSystemProject.Repository.QuizSessionRepository;
+import com.example.QuizSystemProject.Repository.UserRepository;
+import com.example.QuizSystemProject.dto.OverallStatsResponse;
+import com.example.QuizSystemProject.dto.QuizStatsResponse;
+import com.example.QuizSystemProject.dto.StudentOverallResultsResponse;
+import com.example.QuizSystemProject.exception.QuizNotFoundException;
+import com.example.QuizSystemProject.exception.QuizSessionNotFoundException;
+import com.example.QuizSystemProject.exception.UserNotAuthorizedException;
+import com.example.QuizSystemProject.exception.UserNotFoundException;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Comparator;
 import java.util.IntSummaryStatistics;
-import org.springframework.stereotype.Service; // Service anotasyonunu import edin
-import org.springframework.transaction.annotation.Transactional; // İşlemleri yönetmek için <-- org.springframework.transaction.annotation.Transactional 'dan import edildiğinden emin olun
-
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 @Service // Spring'e bu sınıfın bir Service bileşeni olduğunu belirtir
@@ -451,5 +465,39 @@ public class StatisticsService {
     }
 
     // --- Diğer İstatistik İhtiyaçları ---
+    
+    /**
+     * Tüm öğrencileri ortalama puanlarına göre sıralı olarak getirir
+     * @return Öğrenci bilgilerini ve ortalama puanlarını içeren liste
+     */
+
+    @Transactional(readOnly = true)
+    public List<StudentOverallResultsResponse> getStudentLeaders() {
+        System.out.println("StatisticsService: Öğrenci liderlik tablosu hazırlanıyor");
+        
+        // Tüm öğrencileri al
+        List<User> students = userRepository.findAllByRole("ROLE_STUDENT");
+        
+        // Her öğrenci için oturumları al ve StudentOverallResultsResponse oluştur
+        List<StudentOverallResultsResponse> leaders = students.stream()
+            .map(student -> {
+                try {
+                    // Öğrencinin tüm oturumlarını al
+                    List<QuizSession> sessions = quizSessionRepository.findByStudentId(student.getId());
+                    // Student ve oturum listesi ile yeni bir StudentOverallResultsResponse oluştur
+                    return new StudentOverallResultsResponse(student, sessions);
+                } catch (Exception e) {
+                    System.err.println("Öğrenci puanı hesaplanırken hata - Öğrenci ID: " + student.getId() + ", Hata: " + e.getMessage());
+                    return null;
+                }
+            })
+            .filter(Objects::nonNull) // Hata alınan öğrencileri filtrele
+            .sorted(Comparator.comparingDouble(StudentOverallResultsResponse::getAverageScore).reversed()) // Yüksek puandan düşüğe sırala
+            .collect(Collectors.toList());
+            
+        System.out.println("StatisticsService: Toplam " + leaders.size() + " öğrenci listelendi");
+        return leaders;
+    }
+    
     // En başarılı öğrenciler, en zor quizler, en çok yanlış yapılan sorular vb. ileride eklenebilir.
 }
