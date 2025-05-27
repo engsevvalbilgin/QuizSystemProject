@@ -80,7 +80,7 @@ export const AuthProvider = ({ children }) => {
         const currentRefreshToken = localStorage.getItem('refreshToken');
         if (!currentRefreshToken) {
             console.log('No refresh token available');
-            return null;
+            throw new Error('No refresh token available');
         }
 
         try {
@@ -104,37 +104,39 @@ export const AuthProvider = ({ children }) => {
                 throw new Error('Invalid token response from server');
             }
             
-            // Update tokens and user data in storage
+            // Update tokens in storage
             localStorage.setItem('token', newAccessToken);
             
             // Update refresh token if a new one was provided
             if (newRefreshToken) {
                 localStorage.setItem('refreshToken', newRefreshToken);
+            } else {
+                // If no new refresh token, keep the current one
+                localStorage.setItem('refreshToken', currentRefreshToken);
             }
             
-            // Update user data if provided
+            // Prepare user data
+            let userWithRoles;
             if (userData) {
                 console.log('Updating user data from refresh token response:', userData);
-                const userWithRoles = {
+                userWithRoles = {
                     ...userData,
                     // Ensure roles is always an array
                     roles: userData.roles || (userData.role ? [userData.role] : ['ROLE_USER'])
                 };
-                localStorage.setItem('user', JSON.stringify(userWithRoles));
-                setUser(userWithRoles);
             } else {
-                console.log('No user data in refresh token response');
-                // If no user data in response, try to preserve existing user data
-                const currentUser = JSON.parse(localStorage.getItem('user') || '{}');
-                if (currentUser) {
-                    setUser(currentUser);
-                } else {
-                    // If no user data is available, we might need to fetch it
-                    console.log('No user data available after refresh');
-                }
+                // If no user data in response, use existing data
+                console.log('No user data in refresh token response, using existing data');
+                const existingUser = JSON.parse(localStorage.getItem('user') || '{}');
+                userWithRoles = {
+                    ...existingUser,
+                    roles: existingUser?.roles || ['ROLE_USER']
+                };
             }
             
-            // Update state
+            // Update user data in state and storage
+            localStorage.setItem('user', JSON.stringify(userWithRoles));
+            setUser(userWithRoles);
             setToken(newAccessToken);
             
             console.log('Token refresh successful');
@@ -143,29 +145,39 @@ export const AuthProvider = ({ children }) => {
         } catch (error) {
             console.error('Token refresh failed:', error);
             
+            // Clear invalid tokens
+            localStorage.removeItem('token');
+            localStorage.removeItem('refreshToken');
+            
             // If refresh token is invalid or expired, logout the user
             if (error.response?.status === 401 || error.response?.status === 403) {
                 console.log('Refresh token expired or invalid, logging out...');
-                logout();
+                if (logout) {
+                    logout();
+                } else {
+                    // If logout is not available yet, clear user data
+                    setUser(null);
+                    setToken(null);
+                    localStorage.removeItem('user');
+                }
             }
             
-            return null;
+            throw error; // Re-throw to allow the interceptor to handle the error
         }
     }, [logout]);
 
     // Set up axios interceptors
-    // In AuthContext.jsx, update the useEffect for setting up interceptors
-useEffect(() => {
-    console.log("Setting up axios interceptors...");
-    const interceptorId = setupAxiosInterceptors(refreshToken, logout);
-    
-    return () => {
-      console.log("Cleaning up axios interceptors...");
-      if (interceptorId !== undefined) {
-        axiosInstance.interceptors.response.eject(interceptorId);
-      }
-    };
-  }, [refreshToken, logout]);
+    useEffect(() => {
+        console.log("Setting up axios interceptors...");
+        const interceptorId = setupAxiosInterceptors(refreshToken, logout);
+        
+        return () => {
+            console.log("Cleaning up axios interceptors...");
+            if (interceptorId !== undefined) {
+                axiosInstance.interceptors.response.eject(interceptorId);
+            }
+        };
+    }, [refreshToken, logout]);
 
     // Context value
     const contextValue = {
