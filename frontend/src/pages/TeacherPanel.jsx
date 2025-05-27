@@ -162,27 +162,7 @@ function TeacherPanel() {
                                 <span>Yeni Quiz Oluştur</span>
                             </button>
                         </li>
-                        <li>
-                            <button 
-                                onClick={() => navigate('/teacher/quiz/:quizId/questions')}
-                                style={{
-                                    width: '100%',
-                                    textAlign: 'left',
-                                    padding: '10px 20px',
-                                    border: 'none',
-                                    background: 'none',
-                                    cursor: 'pointer',
-                                    fontSize: '1em',
-                                    color: '#495057',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: '10px'
-                                }}
-                            >
-                                <span>📝</span>
-                                <span>Sorular</span>
-                            </button>
-                        </li>
+                        
                         <li>
                             <button 
                                 onClick={() => navigate('/teacher/announcements')}
