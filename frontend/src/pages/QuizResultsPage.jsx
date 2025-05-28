@@ -325,14 +325,14 @@ function QuizResultsPage() {
                                     textAlign: 'left',
                                     padding: '10px 20px',
                                     border: 'none',
-                                    background: window.location.pathname === '/student/profile' ? 'rgba(13, 110, 253, 0.1)' : 'none',
+                                    background: 'none',
                                     cursor: 'pointer',
                                     fontSize: '1em',
-                                    color: window.location.pathname === '/student/profile' ? '#0d6efd' : '#495057',
+                                    color: location.pathname === '/student/profile' ? '#2563eb' : '#495057',
                                     display: 'flex',
                                     alignItems: 'center',
                                     gap: '10px',
-                                    borderRight: window.location.pathname === '/student/profile' ? '3px solid #0d6efd' : 'none'
+                                    fontWeight: location.pathname === '/student/profile' ? 'bold' : 'normal'
                                 }}
                             >
                                 <span>👤</span>
@@ -341,21 +341,65 @@ function QuizResultsPage() {
                         </li>
                         <li>
                             <button 
+                                onClick={() => navigate('/leadership-table')}
+                                style={{
+                                    width: '100%',
+                                    textAlign: 'left',
+                                    padding: '10px 20px',
+                                    border: 'none',
+                                    background: 'none',
+                                    cursor: 'pointer',
+                                    fontSize: '1em',
+                                    color: location.pathname === '/leadership-table' ? '#2563eb' : '#495057',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '10px',
+                                    fontWeight: location.pathname === '/leadership-table' ? 'bold' : 'normal'
+                                }}
+                            >
+                                <span>🏆</span>
+                                <span>Liderlik Tablosu</span>
+                            </button>
+                        </li>
+                        
+                        <li>
+                            <button 
                                 onClick={() => navigate('/student/solve-quiz')}
                                 style={{
                                     width: '100%',
                                     textAlign: 'left',
                                     padding: '10px 20px',
                                     border: 'none',
-                                    background: window.location.pathname === '/student/solve-quiz' ? 'rgba(13, 110, 253, 0.1)' : 'none',
+                                    background: 'none',
                                     cursor: 'pointer',
                                     fontSize: '1em',
-                                    color: window.location.pathname === '/student/solve-quiz' ? '#0d6efd' : '#495057',
-                                    display: 'flex',
+                                    color: location.pathname === '/student/solve-quiz' ? '#2563eb' : '#495057',
                                     display: 'flex',
                                     alignItems: 'center',
                                     gap: '10px',
-                                    borderRight: window.location.pathname.startsWith('/quiz-results') ? '3px solid #0d6efd' : 'none'
+                                    fontWeight: location.pathname === '/student/solve-quiz' ? 'bold' : 'normal'
+                                }}
+                            >
+                                <span>📝</span>
+                                <span>Quiz Çöz</span>
+                            </button>
+                        </li>
+                        <li>
+                            <button 
+                                onClick={() => navigate('/quiz-results')}
+                                style={{
+                                    width: '100%',
+                                    textAlign: 'left',
+                                    padding: '10px 20px',
+                                    border: 'none',
+                                    background: 'none',
+                                    cursor: 'pointer',
+                                    fontSize: '1em',
+                                    color: location.pathname.startsWith('/quiz-results') ? '#2563eb' : '#495057',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '10px',
+                                    fontWeight: location.pathname.startsWith('/quiz-results') ? 'bold' : 'normal'
                                 }}
                             >
                                 <span>📊</span>
@@ -370,18 +414,18 @@ function QuizResultsPage() {
                                     textAlign: 'left',
                                     padding: '10px 20px',
                                     border: 'none',
-                                    background: window.location.pathname === '/student/announcements' ? 'rgba(13, 110, 253, 0.1)' : 'none',
+                                    background: 'none',
                                     cursor: 'pointer',
                                     fontSize: '1em',
-                                    color: window.location.pathname === '/student/announcements' ? '#0d6efd' : '#495057',
+                                    color: location.pathname === '/student/announcements' ? '#2563eb' : '#495057',
                                     display: 'flex',
                                     alignItems: 'center',
                                     gap: '10px',
-                                    borderRight: window.location.pathname === '/student/announcements' ? '3px solid #0d6efd' : 'none'
+                                    fontWeight: location.pathname === '/student/announcements' ? 'bold' : 'normal'
                                 }}
                             >
                                 <span>📢</span>
-                                <span>Duyurular</span>
+                                <span>Duyurular</span> {/* Added closing span for "Duyurular" */}
                             </button>
                         </li>
                     </ul>
