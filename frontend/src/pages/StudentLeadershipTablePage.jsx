@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axiosInstance from '../api/axiosInstance';
 import { CheckCircleIcon, XCircleIcon } from '@heroicons/react/24/outline';
 
@@ -7,6 +8,11 @@ function StudentLeadershipTablePage() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [isVisible, setIsVisible] = useState(true);
+    const navigate = useNavigate();
+    
+    // Get user role from localStorage
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    const userRole = user?.roles?.[0]; // Get the first role
 
     useEffect(() => {
         fetchLeaders();
@@ -53,7 +59,23 @@ function StudentLeadershipTablePage() {
     return (
         <div className="p-6">
             <div className="flex justify-between items-center mb-6">
-                <h2 className="text-2xl font-bold">Liderlik Tablosu</h2>
+                <div className="flex items-center space-x-4">
+                    <button 
+                        onClick={() => {
+                            if (userRole === 'ROLE_STUDENT') {
+                                navigate('/student');
+                            } else if (userRole === 'ROLE_TEACHER' || userRole === 'ROLE_ADMIN') {
+                                navigate('/teacher');
+                            } else {
+                                navigate('/');
+                            }
+                        }}
+                        className="text-gray-600 hover:text-gray-900 px-3 py-1 border border-gray-300 rounded"
+                    >
+                        Geri Dön
+                    </button>
+                    <h2 className="text-2xl font-bold">Liderlik Tablosu</h2>
+                </div>
                 <button 
                     onClick={() => setIsVisible(!isVisible)}
                     className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
