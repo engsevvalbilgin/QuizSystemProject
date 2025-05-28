@@ -105,6 +105,27 @@ function TeacherAnnouncementsPage() {
                                 <span>Profilim</span>
                             </button>
                         </li>
+                        <li style={{ paddingLeft: '30px' }}>
+                            <button 
+                                onClick={() => navigate('/leadership-table')}
+                                style={{
+                                    width: '100%',
+                                    textAlign: 'left',
+                                    padding: '10px 20px',
+                                    border: 'none',
+                                    background: 'none',
+                                    cursor: 'pointer',
+                                    fontSize: '1em',
+                                    color: '#495057',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '10px'
+                                }}
+                            >
+                                <span>🏆</span>
+                                <span>Liderlik Tablosu</span>
+                            </button>
+                        </li>
                         <li>
                             <button 
                                 onClick={() => navigate('/teacher/my-quizzes')}
@@ -147,6 +168,7 @@ function TeacherAnnouncementsPage() {
                                 <span>Yeni Quiz Oluştur</span>
                             </button>
                         </li>
+                        
                         <li>
                             <button 
                                 onClick={() => navigate('/teacher/announcements')}
@@ -155,20 +177,22 @@ function TeacherAnnouncementsPage() {
                                     textAlign: 'left',
                                     padding: '10px 20px',
                                     border: 'none',
-                                    background: 'rgba(13, 110, 253, 0.1)',
+                                    background: 'none',
                                     cursor: 'pointer',
                                     fontSize: '1em',
-                                    color: '#0d6efd',
+                                    color: '#495057',
                                     display: 'flex',
                                     alignItems: 'center',
-                                    gap: '10px',
-                                    borderRight: '3px solid #0d6efd'
+                                    gap: '10px'
                                 }}
                             >
                                 <span>📢</span>
                                 <span>Duyurular</span>
                             </button>
                         </li>
+                        
+                           
+                        
                     </ul>
                 </nav>
             </div>
