@@ -82,29 +82,8 @@ function TeacherQuizQuestionsPage() {
                     <h3 style={{ fontSize: '1.2rem', fontWeight: '600', color: '#333' }}>Öğretmen Paneli</h3>
                 </div>
                 
-                <nav style={{ marginTop: '20px' }}>
-                    <ul style={{ listStyleType: 'none', padding: '0' }}>
-                        <li>
-                            <button 
-                                onClick={() => navigate('/teacher')}
-                                style={{
-                                    width: '100%',
-                                    textAlign: 'left',
-                                    padding: '10px 20px',
-                                    border: 'none',
-                                    background: 'none',
-                                    cursor: 'pointer',
-                                    fontSize: '1em',
-                                    color: '#495057',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: '10px'
-                                }}
-                            >
-                                <span>🏠</span>
-                                <span>Ana Sayfa</span>
-                            </button>
-                        </li>
+                <nav style={{ marginTop: '15px' }}>
+                    <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
                         <li>
                             <button 
                                 onClick={() => navigate('/teacher/profile')}
@@ -124,6 +103,27 @@ function TeacherQuizQuestionsPage() {
                             >
                                 <span>👤</span>
                                 <span>Profilim</span>
+                            </button>
+                        </li>
+                        <li style={{ paddingLeft: '30px' }}>
+                            <button 
+                                onClick={() => navigate('/leadership-table')}
+                                style={{
+                                    width: '100%',
+                                    textAlign: 'left',
+                                    padding: '10px 20px',
+                                    border: 'none',
+                                    background: 'none',
+                                    cursor: 'pointer',
+                                    fontSize: '1em',
+                                    color: '#495057',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '10px'
+                                }}
+                            >
+                                <span>🏆</span>
+                                <span>Liderlik Tablosu</span>
                             </button>
                         </li>
                         <li>
@@ -168,6 +168,31 @@ function TeacherQuizQuestionsPage() {
                                 <span>Yeni Quiz Oluştur</span>
                             </button>
                         </li>
+                        
+                        <li>
+                            <button 
+                                onClick={() => navigate('/teacher/announcements')}
+                                style={{
+                                    width: '100%',
+                                    textAlign: 'left',
+                                    padding: '10px 20px',
+                                    border: 'none',
+                                    background: 'none',
+                                    cursor: 'pointer',
+                                    fontSize: '1em',
+                                    color: '#495057',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '10px'
+                                }}
+                            >
+                                <span>📢</span>
+                                <span>Duyurular</span>
+                            </button>
+                        </li>
+                        
+                           
+                        
                     </ul>
                 </nav>
             </div>
