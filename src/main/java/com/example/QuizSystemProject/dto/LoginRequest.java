@@ -1,31 +1,23 @@
-package com.example.QuizSystemProject.dto; // Paket adınızın doğru olduğundan emin olun
+package com.example.QuizSystemProject.dto; 
 
-import jakarta.validation.constraints.NotBlank; // Boş olamaz kontrolü için
+import jakarta.validation.constraints.NotBlank;
 
-// Bu bir DTO (Data Transfer Object) sınıfıdır. Entity değildir.
-// Sadece API isteklerinde/yanıtlarında veri taşımak için kullanılır.
 public class LoginRequest {
 
-    // Kullanıcı adı veya e-posta olabilir
     @NotBlank(message = "Kullanıcı adı veya email boş olamaz")
     private String usernameOrEmail;
 
     @NotBlank(message = "Şifre boş olamaz")
-    private String password; // Parola, DTO'da ham olarak gelir.
-
-    // DTO'lar için genellikle argümansız constructor ve getter/setter metotları yeterlidir.
+    private String password; 
 
     public LoginRequest() {
     }
 
-    // Alanları alan constructor (isteğe bağlı)
     public LoginRequest(String usernameOrEmail, String password) {
         this.usernameOrEmail = usernameOrEmail;
         this.password = password;
     }
 
-    // Getter ve Setter Metotları
-    // IDE ile otomatik oluşturabilirsiniz.
 
     public String getUsernameOrEmail() {
         return usernameOrEmail;
@@ -43,5 +35,4 @@ public class LoginRequest {
         this.password = password;
     }
 
-    // İsteğe bağlı olarak toString, equals, hashCode metotları eklenebilir.
 }

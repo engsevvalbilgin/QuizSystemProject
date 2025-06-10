@@ -11,19 +11,18 @@ function TeacherEditQuizPage() {
         description: '',
         durationMinutes: 30,
         topic: '',
-        isActive: true, // Default to true, will be updated when data is fetched
+        isActive: true, 
         questions: []
     });
 
-    // Create page ile uyumlu error state yapısı
     const [errors, setErrors] = useState({
         name: false,
         topic: false,
-        questions: [] // Her eleman: { questionSentence: false, options: [], noCorrectOption: false }
+        questions: [] 
     });
 
     const [isLoading, setIsLoading] = useState(true);
-    const [fetchError, setFetchError] = useState(null); // Veri çekme hatası için
+    const [fetchError, setFetchError] = useState(null); 
     const [isSaving, setIsSaving] = useState(false);
 
     const QUESTION_TYPES = [
@@ -49,10 +48,9 @@ function TeacherEditQuizPage() {
                     description: quizData.description || '',
                     durationMinutes: quizData.durationMinutes || 30,
                     topic: quizData.topic || '',
-                    isActive: quizData.isActive === true, // Boolean olmasını sağla
+                    isActive: quizData.isActive === true, 
                     questions: sortedQuestions.map(q => {
-                        let questionTypeId = 1; // Varsayılan
-                        // API'den gelen questionType veya questionTypeId alanına göre belirle
+                        let questionTypeId = 1; 
                         if (q.questionTypeId !== undefined) {
                             questionTypeId = parseInt(q.questionTypeId, 10);
                         } else if (q.questionType) {
@@ -70,19 +68,14 @@ function TeacherEditQuizPage() {
                         }
                         
                         let currentOptions = [];
-                        if (questionTypeId === 1) { // Çoktan Seçmeli
+                        if (questionTypeId === 1) { 
                             if (q.options && Array.isArray(q.options) && q.options.length > 0) {
                                 currentOptions = q.options.map(opt => ({
                                     id: opt.id,
                                     text: opt.text || '',
                                     isCorrect: opt.isCorrect === true || opt.isCorrect === 'true'
                                 }));
-                                // Backend'den en az 4 seçenek gelmiyorsa, UI'da eksik görünebilir.
-                                // Create sayfasındaki gibi 4'e tamamlamak yerine gelenleri gösteriyoruz.
-                                // Kullanıcı isterse silebilir veya ekleyebilir.
                             } else {
-                                // Mevcut çoktan seçmeli bir sorunun seçeneği olmaması durumu için varsayılan
-                                // (idealde backend bu durumu engellemeli)
                                 currentOptions = [
                                     { id: undefined, text: '', isCorrect: false },
                                     { id: undefined, text: '', isCorrect: false },
@@ -98,16 +91,16 @@ function TeacherEditQuizPage() {
                             questionTypeId: questionTypeId,
                             points: q.points || 1,
                             options: currentOptions,
-                            correctAnswerText: q.correctAnswerText || '' // Açık uçlu için
+                            correctAnswerText: q.correctAnswerText || '' 
                         };
                     })
                 });
-                 // Sorular yüklendikten sonra question errors için başlangıç state'i oluştur
+                 
                 setErrors(prevErrors => ({
                     ...prevErrors,
                     questions: sortedQuestions.map(() => ({
                         questionSentence: false,
-                        options: [], // Seçenek sayısı kadar boolean array
+                        options: [], 
                         noCorrectOption: false
                     }))
                 }));
@@ -133,9 +126,9 @@ function TeacherEditQuizPage() {
     const addQuestion = () => {
         const newQuestion = {
             questionSentence: '',
-            questionTypeId: 1, // Varsayılan Çoktan Seçmeli
+            questionTypeId: 1, 
             points: 1,
-            options: [ // Varsayılan 4 seçenek
+            options: [ 
                 { id: Date.now(), text: '', isCorrect: false },
                 { id: Date.now() + 1, text: '', isCorrect: false },
                 { id: Date.now() + 2, text: '', isCorrect: false },
@@ -147,7 +140,6 @@ function TeacherEditQuizPage() {
             ...prev,
             questions: [...prev.questions, newQuestion]
         }));
-        // Yeni soru için errors state'ini güncelle
         setErrors(prevErrors => ({
             ...prevErrors,
             questions: [
@@ -163,7 +155,7 @@ function TeacherEditQuizPage() {
             return;
         }
         try {
-            if (questionToRemove.id) { // Eğer soru veritabanında kayıtlıysa
+            if (questionToRemove.id) { 
                 await axiosInstance.delete(`/quizzes/${quizId}/questions/${questionToRemove.id}`);
             }
             setQuiz(prev => ({
@@ -185,11 +177,11 @@ function TeacherEditQuizPage() {
             if (i === index) {
                 const updatedQuestion = { ...q, [field]: value };
                 if (field === 'questionTypeId') {
-                    updatedQuestion.questionTypeId = parseInt(value, 10); // Değeri integer yap
-                    if (updatedQuestion.questionTypeId === 2) { // Açık Uçlu ise
-                        updatedQuestion.options = []; // Seçenekleri temizle
+                    updatedQuestion.questionTypeId = parseInt(value, 10); 
+                    if (updatedQuestion.questionTypeId === 2) { 
+                        updatedQuestion.options = []; 
                     } else if (updatedQuestion.questionTypeId === 1 && (!q.options || q.options.length === 0)) {
-                        // Çoktan seçmeliye geçişte ve seçenek yoksa varsayılan 4 seçenek ekle
+                       
                         updatedQuestion.options = [
                             { text: '', isCorrect: false }, { text: '', isCorrect: false },
                             { text: '', isCorrect: false }, { text: '', isCorrect: false }
@@ -238,24 +230,21 @@ function TeacherEditQuizPage() {
         const newQuizErrors = { 
             name: quiz.name.trim() === '',
             topic: quiz.topic.trim() === '',
-            questions: [] // Bu, soru bazlı hataları tutacak
+            questions: [] 
         };
 
         if (newQuizErrors.name) isValid = false;
         if (newQuizErrors.topic) isValid = false;
 
         if (quiz.questions.length === 0) {
-            // Genel bir soru hatası ekleyebiliriz veya form level'da gösterebiliriz.
-            // Şimdilik, eğer hiç soru yoksa ve submit edilmeye çalışılırsa bir uyarı verilebilir.
-            // errors.questions state'i UI'da genel bir "en az bir soru ekleyin" mesajı için kullanılabilir.
-            // Bu validasyon, create sayfasındaki gibi soru sayısı kontrolü yapabilir.
+           
         }
 
 
         const newQuestionErrorsArray = quiz.questions.map((q, index) => {
             const questionError = {
                 questionSentence: false,
-                options: q.options ? q.options.map(() => false) : [], // Seçenek sayısı kadar false ile başlat
+                options: q.options ? q.options.map(() => false) : [], 
                 noCorrectOption: false
             };
 
@@ -264,11 +253,10 @@ function TeacherEditQuizPage() {
                 isValid = false;
             }
 
-            if (q.questionTypeId === 1) { // Çoktan Seçmeli
+            if (q.questionTypeId === 1) { 
                 let correctOptionFound = false;
                 if (!q.options || q.options.length === 0) {
-                     // Bu durum normalde addQuestion veya type change ile engellenmeli
-                    questionError.noCorrectOption = true; // Genel bir hata olarak işaretle
+                    questionError.noCorrectOption = true; 
                     isValid = false;
                 } else {
                     q.options.forEach((opt, optIndex) => {
@@ -309,14 +297,13 @@ function TeacherEditQuizPage() {
                 description: quiz.description,
                 durationMinutes: parseInt(quiz.durationMinutes) || 30,
                 topic: quiz.topic,
-                active: true, // Always set to true as per requirement
+                active: true, 
             };
             await axiosInstance.put(`/quizzes/${quizId}`, quizPayload);
 
-            // Soruları güncelle/ekle
             const questionPromises = quiz.questions.map(async (question, index) => {
                 const questionData = {
-                    number: index + 1, // Sıra numarasını güncelle
+                    number: index + 1, 
                     questionSentence: question.questionSentence,
                     questionTypeId: question.questionTypeId,
                     points: question.points || 1,
@@ -324,23 +311,21 @@ function TeacherEditQuizPage() {
                     correctAnswerText: ''
                 };
 
-                if (question.questionTypeId === 1) { // Çoktan Seçmeli
+                if (question.questionTypeId === 1) { 
                     questionData.options = question.options.map(opt => ({
-                        id: opt.id, // Backend'e gönderirken ID'yi dahil et
+                        id: opt.id, 
                         text: opt.text,
                         isCorrect: !!opt.isCorrect
                     }));
-                } else { // Açık Uçlu
+                } else { 
                     questionData.correctAnswerText = question.correctAnswerText || '';
                 }
                 
-                // Backend hem options hem correctAnswerText alıyorsa ikisini de gönderebiliriz.
-                // Ya da sadece ilgili olanı. API dökümantasyonuna göre ayarlanmalı.
-                // Şimdiki create-page uyumluluğu için ikisini de hazırlıyoruz.
+                
 
-                if (question.id) { // Mevcut soru -> PUT
+                if (question.id) { 
                     return axiosInstance.put(`/quizzes/${quizId}/questions/${question.id}`, questionData);
-                } else { // Yeni soru -> POST
+                } else { 
                     return axiosInstance.post(`/quizzes/${quizId}/questions`, questionData);
                 }
             });
@@ -367,7 +352,7 @@ function TeacherEditQuizPage() {
         );
     }
 
-    if (fetchError) { // fetchError'ı kullanıyoruz
+    if (fetchError) { 
         return (
             <div className="p-6">
                 <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
@@ -382,18 +367,15 @@ function TeacherEditQuizPage() {
             </div>
         );
     }
-    // Sidebar ve ana içerik JSX'i, create sayfasındaki form yapısını kullanacak şekilde güncellenecek.
-    // Stil tanımlamaları ve genel yapı korunacak, iç kısımdaki form create sayfasından alınacak.
+    
     return (
         <div style={{ display: 'flex', minHeight: '100vh', backgroundColor: '#f8f9fa' }}>
-            {/* Sidebar (Mevcut haliyle bırakıldı) */}
             <div style={{ width: '250px', backgroundColor: 'white', boxShadow: '0 0 10px rgba(0,0,0,0.1)' }}>
                 <div style={{ padding: '20px', borderBottom: '1px solid #eaeaea' }}>
                     <h3 style={{ fontSize: '1.2rem', fontWeight: '600', color: '#333' }}>Öğretmen Paneli</h3>
                 </div>
                 <nav style={{ marginTop: '20px' }}>
                     <ul style={{ listStyleType: 'none', padding: '0' }}>
-                        {/* Navigasyon linkleri (kısaltıldı) */}
                          <li><button onClick={() => navigate('/teacher')} style={{ width: '100%', textAlign: 'left', padding: '10px 20px', border: 'none', background: 'none', cursor: 'pointer' }}>Ana Sayfa</button></li>
                          <li><button onClick={() => navigate('/teacher/my-quizzes')} style={{ width: '100%', textAlign: 'left', padding: '10px 20px', border: 'none', background: 'none', cursor: 'pointer', backgroundColor: '#e9ecef' }}>Quizlerim</button></li>
                          <li><button onClick={() => navigate('/teacher/create-quiz')} style={{ width: '100%', textAlign: 'left', padding: '10px 20px', border: 'none', background: 'none', cursor: 'pointer' }}>Yeni Quiz Oluştur</button></li>
@@ -401,7 +383,6 @@ function TeacherEditQuizPage() {
                 </nav>
             </div>
 
-            {/* Main Content - Form Create Sayfasıyla Uyumlu */}
             <div style={{ flex: 1, padding: '20px' }}>
                 <div className="p-4 md:p-6 bg-white rounded-lg shadow-md">
                     <div className="flex justify-between items-center mb-6">
@@ -415,7 +396,6 @@ function TeacherEditQuizPage() {
                     </div>
 
                     <form onSubmit={handleSubmit} className="space-y-6">
-                        {/* Quiz bilgileri formu */}
                         <div>
                             <label htmlFor="name" className="block text-sm font-medium text-gray-700">Quiz Adı:</label>
                             <input
@@ -510,7 +490,7 @@ function TeacherEditQuizPage() {
                                     </div>
                                 </div>
 
-                                {q.questionTypeId === 1 && ( // Çoktan Seçmeli
+                                {q.questionTypeId === 1 && (
                                     <div className="space-y-2 mt-2">
                                         <p className="text-xs font-medium text-gray-600">Seçenekler:</p>
                                         {errors.questions[qIndex]?.noCorrectOption && <p className="text-red-600 text-xs">Lütfen bir doğru cevap seçin.</p>}
@@ -541,7 +521,7 @@ function TeacherEditQuizPage() {
 
                                     </div>
                                 )}
-                                {q.questionTypeId === 2 && ( // Açık Uçlu
+                                {q.questionTypeId === 2 && (
                                     <div className="mt-2 p-2 bg-blue-50 rounded">
                                         <p className="text-sm text-blue-700">Açık uçlu soru - Öğrenciler kendi cevaplarını yazacaklar</p>
                                     </div>
@@ -582,7 +562,7 @@ function TeacherEditQuizPage() {
                                 </button>
                             </div>
                         </div>
-                         {fetchError && <p className="mt-2 text-red-600 text-sm">{fetchError}</p>} {/* Submit sonrası genel hata mesajı */}
+                         {fetchError && <p className="mt-2 text-red-600 text-sm">{fetchError}</p>} 
                     </form>
                 </div>
             </div>

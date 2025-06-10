@@ -1,15 +1,14 @@
 import React from 'react';
-import { useAuth } from '../context/AuthContext'; // AuthContext'i import et
+import { useAuth } from '../context/AuthContext'; 
 
 const LogoutButton = () => {
-    const { logout, isAuthenticated } = useAuth(); // logout fonksiyonunu ve isAuthenticated durumunu kullan
+    const { logout, isAuthenticated } = useAuth(); 
 
     const handleLogout = async () => {
         if (!window.confirm('Çıkış yapmak istediğinizden emin misiniz?')) {
             return;
         }
 
-        // Merkezi logout fonksiyonunu çağır
         logout();
     };
 

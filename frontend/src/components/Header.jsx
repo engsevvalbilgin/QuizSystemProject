@@ -8,9 +8,9 @@ function Header() {
   const isAuthenticated = token !== null;
 
   const colors = {
-    primary: '#4CAF50', // Yeşil
-    secondary: '#FFC107', // Sarı (kullanılmıyor ama örnek olsun diye duruyor)
-    accent: '#03A9F4', // Açık Mavi (kullanılmıyor)
+    primary: '#4CAF50', 
+    secondary: '#FFC107', 
+    accent: '#03A9F4', 
     text: '#333',
     white: '#ffffff',
     grayLight: '#ececec',
@@ -23,7 +23,7 @@ function Header() {
     padding: '8px 12px',
     borderRadius: '5px',
     transition: 'all 0.3s ease',
-    textDecoration: 'none', // Link olduğu için
+    textDecoration: 'none', 
   };
 
   const primaryNavBtnStyles = {
@@ -32,7 +32,7 @@ function Header() {
     padding: '8px 15px',
     borderRadius: '5px',
     transition: 'all 0.3s ease',
-    textDecoration: 'none', // Link olduğu için
+    textDecoration: 'none', 
   };
 
   return (
@@ -52,12 +52,12 @@ function Header() {
         justifyContent: 'space-between',
         alignItems: 'center',
       }}>
-        <div style={{}}> {/* Logo için ek div */}
+        <div style={{}}> 
           <Link to="/" style={{
             fontSize: '2em',
             fontWeight: '700',
             color: colors.primary,
-            textDecoration: 'none', // Link olduğu için
+            textDecoration: 'none', 
           }}>
             QuizLand
           </Link>
@@ -80,7 +80,6 @@ function Header() {
                   <Link
                     to="/login"
                     style={{ ...commonNavLinkStyles }}
-                    // Hover efekti için JavaScript event listener gerekir
                   >
                     Giriş Yap
                   </Link>
@@ -89,7 +88,6 @@ function Header() {
                   <Link
                     to="/register"
                     style={{ ...primaryNavBtnStyles }}
-                    // Hover efekti için JavaScript event listener gerekir
                   >
                     Kaydol
                   </Link>

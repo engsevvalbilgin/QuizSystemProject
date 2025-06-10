@@ -68,7 +68,6 @@ function StudentAnnouncementsPage() {
 
     return (
         <div style={{ display: 'flex', minHeight: '100vh' }}>
-            {/* Sidebar */}
             <div style={{
                 width: '250px',
                 backgroundColor: '#f8f9fa',
@@ -192,14 +191,13 @@ function StudentAnnouncementsPage() {
                                 }}
                             >
                                 <span>📢</span>
-                                <span>Duyurular</span> {/* Added closing span for "Duyurular" */}
+                                <span>Duyurular</span>
                             </button>
                         </li>
                     </ul>
                 </nav>
             </div>
             
-            {/* Main Content */}
             <div style={{ flex: 1, padding: '20px', overflowY: 'auto' }}>
                 <div className="mb-6">
                     <h1 className="text-2xl font-bold text-gray-800">Duyurular</h1>

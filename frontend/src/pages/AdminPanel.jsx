@@ -1,8 +1,7 @@
-import React, { useState, useMemo } from 'react'; // useEffect ve useNavigate artık kullanılmıyor
+import React, { useState, useMemo } from 'react';
 import axiosInstance from '../api/axiosInstance';
 
 function AdminPanel() {
-  // const navigate = useNavigate(); // navigate artık kullanılmıyor, kaldırıldı
 
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -11,21 +10,13 @@ function AdminPanel() {
   const [filterUsernameOrEmail, setFilterUsernameOrEmail] = useState('');
   const [filterRole, setFilterRole] = useState('');
 
-  // Duyuru ile ilgili state'ler tamamen kaldırıldı
-  // const [announcements, setAnnouncements] = useState([]);
-  // const [showAddAnnouncement, setShowAddAnnouncement] = useState(false);
-  // const [newAnnouncement, setNewAnnouncement] = useState({
-  //   title: '',
-  //   content: ''
-  // });
-
-  // Kullanıcıları backend'den getir
+ 
   const fetchUsers = async () => {
     setLoading(true);
     setError(null);
-    setUsers([]); // Eski listeyi temizle
+    setUsers([]); 
     try {
-      const response = await axiosInstance.get('/users'); // Bu endpoint backend'ine göre ayarlanmalı
+      const response = await axiosInstance.get('/users'); 
       setUsers(response.data);
     } catch (err) {
       console.error("Kullanıcı listesi getirilirken hata oluştu:", err);
@@ -47,11 +38,6 @@ function AdminPanel() {
     }
   };
 
-  // Duyuru ile ilgili fonksiyonlar kaldırıldı
-  // const fetchAnnouncements = async () => { /* ... */ };
-  // useEffect(() => { /* ... */ }, []);
-  // const handleCreateAnnouncement = async () => { /* ... */ };
-
   const filteredUsers = useMemo(() => {
     if (!users || users.length === 0) return [];
 
@@ -71,9 +57,8 @@ function AdminPanel() {
 
   return (
     <div>
-      <h2>Admin Paneli - Kullanıcı Yönetimi</h2> {/* Başlık güncellendi */}
+      <h2>Admin Paneli - Kullanıcı Yönetimi</h2> 
 
-      {/* Navigasyon */}
       <div style={{
         marginBottom: '20px',
         padding: '15px',
@@ -104,14 +89,12 @@ function AdminPanel() {
         </div>
       </div>
 
-      {/* Kullanıcı Listesini Getirme Düğmesi */}
       <button onClick={fetchUsers} disabled={loading}>
         {loading ? 'Yükleniyor...' : "Kullanıcı Listesini Backend'den Getir"}
       </button>
 
       <h3>Kullanıcı Listesi</h3>
 
-      {/* Filtreleme Seçenekleri */}
       <div style={{ marginBottom: '20px', padding: '15px', border: '1px solid #eee', borderRadius: '5px' }}>
         <h4>Filtreleme Seçenekleri</h4>
         <div>
@@ -128,7 +111,6 @@ function AdminPanel() {
           <label htmlFor="filterRole">Rol Filtre:</label>
           <select id="filterRole" value={filterRole} onChange={(e) => setFilterRole(e.target.value)}>
             <option value="">-- Tüm Roller --</option>
-            {/* Backend'den gelen rol isimlerinin buradaki değerlerle aynı olduğundan emin olun */}
             <option value="ROLE_ADMIN">ADMIN</option>
             <option value="ROLE_TEACHER">TEACHER</option>
             <option value="ROLE_STUDENT">STUDENT</option>
@@ -136,11 +118,9 @@ function AdminPanel() {
         </div>
       </div>
 
-      {/* Hata ve Yüklenme Mesajları */}
       {error && <p style={{ color: 'red' }}>{error}</p>}
       {loading && <p>Kullanıcılar yükleniyor...</p>}
 
-      {/* Kullanıcı Listesi Tablosu */}
       {!loading && !error && filteredUsers && filteredUsers.length > 0 && (
         <table>
           <thead>
@@ -170,7 +150,6 @@ function AdminPanel() {
         </table>
       )}
 
-      {/* Kullanıcı Listesi Boş Durumu Mesajları */}
       {!loading && !error && (!filteredUsers || filteredUsers.length === 0) && (
         users.length > 0 ? (
           <p>Filtreleme sonucuna uyan kullanıcı bulunmuyor.</p>
@@ -178,10 +157,6 @@ function AdminPanel() {
           <p>Henüz kullanıcı bulunmuyor veya liste getirilmedi.<br />Listelemek için yukarıdaki düğmeye basın.</p>
         )
       )}
-
-      {/* Duyuru ile ilgili tüm JSX kaldırıldı */}
-      {/* showAddAnnouncement && ( ... ) */}
-      {/* <div className="mt-8"> ... </div> */}
 
     </div>
   );

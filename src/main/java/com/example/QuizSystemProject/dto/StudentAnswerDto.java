@@ -7,13 +7,12 @@ import java.util.ArrayList;
 @Data
 public class StudentAnswerDto {
     private int questionId;
-    private List<Integer> selectedOptionIds; // Çoktan seçmeli sorular için seçilen şık ID'leri
-    private String textAnswer; // Açık uçlu sorular için (answerText ile uyumlu olması için)
-    private AnswerType answerType = AnswerType.MULTIPLE_CHOICE; // Varsayılan cevap tipi
-    private float score = 0; // Soru için kazanılan puan
-    private String aiExplanation; // AI tarafından verilen açıklama (açık uçlu sorular için)
+    private List<Integer> selectedOptionIds; 
+    private String textAnswer; 
+    private AnswerType answerType = AnswerType.MULTIPLE_CHOICE;
+    private float score = 0; 
+    private String aiExplanation; 
     
-    // Eski alan için uyumluluk metodları
     public String getAnswerText() {
         return textAnswer;
     }
@@ -22,7 +21,6 @@ public class StudentAnswerDto {
         this.textAnswer = answerText;
     }
     
-    // Geriye dönük uyumluluk için
     public Integer getSelectedOptionId() {
         return selectedOptionIds != null && !selectedOptionIds.isEmpty() ? selectedOptionIds.get(0) : null;
     }

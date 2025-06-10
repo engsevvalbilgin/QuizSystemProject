@@ -15,12 +15,11 @@ function StudentQuizzesPage() {
         const fetchQuizzes = async () => {
             try {
                 setLoading(true);
-                setError(null); // Hata durumunu sıfırla
+                setError(null); 
                 console.log('Quizler yükleniyor...');
                 const response = await axiosInstance.get('/student/quizzes');
                 console.log('Quizler başarıyla yüklendi:', response.data);
                 
-                // Debug: Log the attempted status of each quiz
                 response.data.forEach(quiz => {
                     console.log(`Quiz ID: ${quiz.id}, Attempted: ${quiz.attempted}, Name: ${quiz.name}`);
                 });
@@ -53,12 +52,10 @@ function StudentQuizzesPage() {
         });
     };
 
-    // Filter quizzes based on search term, selected teacher, and if attempted
     useEffect(() => {
         console.log('Filtering quizzes...');
         let result = [...quizzes];
         
-        // Debug: Log all quizzes before filtering
         console.log('All quizzes before filtering:', result.map(q => ({
             id: q.id,
             name: q.name,
@@ -66,14 +63,12 @@ function StudentQuizzesPage() {
             teacher: q.teacher?.name
         })));
         
-        // Filter out attempted quizzes
         result = result.filter(quiz => {
             const shouldShow = !quiz.attempted;
             console.log(`Quiz ID ${quiz.id} (${quiz.name}): attempted=${quiz.attempted}, showing=${shouldShow}`);
             return shouldShow;
         });
         
-        // Filter by search term
         if (searchTerm) {
             const term = searchTerm.toLowerCase();
             result = result.filter(quiz => 
@@ -83,7 +78,6 @@ function StudentQuizzesPage() {
             );
         }
         
-        // Filter by teacher
         if (selectedTeacher !== 'all') {
             result = result.filter(quiz => quiz.teacher?.id?.toString() === selectedTeacher);
         }
@@ -92,7 +86,6 @@ function StudentQuizzesPage() {
         setFilteredQuizzes(result);
     }, [searchTerm, selectedTeacher, quizzes]);
 
-    // Get unique teachers for filter
     const teachers = [...new Set(quizzes.map(quiz => JSON.stringify({
         id: quiz.teacher.id,
         name: quiz.teacher.name
@@ -129,7 +122,6 @@ function StudentQuizzesPage() {
 
     return (
         <div style={{ display: 'flex', minHeight: '100vh' }}>
-            {/* Sidebar */}
             <div style={{
                 width: '250px',
                 backgroundColor: '#f8f9fa',
@@ -253,18 +245,16 @@ function StudentQuizzesPage() {
                                 }}
                             >
                                 <span>📢</span>
-                                <span>Duyurular</span> {/* Added closing span for "Duyurular" */}
+                                <span>Duyurular</span>
                             </button>
                         </li>
                     </ul>
                 </nav>
             </div>
             
-            {/* Main Content */}
             <div style={{ flex: 1, padding: '20px', overflowY: 'auto' }}>
                 <h1 className="text-3xl font-bold mb-6">Çözülebilir Quizler</h1>
                 
-                {/* Search and Filter Section */}
                 <div className="bg-white p-4 rounded-lg shadow-md mb-6">
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div>

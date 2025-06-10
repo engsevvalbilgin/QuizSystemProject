@@ -14,7 +14,6 @@ public class ChangeEmailRequest {
     @NotBlank(message = "Şifre alanı boş olamaz")
     private String password;
 
-    // Constructors
     public ChangeEmailRequest() {
     }
 
@@ -23,7 +22,6 @@ public class ChangeEmailRequest {
         this.password = password;
     }
 
-    // Getters and Setters
     public String getNewEmail() {
         return newEmail;
     }

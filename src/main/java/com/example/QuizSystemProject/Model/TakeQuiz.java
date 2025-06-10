@@ -35,6 +35,6 @@ public class TakeQuiz {
     public int calculateDuration() {
         if (startTime == null || endTime == null) return 0;
         long diffMillis = endTime.getTime() - startTime.getTime();
-        return (int) (diffMillis / (1000 * 60)); // in minutes
+        return (int) (diffMillis / (1000 * 60));    
     }
 }

@@ -10,9 +10,8 @@ function StudentLeadershipTablePage() {
     const [isVisible, setIsVisible] = useState(true);
     const navigate = useNavigate();
     
-    // Get user role from localStorage
     const user = JSON.parse(localStorage.getItem('user') || '{}');
-    const userRole = user?.roles?.[0]; // Get the first role
+    const userRole = user?.roles?.[0]; 
 
     useEffect(() => {
         fetchLeaders();
@@ -23,11 +22,9 @@ function StudentLeadershipTablePage() {
             setLoading(true);
             setError(null);
             
-            // Tüm öğrencileri ve quiz sonuçlarını tek bir sorgu ile al
             const response = await axiosInstance.get('/statistics/student-leaders');
             const students = response.data;
 
-            // ortalama puanına göre sırala
             students.sort((a, b) => b.averageScore - a.averageScore);
 
             setLeaders(students);

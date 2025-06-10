@@ -15,7 +15,6 @@ public class PasswordResetCompleteDto {
     @NotBlank(message = "Şifre tekrarı boş olamaz")
     private String confirmPassword;
 
-    // Getters and Setters
     public String getToken() {
         return token;
     }

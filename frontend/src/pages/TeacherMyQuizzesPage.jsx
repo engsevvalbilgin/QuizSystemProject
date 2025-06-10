@@ -9,17 +9,13 @@ function TeacherMyQuizzesPage() {
     const [userId, setUserId] = useState(null);
     const navigate = useNavigate();
 
-    // Navigate to create quiz page
     const handleCreateQuiz = () => {
         navigate('/teacher/create-quiz');
     };
-
-    // Navigate to edit quiz page
     const handleEditQuiz = (quizId) => {
         navigate(`/teacher/edit-quiz/${quizId}`);
     };
 
-    // Delete a quiz
     const handleDeleteQuiz = async (quizId) => {
         if (!window.confirm('Bu quizi silmek istediğinize emin misiniz?')) {
             return;
@@ -27,7 +23,6 @@ function TeacherMyQuizzesPage() {
         
         try {
             await axiosInstance.delete(`/quizzes/${quizId}`);
-            // Update the quizzes list after deletion
             setQuizzes(quizzes.filter(quiz => quiz.id !== quizId));
         } catch (err) {
             console.error('Quiz silinirken hata:', err);
@@ -35,14 +30,12 @@ function TeacherMyQuizzesPage() {
         }
     };
     
-    // Activate a quiz
     const handleActivateQuiz = async (quizId) => {
         try {
             console.log(`Quiz aktifleştiriliyor - Quiz ID: ${quizId}`);
             const response = await axiosInstance.put(`/quizzes/${quizId}/activate`);
             console.log('Quiz aktifleştirme yanıtı:', response.data);
             
-            // Update the quizzes list to reflect the new active status
             setQuizzes(quizzes.map(quiz => 
                 quiz.id === quizId ? { ...quiz, isActive: true } : quiz
             ));
@@ -54,7 +47,6 @@ function TeacherMyQuizzesPage() {
         }
     };
 
-    // Navigate to view quiz questions
     const handleViewQuestions = (quizId) => {
         console.log(`Soruları Gör butonuna tıklandı - Quiz ID: ${quizId}`);
         try {
@@ -65,7 +57,6 @@ function TeacherMyQuizzesPage() {
         }
     };
     
-    // Activate all quizzes at once
     const handleActivateAllQuizzes = async () => {
         if (!userId) {
             alert('Kullanıcı bilgisi bulunamadı.');
@@ -77,7 +68,6 @@ function TeacherMyQuizzesPage() {
             const response = await axiosInstance.post(`/quizzes/teacher/${userId}/activate-all`);
             console.log('Tüm quizleri aktifleştirme yanıtı:', response.data);
             
-            // Update all quizzes to active
             setQuizzes(quizzes.map(quiz => ({ ...quiz, isActive: true })));
             
             const activatedCount = response.data.activatedCount;
@@ -92,14 +82,12 @@ function TeacherMyQuizzesPage() {
         }
     };
 
-    // Data fetching effect
     useEffect(() => {
         const fetchData = async () => {
             try {
                 setLoading(true);
                 setError(null);
                 
-                // Get current user profile
                 const userResponse = await axiosInstance.get('/users/profile');
                 if (!userResponse.data || userResponse.data.role !== 'ROLE_TEACHER') {
                     setError('Bu sayfaya erişim için öğretmen yetkisi gerekiyor.');
@@ -109,17 +97,16 @@ function TeacherMyQuizzesPage() {
                 const teacherId = userResponse.data.id;
                 setUserId(teacherId);
                 
-                // Fetch teacher's quizzes
                 console.log(`Öğretmen quizleri getiriliyor - Öğretmen ID: ${teacherId}`);
                 const quizzesResponse = await axiosInstance.get(`/quizzes/teacher/${teacherId}`);
                 console.log('Alınan quizler:', quizzesResponse.data);
                 
-                // Set quizzes data
+              
                 setQuizzes(quizzesResponse.data || []);
                 
-                // Automatically activate all quizzes
+             
                 
-                // Update quizzes list to show all as active
+                
                 if (quizzesResponse.data && quizzesResponse.data.length > 0) {
                     setQuizzes(quizzesResponse.data.map(quiz => ({ ...quiz, isActive: true })));
                 }
@@ -134,7 +121,7 @@ function TeacherMyQuizzesPage() {
         fetchData();
     }, []);
     
-    // Redirect effect when no quizzes
+    
     useEffect(() => {
         if (!loading && !error && quizzes.length === 0) {
             const redirectTimer = setTimeout(() => {
@@ -146,7 +133,7 @@ function TeacherMyQuizzesPage() {
         }
     }, [loading, error, quizzes.length, navigate]);
 
-    // Loading state
+    
     if (loading) {
         return (
             <div className="flex justify-center items-center h-64">
@@ -155,7 +142,7 @@ function TeacherMyQuizzesPage() {
         );
     }
 
-    // Error state
+    
     if (error) {
         return (
             <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
@@ -165,10 +152,10 @@ function TeacherMyQuizzesPage() {
         );
     }
 
-    // Main render    
+    
     return (
         <div style={{ display: 'flex', minHeight: '100vh' }}>
-            {/* Sidebar */}
+            
             <div style={{
                 width: '250px',
                 backgroundColor: '#f8f9fa',
@@ -294,7 +281,7 @@ function TeacherMyQuizzesPage() {
                 </nav>
             </div>
             
-            {/* Main Content */}
+            
             <div style={{ flex: 1, padding: '20px' }}>
                 <div className="container mx-auto">
                     <div className="flex justify-between items-center mb-6">

@@ -22,7 +22,7 @@ public class TestQuestion extends Question {
     }
 
     public TestQuestion(String questionSentence, List<Option> options) {
-         // quizId yerine uygun parametre kullanılabilir
+         
         this.options = options;
     }
 

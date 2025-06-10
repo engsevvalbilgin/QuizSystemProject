@@ -6,10 +6,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-/**
- * Student entity that extends the base User class.
- * Represents a student user in the system.
- */
+
 @Entity
 @DiscriminatorValue("STUDENT")
 @Getter
@@ -17,7 +14,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Table(name = "users") // Explicitly set the table name to match the parent class
+@Table(name = "users") 
 public class Student extends User {
     
     @Column(name = "school_name", nullable = false, length = 100, columnDefinition = "VARCHAR(100) DEFAULT 'Default School'")
@@ -28,24 +25,14 @@ public class Student extends User {
     @Builder.Default
     private List<TakeQuiz> takenQuizzes = new ArrayList<>();
 
-    /**
-     * Constructor for creating a new Student
-     */
+    
     public Student(String name, String surname, int age, String email, String username, 
                   String password, String schoolName) {
         super(name, surname, age, email, username, password, "ROLE_STUDENT");
         this.schoolName = schoolName != null ? schoolName : "Default School";
     }
 
-    /**
-     * Records a quiz attempt by the student
-     * @param quiz The quiz being taken
-     * @param score The score achieved in the quiz
-     */
-    /**
-     * Records a quiz attempt by the student
-     * @param quiz The quiz being taken
-     */
+  
     public void takeQuiz(Quiz quiz) {
         if (quiz == null) {
             throw new IllegalArgumentException("Quiz cannot be null");
@@ -62,19 +49,14 @@ public class Student extends User {
         takenQuizzes.add(takeQuiz);
     }
     
-    /**
-     * Completes a quiz attempt
-     * @param takeQuiz The quiz attempt to complete
-     */
+   
     public void completeQuiz(TakeQuiz takeQuiz) {
         if (takeQuiz != null) {
             takeQuiz.setEndTime(new Date());
         }
     }
 
-    /**
-     * Displays all quizzes taken by the student
-     */
+  
     public void showTakenQuizzes() {
         if (takenQuizzes != null && !takenQuizzes.isEmpty()) {
             takenQuizzes.forEach(System.out::println);
@@ -90,7 +72,7 @@ public class Student extends User {
         System.out.println("Quizzes Taken: " + (takenQuizzes != null ? takenQuizzes.size() : 0));
     }
     
-    // Explicit getter and setter for schoolName to ensure proper mapping
+    
     public String getSchoolName() {
         return schoolName;
     }

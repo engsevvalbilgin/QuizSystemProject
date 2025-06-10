@@ -22,10 +22,10 @@ public class QuestionAnswer {
     private boolean isCorrect;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "take_quiz_id", nullable = true) // nullable = true yapıyoruz
+    @JoinColumn(name = "take_quiz_id", nullable = true) 
     private TakeQuiz takeQuiz;
 
-    @OneToOne // @ManyToOne yerine @OneToOne kullanmalıyız
+    @OneToOne 
     @JoinColumn(name = "question_id")
     private Question question;
     

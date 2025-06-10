@@ -12,12 +12,11 @@ import jakarta.persistence.DiscriminatorValue;
 @NoArgsConstructor
 public class Admin extends User {
 
-    // Constructor that sets the role to ROLE_ADMIN
     public Admin(String name, String surname, int age, String email, String username, String password) {
         super(name, surname, age, email, username, password, "ROLE_ADMIN");
     }
     
-    // No need for announcements list as it's now managed by User
+    
 
     public void showUserDetails() {
         System.out.println("Name: " + getName());

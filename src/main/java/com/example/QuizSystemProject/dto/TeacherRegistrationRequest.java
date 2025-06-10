@@ -17,7 +17,6 @@ public class TeacherRegistrationRequest extends UserCreationRequest {
     @Size(max = 50, message = "Diploma number must be at most 50 characters")
     private String diplomaNumber;
 
-    // Getters and Setters
     public String getSubject() {
         return subject;
     }

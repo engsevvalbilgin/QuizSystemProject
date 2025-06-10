@@ -6,7 +6,7 @@ import '../styles/AuthStyles.css';
 function PasswordResetPage() {
     const navigate = useNavigate();
     const location = useLocation();
-    const [step, setStep] = useState(1); // 1: Email form, 2: Reset form
+    const [step, setStep] = useState(1); 
     const [email, setEmail] = useState('');
     const [token, setToken] = useState('');
     const [passwords, setPasswords] = useState({
@@ -17,7 +17,6 @@ function PasswordResetPage() {
     const [success, setSuccess] = useState(null);
     const [loading, setLoading] = useState(false);
 
-    // Extract token from URL if present
     React.useEffect(() => {
         const params = new URLSearchParams(location.search);
         const tokenParam = params.get('token');
@@ -28,7 +27,7 @@ function PasswordResetPage() {
         
         if (tokenParam) {
             setToken(tokenParam);
-            setStep(2); // Move to reset form if token is in URL
+            setStep(2); 
             console.log("PasswordResetPage: Token bulundu, adım 2'ye geçildi (şifre sıfırlama formu)");
         } else {
             console.log("PasswordResetPage: Token bulunamadı, adım 1'de kalındı (email formu)");
@@ -49,13 +48,11 @@ function PasswordResetPage() {
         
         try {
             console.log("PasswordResetPage: Şifre sıfırlama isteği gönderiliyor...");
-            // Remove duplicate /api prefix - axiosInstance already has baseURL configured
             const response = await axiosInstance.post('/users/password-reset/request', { email });
             console.log("PasswordResetPage: Şifre sıfırlama isteği başarılı:", response.data);
             setSuccess('E-posta adresinize şifre sıfırlama talimatları gönderildi. Lütfen e-postanızı kontrol edin.');
         } catch (err) {
             console.error('Şifre sıfırlama isteği hatası:', err);
-            // Always show the same message to prevent email enumeration
             setSuccess('E-posta adresinize şifre sıfırlama talimatları gönderildi. Lütfen e-postanızı kontrol edin.');
         } finally {
             setLoading(false);
@@ -96,29 +93,24 @@ function PasswordResetPage() {
             console.log("PasswordResetPage: Şifre sıfırlama tamamlama isteği gönderiliyor...");
             console.log("PasswordResetPage: Kullanılan token:", token);
             
-            // Add additional debug for token
             console.log("PasswordResetPage: Token uzunluk:", token ? token.length : 0);
             
-            // Double check that token is properly formatted
             if (!token || token.length < 10) {
                 throw new Error("Token geçersiz veya eksik. Doğru token değerinin kullanıldığından emin olun.");
             }
             
-            // Ensure we use the correct API endpoint path without duplicate /api prefix
             const response = await axiosInstance.post('/users/password-reset/complete', {
                 token: token,
                 newPassword: passwords.newPassword,
                 confirmPassword: passwords.confirmPassword
             });
             
-            // Log entire response for debugging
             console.log("PasswordResetPage: Server yanıtı tam:", response);
             
             console.log("PasswordResetPage: Şifre sıfırlama başarılı:", response.data);
             
             setSuccess('Şifreniz başarıyla sıfırlandı. Şimdi giriş yapabilirsiniz.');
             
-            // Kullanıcıyı 3 saniye sonra giriş sayfasına yönlendir
             setTimeout(() => {
                 navigate('/login');
             }, 3000);

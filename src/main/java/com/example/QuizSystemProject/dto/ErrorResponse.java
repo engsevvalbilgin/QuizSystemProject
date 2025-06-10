@@ -1,8 +1,5 @@
 package com.example.QuizSystemProject.dto;
 
-/**
- * Standard error response DTO for REST API error responses
- */
 public class ErrorResponse {
     private String message;
     private int status;

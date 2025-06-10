@@ -10,6 +10,6 @@ public class QuizWithQuestionsDto {
     private String description;
     private String topic;
     private int durationMinutes;
-    private boolean active = true; // Default to true since we only load active quizzes
+    private boolean active = true;
     private List<QuestionDto> questions;
 }

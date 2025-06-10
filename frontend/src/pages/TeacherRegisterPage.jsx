@@ -34,14 +34,14 @@ function TeacherRegisterPage() {
         setLoading(true);
         setSuccess(false);
 
-        // Validate password match
+        
         if (formData.password !== formData.confirmPassword) {
             setError('Şifreler eşleşmiyor!');
             setLoading(false);
             return;
         }
 
-        // Prepare request data
+        
         const requestData = {
             username: formData.username,
             email: formData.email,
@@ -52,14 +52,14 @@ function TeacherRegisterPage() {
             subject: formData.subject,
             graduateSchool: formData.graduateSchool,
             diplomaNumber: formData.diplomaNo,
-            role: "ROLE_TEACHER" // Add role for teacher registration
+            role: "ROLE_TEACHER" 
         };
 
         try {
             const response = await axiosInstance.post('/teachers/register', requestData);
             console.log('Teacher registration successful:', response.data);
             setSuccess(true);
-            // Clear form
+            
             setFormData({
                 username: '',
                 email: '',
@@ -72,7 +72,7 @@ function TeacherRegisterPage() {
                 graduateSchool: '',
                 diplomaNo: ''
             });
-            // Show success message for 3 seconds then redirect
+            
             setTimeout(() => {
                 navigate('/login');
             }, 3000);

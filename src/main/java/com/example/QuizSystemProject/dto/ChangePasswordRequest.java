@@ -12,7 +12,6 @@ public class ChangePasswordRequest {
     @Size(min = 6, message = "Şifre en az 6 karakter olmalıdır")
     private String newPassword;
 
-    // Constructors
     public ChangePasswordRequest() {
     }
 
@@ -21,7 +20,6 @@ public class ChangePasswordRequest {
         this.newPassword = newPassword;
     }
 
-    // Getters and Setters
     public String getCurrentPassword() {
         return currentPassword;
     }

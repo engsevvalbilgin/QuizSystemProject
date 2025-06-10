@@ -9,7 +9,6 @@ public class PasswordResetRequestDto {
     @Email(message = "Geçerli bir email adresi giriniz")
     private String email;
 
-    // Getters and Setters
     public String getEmail() {
         return email;
     }

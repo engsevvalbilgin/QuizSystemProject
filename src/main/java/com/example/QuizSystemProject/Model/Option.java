@@ -13,11 +13,11 @@ public class Option {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id") // Otomatik olarak eklenir ama açıkça belirtiyoruz
+    @Column(name = "id") 
     private int id;
 
     @ManyToOne
-    @JoinColumn(name = "question_id", nullable = false) // Foreign Key olarak bağlanır
+    @JoinColumn(name = "question_id", nullable = false) 
     private Question question;
 
     @Column(name = "text", nullable = false)
@@ -30,7 +30,6 @@ public class Option {
     @JoinColumn(name = "test_question_id")
     private TestQuestion testQuestion;
 
-    // Factory metodu
     public static Option createOption(Question question, String text, boolean isCorrect) {
         Option option = new Option();
         option.setQuestion(question);

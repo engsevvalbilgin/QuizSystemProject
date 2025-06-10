@@ -1,23 +1,17 @@
-package com.example.QuizSystemProject.dto; // Paket adınızın doğru olduğundan emin olun
+package com.example.QuizSystemProject.dto;
 
-import java.util.Map; // Map'ten dönüşüm için (Service'ten Map dönüyorsa)
+import java.util.Map;
 
-// Bu DTO, API yanıtlarında programın genel istatistiklerini taşır.
 public class OverallStatsResponse {
 
-    private int totalUsers; // Toplam kullanıcı sayısı
-    private int totalQuizzes; // Toplam quiz sayısı
-    private int totalQuizSessions; // Toplam quiz oturumu sayısı
-    private Double averageScore; // Tüm oturumların genel ortalama puanı
+    private int totalUsers;
+    private int totalQuizzes;
+    private int totalQuizSessions;
+    private Double averageScore;
 
-    // İstenirse Adminler için aktif/pasif kullanıcı sayıları gibi ek alanlar eklenebilir.
-
-
-    // JPA için argümansız constructor
     public OverallStatsResponse() {
     }
 
-    // Alanları alan constructor
     public OverallStatsResponse(int totalUsers, int totalQuizzes, int totalQuizSessions, Double averageScore) {
         this.totalUsers = totalUsers;
         this.totalQuizzes = totalQuizzes;
@@ -25,7 +19,6 @@ public class OverallStatsResponse {
         this.averageScore = averageScore;
     }
 
-    // Service'ten Map dönüyorsa, Map'ten dönüşüm yapmayı kolaylaştıran constructor (isteğe bağlı)
     public OverallStatsResponse(Map<String, Object> statsMap) {
         this.totalUsers = ((Number) statsMap.get("totalUsers")).intValue();
         this.totalQuizzes = ((Number) statsMap.get("totalQuizzes")).intValue();
@@ -33,22 +26,36 @@ public class OverallStatsResponse {
         this.averageScore = (Double) statsMap.get("averageScore");
     }
 
+    public int getTotalUsers() {
+        return totalUsers;
+    }
 
-    // Getter ve Setterlar
-    // IDE ile otomatik oluşturabilirsiniz.
+    public void setTotalUsers(int totalUsers) {
+        this.totalUsers = totalUsers;
+    }
 
-    public int getTotalUsers() { return totalUsers; }
-    public void setTotalUsers(int totalUsers) { this.totalUsers = totalUsers; }
+    public int getTotalQuizzes() {
+        return totalQuizzes;
+    }
 
-    public int getTotalQuizzes() { return totalQuizzes; }
-    public void setTotalQuizzes(int totalQuizzes) { this.totalQuizzes = totalQuizzes; }
+    public void setTotalQuizzes(int totalQuizzes) {
+        this.totalQuizzes = totalQuizzes;
+    }
 
-    public int getTotalQuizSessions() { return totalQuizSessions; }
-    public void setTotalQuizSessions(int totalQuizSessions) { this.totalQuizSessions = totalQuizSessions; }
+    public int getTotalQuizSessions() {
+        return totalQuizSessions;
+    }
 
-    public Double getAverageScore() { return averageScore; }
-    public void setAverageScore(Double averageScore) { this.averageScore = averageScore; }
+    public void setTotalQuizSessions(int totalQuizSessions) {
+        this.totalQuizSessions = totalQuizSessions;
+    }
 
+    public Double getAverageScore() {
+        return averageScore;
+    }
 
-    // İsteğe bağlı olarak toString, equals, hashCode metotları eklenebilir.
+    public void setAverageScore(Double averageScore) {
+        this.averageScore = averageScore;
+    }
+
 }

@@ -10,13 +10,12 @@ function StudentQuizResultsPage() {
     const [student, setStudent] = useState({ name: '', surname: '' });
     const navigate = useNavigate();
     
-    // Kullanıcı bilgilerini getir
     useEffect(() => {
         const fetchCurrentUser = async () => {
             try {
                 const response = await axiosInstance.get('/users/profile');
-                console.log('Raw API response:', response); // API'den gelen ham yanıtı logluyoruz
-                console.log('Response data:', response.data); // response.data içeriğini logluyoruz
+                console.log('Raw API response:', response);
+                console.log('Response data:', response.data); 
                 setStudent(response.data);
             } catch (err) {
                 console.error('Kullanıcı bilgileri yüklenirken hata:', err);
@@ -34,7 +33,7 @@ function StudentQuizResultsPage() {
                 const response = await axiosInstance.get('/student/quiz-attempts');
                 console.log('Raw API response:', response);
                 console.log('Response data:', response.data);
-                console.log('First attempt details:', response.data[0]); // İlk deneme detaylarını logla
+                console.log('First attempt details:', response.data[0]); 
                 setQuizAttempts(response.data);
             } catch (err) {
                 const errorMessage = err.response?.data?.message || 'Quiz sonuçları yüklenirken bir hata oluştu.';
@@ -65,7 +64,6 @@ function StudentQuizResultsPage() {
     };
 
 
-    // Puanı x/y formatında göster
     const formatScore = (earnedPoints, totalPoints) => {
         console.log('formatScore called with:', { earnedPoints, totalPoints });
         if (earnedPoints === undefined || earnedPoints === null || totalPoints === undefined || totalPoints === null) {
@@ -75,7 +73,6 @@ function StudentQuizResultsPage() {
         return `${earnedPoints}/${totalPoints}`;
     };
 
-    // Geçen süreyi formatla (saniye -> dakika:saniye)
     const formatTimeSpent = (seconds) => {
         if (!seconds) return '--:--';
         const mins = Math.floor(seconds / 60);
@@ -102,7 +99,6 @@ function StudentQuizResultsPage() {
 
     return (
         <div style={{ display: 'flex', minHeight: '100vh' }}>
-            {/* Sidebar */}
             <div style={{
                 width: '250px',
                 backgroundColor: '#f8f9fa',
@@ -226,14 +222,13 @@ function StudentQuizResultsPage() {
                                 }}
                             >
                                 <span>📢</span>
-                                <span>Duyurular</span> {/* Added closing span for "Duyurular" */}
+                                <span>Duyurular</span>
                             </button>
                         </li>
                     </ul>
                 </nav>
             </div>
             
-            {/* Main Content */}
             <div style={{ flex: 1, padding: '20px' }}>
                 <h1 className="text-2xl font-bold mb-6">Quiz Sonuçlarım</h1>
 

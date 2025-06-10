@@ -7,16 +7,15 @@ function AdminUserListPage() {
   const [error, setError] = useState(null);
   const [filterUsernameOrEmail, setFilterUsernameOrEmail] = useState('');
   const [filterRole, setFilterRole] = useState('');
-  const [updatingUsers, setUpdatingUsers] = useState({}); // Track which users are being updated
+  const [updatingUsers, setUpdatingUsers] = useState({}); 
 
-  // Kullanıcı rolleri için görünen isimler
+
   const roleDisplayNames = {
     'ROLE_ADMIN': 'Admin',
     'ROLE_TEACHER': 'Öğretmen',
     'ROLE_STUDENT': 'Öğrenci'
   };
 
-  // Kullanıcı tipine göre rol belirleme
   const getUserRole = (user) => {
     if (user.roles && user.roles.length > 0) {
       return user.roles.map(role => {
@@ -50,7 +49,6 @@ function AdminUserListPage() {
     return 'Öğrenci';
   };
 
-  // Kullanıcının aktiflik durumunu değiştiren fonksiyon
   const toggleUserActivation = async (userId, currentStatus) => {
     if (window.confirm(`Bu kullanıcıyı ${currentStatus ? 'pasif' : 'aktif'} hale getirmek istediğinize emin misiniz?`)) {
       try {
@@ -63,7 +61,6 @@ function AdminUserListPage() {
           { headers: { 'Authorization': `Bearer ${token}` } }
         );
         
-        // Update the user's status in the local state
         setUsers(prevUsers => 
           prevUsers.map(user => 
             user.id === userId 
@@ -72,7 +69,6 @@ function AdminUserListPage() {
           )
         );
         
-        // Show success message
         alert(response.data.message);
       } catch (err) {
         console.error('Kullanıcı durumu güncellenirken hata oluştu:', err);
@@ -84,7 +80,6 @@ function AdminUserListPage() {
     }
   };
 
-  // Kullanıcıları backend'den getiren fonksiyon
   const fetchUsers = async () => {
     setError(null);
     setLoading(true);
@@ -202,7 +197,7 @@ function AdminUserListPage() {
         </button>
       </div>
 
-      {/* Filtreleme Seçenekleri */}
+
       <div style={{ 
         marginBottom: '20px', 
         padding: '15px', 
@@ -252,7 +247,6 @@ function AdminUserListPage() {
         </div>
       </div>
 
-      {/* Hata Mesajı */}
       {error && (
         <div style={{ 
           color: '#d32f2f', 
@@ -266,7 +260,6 @@ function AdminUserListPage() {
         </div>
       )}
 
-      {/* Kullanıcı Listesi */}
       {loading ? (
         <p>Kullanıcılar yükleniyor...</p>
       ) : !error && filteredUsers && filteredUsers.length > 0 ? (

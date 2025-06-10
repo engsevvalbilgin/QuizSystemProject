@@ -1,26 +1,23 @@
-package com.example.QuizSystemProject.security; // Paket adınızı kontrol edin
+package com.example.QuizSystemProject.security; 
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.security.access.AccessDeniedException; // Yetkilendirme hatası için
-import org.springframework.security.web.access.AccessDeniedHandler; // AccessDeniedHandler arayüzü
-import org.springframework.stereotype.Component; // Spring bileşeni olarak işaretlemek için
+import org.springframework.security.access.AccessDeniedException; 
+import org.springframework.security.web.access.AccessDeniedHandler; 
+import org.springframework.stereotype.Component; 
 
 import java.io.IOException;
 
-@Component // Spring'e bu sınıfın bir bileşen olduğunu belirtir
+@Component 
 public class CustomAccessDeniedHandler implements AccessDeniedHandler {
 
-    // Yetkilendirme (Yetki/Rol) başarısız olduğunda Spring Security tarafından çağrılır.
     @Override
     public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException accessDeniedException) throws IOException, ServletException {
         System.err.println("CustomAccessDeniedHandler: Yetkilendirme başarısız. Erişim engellendi! Mesaj: " + accessDeniedException.getMessage());
-
-        // 403 Forbidden yanıtı dön
-        response.setStatus(HttpServletResponse.SC_FORBIDDEN); // 403 durumu
-        response.setContentType("application/json"); // JSON formatı
-        response.getWriter().write("{\"error\": \"Erişim Reddedildi\", \"message\": \"" + accessDeniedException.getMessage() + "\"}"); // Yanıt gövdesi
+        response.setStatus(HttpServletResponse.SC_FORBIDDEN); 
+        response.setContentType("application/json"); 
+        response.getWriter().write("{\"error\": \"Erişim Reddedildi\", \"message\": \"" + accessDeniedException.getMessage() + "\"}"); 
         response.getWriter().flush();
     }
 }

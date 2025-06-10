@@ -15,25 +15,36 @@ public class OptionUpdateRequest {
     private String text;
 
     @NotNull(message = "Doğru cevap bilgisi boş olamaz")
-    @JsonProperty(value = "isCorrect") // JSON field name will always be isCorrect
-    private Boolean correct; // Renamed to avoid serialization issues
+    @JsonProperty(value = "isCorrect")
+    private Boolean correct;
 
-    // Getter ve Setterlar
-    public OptionUpdateRequest() {}
+    public OptionUpdateRequest() {
+    }
 
-    public Integer getId() { return id; }
-    public void setId(Integer id) { this.id = id; }
+    public Integer getId() {
+        return id;
+    }
 
-    public String getText() { return text; }
-    public void setText(String text) { this.text = text; }
+    public void setId(Integer id) {
+        this.id = id;
+    }
 
-    // Standard JavaBean getter with JsonProperty annotation to control the property name in JSON
-    @JsonProperty("isCorrect") 
-    public Boolean isCorrect() { return correct; }
-    
-    // Single setter with JsonProperty annotation to ensure it maps to "isCorrect" in JSON
+    public String getText() {
+        return text;
+    }
+
+    public void setText(String text) {
+        this.text = text;
+    }
+
     @JsonProperty("isCorrect")
-    public void setCorrect(Boolean correct) { this.correct = correct; }
-    
-    // REMOVED duplicate setter to avoid Jackson conflict
+    public Boolean isCorrect() {
+        return correct;
+    }
+
+    @JsonProperty("isCorrect")
+    public void setCorrect(Boolean correct) {
+        this.correct = correct;
+    }
+
 }

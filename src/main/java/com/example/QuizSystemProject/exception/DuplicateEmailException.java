@@ -1,31 +1,24 @@
-package com.example.QuizSystemProject.exception; // Paket adınızın doğru olduğundan emin olun
+package com.example.QuizSystemProject.exception;
 
-import org.springframework.http.HttpStatus; // HTTP durum kodu için
-import org.springframework.web.bind.annotation.ResponseStatus; // HTTP durum kodunu belirtmek için
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
-// Bu exception, kaydedilmek istenen e-posta adresinin zaten kullanımda olması durumunda fırlatılacaktır.
-// @ResponseStatus anotasyonu, Spring'in bu exception'ı yakaladığında otomatik olarak
-// 409 Conflict HTTP yanıtı dönmesini sağlar (Benzersizlik çakışmaları için 409 uygundur).
-@ResponseStatus(HttpStatus.CONFLICT) // HTTP 409 Conflict yanıtı döndürür
-public class DuplicateEmailException extends RuntimeException { // RuntimeException'dan extend ediyoruz
+@ResponseStatus(HttpStatus.CONFLICT)
+public class DuplicateEmailException extends RuntimeException {
 
-    // Argümansız constructor
     public DuplicateEmailException() {
-        super("Email adresi zaten kullanımda."); // Varsayılan hata mesajı
+        super("Email adresi zaten kullanımda.");
     }
 
-    // Hata mesajı alan constructor
     public DuplicateEmailException(String message) {
-        super(message); // Belirtilen hata mesajını kullanır
+        super(message);
     }
 
-    // Hata mesajı ve neden (cause) alan constructor
     public DuplicateEmailException(String message, Throwable cause) {
-        super(message, cause); // Belirtilen mesajı ve nedeni kullanır
+        super(message, cause);
     }
 
-     // Neden (cause) alan constructor
-     public DuplicateEmailException(Throwable cause) {
-         super(cause); // Belirtilen nedeni kullanır
-     }
+    public DuplicateEmailException(Throwable cause) {
+        super(cause);
+    }
 }

@@ -8,7 +8,6 @@ function LeadershipTable({ isVisible }) {
     const [error, setError] = useState(null);
     const [selectedStudent, setSelectedStudent] = useState(null);
 
-    // Use isVisible prop to control visibility
     const visible = isVisible;
 
     const fetchLeaders = async () => {
@@ -16,14 +15,11 @@ function LeadershipTable({ isVisible }) {
             setLoading(true);
             setError(null);
             
-            // Tüm öğrencileri liderlik tablosuna göre sırala
             const response = await axiosInstance.get('/api/statistics/student-leaders');
             const leaders = response.data;
             
-            // İlk 10 öğrenciyi göster
             const topStudents = leaders.slice(0, 10);
             
-            // Her öğrenci için detaylı bilgileri hazırla
             const studentDetails = topStudents.map(student => ({
                 id: student.id,
                 name: student.name,
@@ -43,15 +39,10 @@ function LeadershipTable({ isVisible }) {
     };
 
     useEffect(() => {
-        // This useEffect is currently dependent on 'visible', but 'visible' is not being set to true inside this component.
-        // If you intend for this table to load data on mount, you might want to initialize 'visible' to true,
-        // or pass a prop to control its visibility and data fetching.
         if (visible) {
             fetchLeaders();
         }
     }, [visible]);
-
-    // Add a useEffect to cleanup on unmount - this one is fine
     useEffect(() => {
         return () => {
             setVisible(false);
@@ -69,7 +60,7 @@ function LeadershipTable({ isVisible }) {
     }
 
     return (
-        <div className="flex"> {/* This is the parent div that wraps everything */}
+        <div className="flex"> 
             <div className="flex-1">
                 <div className="bg-white shadow rounded-lg p-6">
                     <h2 className="text-xl font-semibold text-gray-900 mb-4">Liderlik Tablosu</h2>
@@ -79,7 +70,7 @@ function LeadershipTable({ isVisible }) {
                                 <tr className="bg-gray-100">
                                     <th className="px-6 py-3 border-b border-gray-300 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Sıra</th>
                                     <th className="px-6 py-3 border-b border-gray-300 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">İsim</th>
-                                    <th className="px-6 py-3 border-b border-gray-300 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Soyad</th> {/* Added missing 'Soyad' column header */}
+                                    <th className="px-6 py-3 border-b border-gray-300 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Soyad</th> 
                                     <th className="px-6 py-3 border-b border-gray-300 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ortalama Başarı</th>
                                     <th className="px-6 py-3 border-b border-gray-300 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Çözülen Quizler</th>
                                     <th className="px-6 py-3 border-b border-gray-300 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Başarılı Quizler</th>
@@ -96,7 +87,7 @@ function LeadershipTable({ isVisible }) {
                                             {leader.name}
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{leader.surname}</td>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{(leader.averageScore * 100).toFixed(2)}%</td> {/* Display as percentage */}
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{(leader.averageScore * 100).toFixed(2)}%</td> 
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{leader.totalQuizzes}</td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{leader.successfulQuizzes}</td>
                                     </tr>
@@ -120,7 +111,7 @@ function LeadershipTable({ isVisible }) {
                         </div>
                         <div>
                             <h4 className="font-medium text-gray-700">Ortalama Puan:</h4>
-                            <p className="text-gray-900">{(selectedStudent.averageScore * 100).toFixed(2)}%</p> {/* Display as percentage */}
+                            <p className="text-gray-900">{(selectedStudent.averageScore * 100).toFixed(2)}%</p> 
                         </div>
                         <div>
                             <h4 className="font-medium text-gray-700">Toplam Quiz:</h4>
@@ -144,6 +135,5 @@ export default function EnhancedLeadershipTable({ isVisible }) {
         setVisible(isVisible);
     }, [isVisible]);
 
-    // Pass the 'visible' state to the LeadershipTable component
     return <LeadershipTable visible={visible} />;
 }

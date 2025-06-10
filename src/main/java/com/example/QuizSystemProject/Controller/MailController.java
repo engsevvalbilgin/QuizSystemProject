@@ -14,13 +14,10 @@ public class MailController {
     @Autowired
     private MailService mailService;
 
-    // E-posta doğrulama maili gönderme endpoint'i
     @PostMapping("/send-verification")
     @PreAuthorize("hasAnyRole('ADMIN', 'TEACHER')")
     public ResponseEntity<?> sendVerificationEmail(@RequestBody EmailRequestDto emailRequest) {
         try {
-            // Token oluşturma ve kaydetme işlemi AuthenticationService'de yapılıyor
-            // Burada sadece var olan bir token için mail gönderme yapılabilir
             String verificationLink = emailRequest.getVerificationLink();
             if (verificationLink == null || verificationLink.isEmpty()) {
                 return ResponseEntity.badRequest().body("Doğrulama linki gereklidir");
@@ -33,29 +30,27 @@ public class MailController {
         }
     }
 
-    // Admin için özel mail gönderme endpoint'i
     @PostMapping("/admin/send")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> sendCustomEmail(@RequestBody EmailRequestDto emailRequest) {
         try {
-            mailService.sendEmail(emailRequest.getEmail(), 
-                "Quiz Sistemi Bildirimi", 
-                "Bu bir admin tarafından gönderilen özel bildirimdir.");
+            mailService.sendEmail(emailRequest.getEmail(),
+                    "Quiz Sistemi Bildirimi",
+                    "Bu bir admin tarafından gönderilen özel bildirimdir.");
             return ResponseEntity.ok("E-posta başarıyla gönderildi");
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("E-posta gönderme hatası: " + e.getMessage());
         }
     }
 
-    // Admin için toplu mail gönderme endpoint'i
     @PostMapping("/admin/send-bulk")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> sendBulkEmail(@RequestBody EmailRequestDto[] emailRequests) {
         try {
             for (EmailRequestDto request : emailRequests) {
-                mailService.sendEmail(request.getEmail(), 
-                    "Quiz Sistemi Toplu Bildirimi", 
-                    "Bu bir admin tarafından gönderilen toplu bildirimdir.");
+                mailService.sendEmail(request.getEmail(),
+                        "Quiz Sistemi Toplu Bildirimi",
+                        "Bu bir admin tarafından gönderilen toplu bildirimdir.");
             }
             return ResponseEntity.ok("Toplu e-postalar başarıyla gönderildi");
         } catch (Exception e) {

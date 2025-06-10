@@ -1,79 +1,66 @@
 package com.example.QuizSystemProject.Model;
 
 
-import jakarta.persistence.*; // JPA anotasyonları için
-import java.time.LocalDateTime; // Tarih/saat için
+import jakarta.persistence.*; 
+import java.time.LocalDateTime; 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects; // equals/hashCode için
+import java.util.Objects; 
 
-@Entity // Bu sınıfın bir JPA Entity'si olduğunu belirtir
-@Table(name = "quiz_sessions") // Veritabanındaki tablonun adı 'quiz_sessions' olacak
+@Entity 
+@Table(name = "quiz_sessions") 
 public class QuizSession {
 
-    @Id // Birincil anahtar
-    @GeneratedValue(strategy = GenerationType.IDENTITY) // Otomatik artan ID
-    private int id; // int tipinde ID
+    @Id 
+    @GeneratedValue(strategy = GenerationType.IDENTITY) 
+    private int id; 
 
-    // Quiz oturumunu alan öğrenciyi belirten ilişki
-    // Sizin template'inizdeki 'studentId' alanına karşılık gelir
-    @ManyToOne // Bir oturumun SADECE bir öğrencisi olur, ama bir öğrenci birden çok oturum açabilir (Çoğa-Bir ilişki)
-    @JoinColumn(name = "student_id", nullable = false) // Veritabanındaki yabancı anahtar sütununun adı 'student_id' olacak. Boş olamaz.
-    private User student; // İlişkili User objesi (Rolü 'STUDENT' olmalı)
+    @ManyToOne 
+    @JoinColumn(name = "student_id", nullable = false) 
+    private User student; 
 
-    // Quiz oturumunun hangi quize ait olduğunu belirten ilişki
-    // Sizin template'inizdeki 'quizId' alanına karşılık gelir
-    @ManyToOne // Bir oturumun SADECE bir quizi olur, ama bir quizin birden çok oturumu olabilir (Çoğa-Bir ilişki)
-    @JoinColumn(name = "quiz_id", nullable = false) // Veritabanındaki yabancı anahtar sütununun adı 'quiz_id' olacak. Boş olamaz.
-    private Quiz quiz; // İlişkili Quiz objesi
+    @ManyToOne 
+    @JoinColumn(name = "quiz_id", nullable = false) 
+    private Quiz quiz; 
 
-    @Column(nullable = false) // Boş olamaz
-    private LocalDateTime startTime; // Quiz'e başlangıç tarihi/saati
+    @Column(nullable = false) 
+    private LocalDateTime startTime; 
 
-    @Column // Boş olabilir (eğer quiz tamamlanmadıysa)
-    private LocalDateTime endTime; // Quiz'in bitiş tarihi/saati
+    @Column 
+    private LocalDateTime endTime;
 
-    @Column(nullable = false) // Boş olamaz, varsayılan 0
-    private int score = 0; // Öğrencinin bu oturumda aldığı puan (100 üzerinden)
+    @Column(nullable = false) 
+    private int score = 0; 
     
-    @Column(nullable = false) // Boş olamaz, varsayılan 0
-    private int earnedPoints = 0; // Öğrencinin kazandığı toplam puan
+    @Column(nullable = false) 
+    private int earnedPoints = 0; 
     
-    @Column(nullable = false) // Boş olamaz, varsayılan 0
-    private int correctAnswers = 0; // Doğru cevap sayısı
+    @Column(nullable = false)
+    private int correctAnswers = 0; 
     
-    @Column(nullable = false) // Boş olamaz, varsayılan false
-    private boolean completed = false; // Sınavın tamamlanıp tamamlanmadığı
+    @Column(nullable = false)
+    private boolean completed = false; 
     
     @Column
-    private Integer timeSpentSeconds; // Sınavın süresi (saniye cinsinden)
+    private Integer timeSpentSeconds; 
 
-    // Bir quiz oturumunda, öğrencinin birden çok soruya verdiği cevap olabilir
-    // Sizin 'QuestionAnswer' template'inize karşılık gelen 'AnswerAttempt' Entity'si ile ilişki
-    @OneToMany(mappedBy = "quizSession", cascade = CascadeType.ALL, orphanRemoval = true) // Bir Oturumun ÇOĞU bir AnswerAttempt'i vardır.
-    // mappedBy = "quizSession": İlişkinin AnswerAttempt Entity'sindeki 'quizSession' alanı tarafından yönetildiğini belirtir.
-    // cascade = CascadeType.ALL: Oturum silindiğinde ilgili cevapları da siler.
-    // orphanRemoval = true: Bir cevap listeden çıkarılırsa veritabanından da silinir.
-    private List<AnswerAttempt> answers = new ArrayList<>(); // Bu oturumdaki öğrenci cevapları listesi
+    @OneToMany(mappedBy = "quizSession", cascade = CascadeType.ALL, orphanRemoval = true) 
+    private List<AnswerAttempt> answers = new ArrayList<>(); 
 
-    // JPA için argümansız constructor
     public QuizSession() {
-         this.answers = new ArrayList<>(); // Liste boş başlatılmalı
+         this.answers = new ArrayList<>(); 
     }
 
-    // Temel alanları alan constructor (ID, tarihler, score otomatik yönetilir)
-    // İlişkili objeler (student, quiz) constructora dahil edilebilir veya sonradan set edilebilir
     public QuizSession(User student, Quiz quiz) {
         this.student = student;
         this.quiz = quiz;
-        this.startTime = LocalDateTime.now(); // Oturum başladığında otomatik set edelim
-        this.score = 0; // Başlangıç puanı 0
-        this.answers = new ArrayList<>(); // Liste boş başlatılmalı
+        this.startTime = LocalDateTime.now(); 
+        this.score = 0; 
+        this.answers = new ArrayList<>(); 
     }
 
-    // Getter ve Setter Metotları
     public int getId() { return id; }
-    public void setId(int id) { this.id = id; } // ID setter'ı genellikle kullanılmaz
+    public void setId(int id) { this.id = id; } 
 
     public User getStudent() { return student; }
     public void setStudent(User student) { this.student = student; }
@@ -102,10 +89,7 @@ public class QuizSession {
     public Integer getTimeSpentSeconds() { return timeSpentSeconds; }
     public void setTimeSpentSeconds(Integer timeSpentSeconds) { this.timeSpentSeconds = timeSpentSeconds; }
     
-    /**
-     * Get the time spent in seconds for this quiz session
-     * @return Time spent in seconds, or 0 if the session is not completed
-     */
+   
     public int calculateTimeSpentSeconds() {
         if (startTime == null || endTime == null) {
             return 0;
@@ -113,10 +97,7 @@ public class QuizSession {
         return (int) java.time.Duration.between(startTime, endTime).getSeconds();
     }
     
-    /**
-     * Check if this session has been submitted
-     * @return true if the session has an endTime (completed), false otherwise
-     */
+   
     public boolean isSubmitted() {
         return endTime != null;
     }
@@ -124,21 +105,15 @@ public class QuizSession {
     public List<AnswerAttempt> getAnswers() { return answers; }
     public void setAnswers(List<AnswerAttempt> answers) { this.answers = answers; }
 
-    // İlişkiye cevap eklemek için yardımcı metot
-    // Bu metot, ilişkinin her iki tarafını da doğru kurar (QuizSession -> AnswerAttempt ve AnswerAttempt -> QuizSession)
     public void addAnswerAttempt(AnswerAttempt answerAttempt) {
         answers.add(answerAttempt);
-        answerAttempt.setQuizSession(this); // AnswerAttempt'in ait olduğu oturumu da set etmeyi unutmayın!
+        answerAttempt.setQuizSession(this); 
     }
-
-    // İlişkiden cevap çıkarmak için yardımcı metot
     public void removeAnswerAttempt(AnswerAttempt answerAttempt) {
         answers.remove(answerAttempt);
-        answerAttempt.setQuizSession(null); // AnswerAttempt'in oturum ilişkisini kaldırın
+        answerAttempt.setQuizSession(null); 
     }
 
-
-    // equals() ve hashCode() (ID üzerinden)
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -152,7 +127,6 @@ public class QuizSession {
         return Objects.hash(id);
     }
 
-    // toString() (Debugging için)
     @Override
     public String toString() {
         return "QuizSession{" +
@@ -164,8 +138,5 @@ public class QuizSession {
                ", score=" + score +
                '}';
     }
-
-    // --- NOT: Template kodunuzdaki calculateDuration() metodu Entity sınıfına ait değil.
-    // --- Bu metot ve quiz çözme akışındaki diğer iş mantığı QuizSessionService sınıfında yer alacak.
 }
 

@@ -16,9 +16,6 @@ public class StudentQuizController {
 
     private final StudentQuizService studentQuizService;
 
-    /**
-     * Öğrencinin çözebileceği tüm aktif quizleri getirir
-     */
     @GetMapping
     public ResponseEntity<List<StudentQuizDto>> getAvailableQuizzes() {
         int studentId = studentQuizService.getCurrentUserId();
@@ -26,9 +23,6 @@ public class StudentQuizController {
         return ResponseEntity.ok(quizzes);
     }
 
-    /**
-     * Belirli bir quizin detaylarını getirir (öğrenci için)
-     */
     @GetMapping("/{quizId}")
     public ResponseEntity<StudentQuizDto> getQuizForStudent(@PathVariable int quizId) {
         int studentId = studentQuizService.getCurrentUserId();
@@ -36,14 +30,11 @@ public class StudentQuizController {
         return ResponseEntity.ok(quiz);
     }
 
-    /**
-     * Get all attempts for a specific quiz by the current student
-     */
     @GetMapping("/{quizId}/attempts")
     public ResponseEntity<List<QuizAttemptDto>> getQuizAttempts(@PathVariable int quizId) {
         int studentId = studentQuizService.getCurrentUserId();
         List<QuizAttemptDto> attempts = studentQuizService.getQuizAttemptsForStudent(quizId, studentId);
         return ResponseEntity.ok(attempts);
     }
-    
+
 }

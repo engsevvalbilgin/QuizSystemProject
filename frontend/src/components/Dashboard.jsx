@@ -29,7 +29,7 @@ function Dashboard() {
         <div className="p-4">
             <h2 className="text-2xl font-bold mb-4">Dashboard</h2>
 
-            {/* Duyuru Alanı */}
+           
             <div className="bg-white rounded-lg shadow p-4 mb-6">
                 <h3 className="text-lg font-semibold mb-4">Duyurular</h3>
                 
@@ -54,7 +54,7 @@ function Dashboard() {
                 )}
             </div>
 
-            {/* Diğer dashboard içeriği buraya gelecek */}
+           
             <div className="mt-4">
                 <LogoutButton />
             </div>

@@ -78,12 +78,12 @@ function TeacherCreateQuizPage() {
             ...prev,
             questions: prev.questions.map((q, i) => {
                 if (i === index) {
-                    // If changing question type
+                    
                     if (field === 'questionTypeId') {
                         return {
                             ...q,
                             questionTypeId: value,
-                            // If changing to multiple-choice and options are empty, initialize default options
+                            
                             options: value === 1 && (!q.options || q.options.length === 0) ? [
                                 { text: '', isCorrect: false },
                                 { text: '', isCorrect: false },
@@ -92,7 +92,7 @@ function TeacherCreateQuizPage() {
                             ] : q.options
                         };
                     }
-                    // For other fields
+                    
                     return {
                         ...q,
                         [field]: value
@@ -217,7 +217,7 @@ function TeacherCreateQuizPage() {
                     }));
                 }
 
-                console.log('Sending questionData:', questionData); // Debug log
+                console.log('Sending questionData:', questionData); 
                 return questionData;
             });
 

@@ -30,7 +30,7 @@ public class Teacher extends User {
 
     public void createQuiz(Quiz quiz) {
         quizzes.add(quiz);
-        quiz.setTeacher(this); // Automatically associate the quiz with this teacher
+        quiz.setTeacher(this); 
     }
 
     public void showQuizzes() {
@@ -41,7 +41,6 @@ public class Teacher extends User {
 
     @Override
     public void showUserDetails() {
-         // Calls the base method from User class
         System.out.println("Quizzes: " + getQuizzes());
         System.out.println("Subject: " + getSubject());
         System.out.println("Graduate School: " + getGraduateSchool());
@@ -50,16 +49,16 @@ public class Teacher extends User {
 
     @Override
     public void signIn(User user) {
-        super.signIn(user); // Uses the signIn from User class
+        super.signIn(user); 
     }
 
     @Override
     public void logIn(User user) {
-        super.logIn(user); // Uses the logIn from User class
+        super.logIn(user); 
     }
 
     @Override
     public void logOut(User user) {
-        // Logic to log out
+        
     }
 }

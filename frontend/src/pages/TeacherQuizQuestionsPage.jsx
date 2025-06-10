@@ -10,23 +10,22 @@ function TeacherQuizQuestionsPage() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
-    // Fetch quiz and questions data
+    
     useEffect(() => {
         const fetchData = async () => {
             try {
                 setLoading(true);
                 setError(null);
                 
-                // Fetch quiz details
                 console.log(`Quiz ID ${quizId} için detaylar getiriliyor...`);
                 const quizResponse = await axiosInstance.get(`/quizzes/${quizId}`);
                 setQuiz(quizResponse.data);
                 
-                // Fetch questions for this quiz
+                
                 console.log(`Quiz ID ${quizId} için sorular getiriliyor...`);
                 const questionsResponse = await axiosInstance.get(`/quizzes/${quizId}/questions`);
                 
-                // Sort questions by their number property to ensure consistent order
+                
                 const sortedQuestions = [...(questionsResponse.data || [])].sort((a, b) => {
                     if (a.number !== b.number) return a.number - b.number;
                     return a.id - b.id;
@@ -76,7 +75,6 @@ function TeacherQuizQuestionsPage() {
     
     return (
         <div style={{ display: 'flex', minHeight: '100vh' }}>
-            {/* Sidebar */}
             <div style={{ width: '250px', backgroundColor: 'white', boxShadow: '0 0 10px rgba(0,0,0,0.1)' }}>
                 <div style={{ padding: '20px', borderBottom: '1px solid #eaeaea' }}>
                     <h3 style={{ fontSize: '1.2rem', fontWeight: '600', color: '#333' }}>Öğretmen Paneli</h3>
@@ -197,7 +195,6 @@ function TeacherQuizQuestionsPage() {
                 </nav>
             </div>
             
-            {/* Main Content */}
             <div style={{ flex: 1, padding: '20px' }}>
                 <div className="container mx-auto">
             <div className="flex justify-between items-center mb-6">

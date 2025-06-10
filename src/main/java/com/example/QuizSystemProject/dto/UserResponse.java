@@ -1,10 +1,9 @@
-package com.example.QuizSystemProject.dto; // Paket adınızın doğru olduğundan emin olun
+package com.example.QuizSystemProject.dto;
 
-import com.example.QuizSystemProject.Model.User; // Entity'den dönüşüm için User Entity'sini import edin
+import com.example.QuizSystemProject.Model.User;
 import java.time.LocalDateTime;
 import com.example.QuizSystemProject.Model.Teacher;
-// Bu DTO, API yanıtlarında temel kullanıcı bilgilerini taşır (örn: kullanıcı listeleri).
-// Hassas bilgiler (parola gibi) dahil EDİLMEZ.
+
 public class UserResponse {
 
     private int id;
@@ -12,22 +11,16 @@ public class UserResponse {
     private String name;
     private String surname;
     private String email;
-    private String role; // Kullanıcı rolü
-    private boolean isActive; // Hesabın aktif (silinmemiş) olup olmadığı
-    private boolean enabled; // Hesabın etkinleştirilmiş (e-posta doğrulaması yapılmış) olup olmadığı
-    private String diplomaNumber; // Diplomalar için diploma numarası
-    private String graduateSchool; // Mezun olduğu okul
-    private LocalDateTime createdAt; // Kullanıcının oluşturulma tarihi
+    private String role;
+    private boolean isActive;
+    private boolean enabled;
+    private String diplomaNumber;
+    private String graduateSchool;
+    private LocalDateTime createdAt;
 
-    // Yaş, oluşturulma/güncellenme tarihleri gibi alanları liste DTO'suna dahil etmeyebiliriz
-    // veya isteğe bağlı olarak ekleyebiliriz. Şimdilik temel alanları alalım.
-
-    // JPA için argümansız constructor (Spring genellikle buna ihtiyaç duymaz ama iyi practice'dir)
     public UserResponse() {
     }
 
-    // User Entity'sinden bu DTO'ya dönüşüm yapmayı kolaylaştıran constructor
-    // Service veya Controller katmanında Entity'i bu constructor'a vererek DTO objesi oluşturabiliriz
     public UserResponse(User user) {
         this.id = user.getId();
         this.username = user.getUsername();
@@ -35,50 +28,101 @@ public class UserResponse {
         this.surname = user.getSurname();
         this.email = user.getEmail();
         this.role = user.getRole();
-        this.isActive = user.isActive(); // Getter metodu isActive()
-        this.enabled = user.isEnabled(); // Getter metodu isEnabled()
+        this.isActive = user.isActive();
+        this.enabled = user.isEnabled();
         if (user instanceof Teacher) {
             this.diplomaNumber = ((Teacher) user).getDiplomaNumber();
             this.graduateSchool = ((Teacher) user).getGraduateSchool();
         }
-        this.createdAt = user.getCreatedDate(); // Kullanıcının oluşturulma tarihi
+        this.createdAt = user.getCreatedDate();
     }
 
-    // Getter ve Setterlar (Setterlar API'den veri almadığı için zorunlu değildir ama eklenebilir)
-    // IDE ile otomatik oluşturabilirsiniz.
+    public int getId() {
+        return id;
+    }
 
-    public int getId() { return id; }
-    public void setId(int id) { this.id = id; } // Yanıt DTO'larında setterlar genellikle kullanılmaz ama bulunabilir
+    public void setId(int id) {
+        this.id = id;
+    }
 
-    public String getUsername() { return username; }
-    public void setUsername(String username) { this.username = username; }
+    public String getUsername() {
+        return username;
+    }
 
-    public String getName() { return name; }
-    public void setName(String name) { this.name = name; }
+    public void setUsername(String username) {
+        this.username = username;
+    }
 
-    public String getSurname() { return surname; }
-    public void setSurname(String surname) { this.surname = surname; }
+    public String getName() {
+        return name;
+    }
 
-    public String getEmail() { return email; }
-    public void setEmail(String email) { this.email = email; }
+    public void setName(String name) {
+        this.name = name;
+    }
 
-    public String getRole() { return role; }
-    public void setRole(String role) { this.role = role; }
+    public String getSurname() {
+        return surname;
+    }
 
-    public boolean isActive() { return isActive; }
-    public void setActive(boolean active) { isActive = active; }
+    public void setSurname(String surname) {
+        this.surname = surname;
+    }
 
-    public boolean isEnabled() { return enabled; }
-    public void setEnabled(boolean enabled) { this.enabled = enabled; }
-    
-    public String getDiplomaNumber() { return diplomaNumber; }
-    public void setDiplomaNumber(String diplomaNumber) { this.diplomaNumber = diplomaNumber; }
+    public String getEmail() {
+        return email;
+    }
 
-    public String getGraduateSchool() { return graduateSchool; }
-    public void setGraduateSchool(String graduateSchool) { this.graduateSchool = graduateSchool; }
+    public void setEmail(String email) {
+        this.email = email;
+    }
 
-    public LocalDateTime getCreatedAt() { return createdAt; }
-    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+    public String getRole() {
+        return role;
+    }
 
-    // İsteğe bağlı olarak toString, equals, hashCode metotları eklenebilir.
+    public void setRole(String role) {
+        this.role = role;
+    }
+
+    public boolean isActive() {
+        return isActive;
+    }
+
+    public void setActive(boolean active) {
+        isActive = active;
+    }
+
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+    }
+
+    public String getDiplomaNumber() {
+        return diplomaNumber;
+    }
+
+    public void setDiplomaNumber(String diplomaNumber) {
+        this.diplomaNumber = diplomaNumber;
+    }
+
+    public String getGraduateSchool() {
+        return graduateSchool;
+    }
+
+    public void setGraduateSchool(String graduateSchool) {
+        this.graduateSchool = graduateSchool;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
 }

@@ -9,7 +9,6 @@ function AdminAnnouncementsPage() {
         content: ''
     });
 
-    // Duyuruları getir
     const fetchAnnouncements = async () => {
         try {
             const response = await axiosInstance.get('/announcements');
@@ -20,7 +19,6 @@ function AdminAnnouncementsPage() {
         }
     };
 
-    // Yeni duyuru oluştur
     const handleCreateAnnouncement = async () => {
         if (!newAnnouncement.title || !newAnnouncement.content) {
             alert('Başlık ve içerik boş olamaz!');
@@ -34,7 +32,6 @@ function AdminAnnouncementsPage() {
             });
 
             if (response.status === 201) {
-                // Başarılı oluşturma
                 setAnnouncements(prev => [...prev, response.data]);
                 setShowAddAnnouncement(false);
                 setNewAnnouncement({ title: '', content: '' });
@@ -66,7 +63,6 @@ function AdminAnnouncementsPage() {
         }
     };
 
-    // Duyuru sil
     const handleDeleteAnnouncement = async (announcementId) => {
         if (!window.confirm('Bu duyuruyu silmek istediğinizden emin misiniz?')) {
             return;

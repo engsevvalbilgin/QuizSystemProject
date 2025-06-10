@@ -48,9 +48,9 @@ public class DetailedQuizAttemptDto {
         private double earnedPoints;
         private double maxPoints;
         private String correctAnswerText;
-        private String aiExplanation; // AI'nin yaptığı değerlendirme açıklaması
-        private Integer aiScore; // AI'nin verdiği puan
-    }
+        private String aiExplanation; 
+        private Integer aiScore; 
+        }
 
     @Data
     @Builder

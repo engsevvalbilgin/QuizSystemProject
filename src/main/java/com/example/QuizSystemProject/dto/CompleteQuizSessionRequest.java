@@ -11,7 +11,7 @@ public class CompleteQuizSessionRequest {
     @Data
     public static class QuestionAnswerDto {
         private int questionId;
-        private List<Integer> selectedOptionIds; // Çoklu seçim için
-        private String openEndedAnswer; // Açık uçlu soru için
+        private List<Integer> selectedOptionIds;
+        private String openEndedAnswer; 
     }
 }

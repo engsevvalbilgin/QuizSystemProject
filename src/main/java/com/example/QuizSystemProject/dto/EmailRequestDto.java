@@ -1,30 +1,25 @@
-package com.example.QuizSystemProject.dto; // Paket adınızın doğru olduğundan emin olun
+package com.example.QuizSystemProject.dto; 
 
-import jakarta.validation.constraints.Email; // Email formatı için
-import jakarta.validation.constraints.NotBlank; // Boş olamaz kontrolü için
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 
-// Parola sıfırlama isteği veya sadece email bilgisini göndermek için kullanılacak DTO.
 public class EmailRequestDto {
 
     @NotBlank(message = "Email boş olamaz")
     @Email(message = "Geçerli bir email formatı girin")
-    private String email; // Email adresi
+    private String email; 
 
     private String verificationLink;
     private String subject;
     private String body;
 
-    // --- Constructorlar ---
-    // Argümansız constructor
     public EmailRequestDto() {
     }
 
-    // Email alan constructor
     public EmailRequestDto(String email) {
         this.email = email;
     }
 
-    // Tüm alanları alan constructor
     public EmailRequestDto(String email, String verificationLink, String subject, String body) {
         this.email = email;
         this.verificationLink = verificationLink;
@@ -32,7 +27,6 @@ public class EmailRequestDto {
         this.body = body;
     }
 
-    // --- Getter ve Setter ---
     public String getEmail() {
         return email;
     }

@@ -1,7 +1,6 @@
 import axiosInstance from './axiosInstance';
 
 const teacherService = {
-    // Register as a teacher
     registerTeacher: async (teacherData) => {
         try {
             const response = await axiosInstance.post('/auth/register/teacher', teacherData);
@@ -11,7 +10,6 @@ const teacherService = {
         }
     },
 
-    // Get pending teacher requests (admin only)
     getPendingRequests: async () => {
         try {
             const response = await axiosInstance.get('/users/teachers/pending');
@@ -21,7 +19,6 @@ const teacherService = {
         }
     },
 
-    // Review teacher request (admin only)
     reviewTeacherRequest: async (userId, approve) => {
         try {
             const response = await axiosInstance.post(`/users/teachers/${userId}/review`, { approve });

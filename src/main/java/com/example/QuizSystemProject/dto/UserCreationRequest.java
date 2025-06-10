@@ -24,17 +24,16 @@ public class UserCreationRequest {
     @Size(min = 6, message = "Password must be at least 6 characters long")
     private String password;
 
-    @NotBlank(message = "Username cannot be blank") // Added validation for username
-    private String username; 
+    @NotBlank(message = "Username cannot be blank")
+    private String username;
 
     @NotBlank(message = "Role cannot be blank")
-    private String role; // e.g., "ROLE_STUDENT", "ROLE_TEACHER", "ROLE_ADMIN"
+    private String role;
 
     @NotNull(message = "Age cannot be null")
     @Min(value = 0, message = "Age cannot be negative")
     private Integer age;
 
-    // Getters and Setters
     public String getName() {
         return name;
     }

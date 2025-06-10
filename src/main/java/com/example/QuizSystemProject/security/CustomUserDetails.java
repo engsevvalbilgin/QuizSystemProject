@@ -7,10 +7,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Collection;
 import java.util.Objects;
 
-/**
- * Custom UserDetails implementation that wraps our User entity.
- * This allows us to access the full User object in the security context.
- */
+
 public class CustomUserDetails implements UserDetails {
     private static final long serialVersionUID = 1L;
 
@@ -63,18 +60,12 @@ public class CustomUserDetails implements UserDetails {
         return user.isActive();
     }
     
-    /**
-     * Get the underlying User entity
-     * @return the User entity
-     */
+  
     public User getUser() {
         return user;
     }
     
-    /**
-     * Get the user ID
-     * @return the user ID
-     */
+   
     public int getId() {
         return user.getId();
     }

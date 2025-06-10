@@ -7,7 +7,7 @@ function TeacherRequestsPage() {
     const [error, setError] = useState(null);
     const [actionLoading, setActionLoading] = useState(false);
 
-    // Fetch pending teacher requests
+    
     const fetchRequests = async () => {
         setLoading(true);
         setError(null);
@@ -22,18 +22,18 @@ function TeacherRequestsPage() {
         }
     };
 
-    // Load requests when component mounts
+    
     useEffect(() => {
         fetchRequests();
     }, []);
 
-    // Handle request approval/rejection
+    
     const handleRequestAction = async (userId, approve) => {
         setActionLoading(true);
         try {
-            // Send approve as a URL parameter instead of request body
+            
             await axiosInstance.post(`/users/teachers/${userId}/review?approve=${approve}`);
-            // Refresh the list after action
+            
             await fetchRequests();
         } catch (err) {
             console.error('Error processing teacher request:', err);

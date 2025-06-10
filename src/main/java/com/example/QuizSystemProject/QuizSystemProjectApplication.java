@@ -1,6 +1,6 @@
 package com.example.QuizSystemProject;
 
-import com.example.QuizSystemProject.Model.User; // Bu importlar aslında 'Model' paketinden geliyor
+import com.example.QuizSystemProject.Model.User; 
 import com.example.QuizSystemProject.Model.Teacher;
 import com.example.QuizSystemProject.Model.Student;
 import com.example.QuizSystemProject.Model.Admin;
@@ -11,16 +11,14 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.DependsOn; // Önemli: @DependsOn importu
+import org.springframework.context.annotation.DependsOn; 
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-/**
- * QuizSystemProjectApplication
- */
+
 @SpringBootApplication
 public class QuizSystemProjectApplication {
 
@@ -28,7 +26,6 @@ public class QuizSystemProjectApplication {
     private final UserRepository userRepository;
     private final QuestionTypeRepository questionTypeRepository;
 
-    // Constructor Injection (Autowired yerine daha modern ve önerilen yöntem)
     public QuizSystemProjectApplication(PasswordEncoder passwordEncoder,
                                         UserRepository userRepository,
                                         QuestionTypeRepository questionTypeRepository) {
@@ -42,24 +39,18 @@ public class QuizSystemProjectApplication {
     }
 
     @Bean
-    // Bu CommandLineRunner'ın demoUser'dan önce çalışmasını sağlayabiliriz.
-    // Ancak her ikisi de @DependsOn("entityManagerFactory") kullandığı için
-    // Spring bunların oluşturulduktan sonra çalışmasını garantileyecektir.
     public CommandLineRunner initQuestionTypes() {
         return args -> {
-            // Soru tiplerini kontrol et, yoksa ekle
+           
             if (questionTypeRepository.count() == 0) {
                 System.out.println("Varsayılan soru tipleri oluşturuluyor...");
 
-                // Çoktan seçmeli soru tipi (ID: 1) - Frontend'de de 1 olarak kullanılıyor
                 QuestionType multipleChoice = new QuestionType();
-                multipleChoice.setId(1); // ID'yi manuel olarak ayarlıyoruz, dikkatli kullanılmalı
+                multipleChoice.setId(1); 
                 multipleChoice.setTypeName("Çoktan Seçmeli");
                 questionTypeRepository.save(multipleChoice);
-
-                // Açık uçlu soru tipi (ID: 2) - Frontend'de de 2 olarak kullanılıyor
                 QuestionType openEnded = new QuestionType();
-                openEnded.setId(2); // ID'yi manuel olarak ayarlıyoruz, dikkatli kullanılmalı
+                openEnded.setId(2); 
                 openEnded.setTypeName("Açık Uçlu");
                 questionTypeRepository.save(openEnded);
 
@@ -71,29 +62,24 @@ public class QuizSystemProjectApplication {
     }
 
     @Bean
-    // @DependsOn ile entityManagerFactory ve dataSource bean'lerine bağımlılık belirtiyoruz.
-    // Bu, DDL (tablo oluşturma) işlemlerinin bu metod çalışmadan önce tamamlanmasını sağlar.
     @DependsOn({"entityManagerFactory", "dataSource"})
     public CommandLineRunner demoUser() {
         return (args) -> {
 
             if (userRepository.findByUsername("adminuser").isPresent()) {
                 System.out.println("\nVarsayılan kullanıcılar zaten mevcut, tekrar eklenmiyor.");
-                return; // Kullanıcılar zaten varsa metodu sonlandır
+                return; 
             }
 
             System.out.println("\nVarsayılan kullanıcılar ekleniyor...");
 
-            // -- Kullanıcı Oluşturma ve Kaydetme (CREATE) --
-
-            // Admin user
             Admin adminUser = new Admin();
             adminUser.setName("Admin");
             adminUser.setSurname("Soyadi");
             adminUser.setAge(45);
             adminUser.setEmail("admin@example.com");
             adminUser.setUsername("adminuser");
-            adminUser.setPassword(passwordEncoder.encode("adminpassword")); // Parola şifreleniyor
+            adminUser.setPassword(passwordEncoder.encode("adminpassword")); 
             adminUser.setRole("ROLE_ADMIN");
             adminUser.setEnabled(true);
             adminUser.setActive(true);
@@ -103,17 +89,16 @@ public class QuizSystemProjectApplication {
             System.out.println("Kaydedilen Yönetici: " + adminUser.getUsername());
 
 
-            // Öğrenci Kullanıcısı
             Student studentUser = new Student();
             studentUser.setName("Ogrenci");
             studentUser.setSurname("Soyadi");
             studentUser.setAge(20);
             studentUser.setEmail("student@example.com");
             studentUser.setUsername("studentuser");
-            studentUser.setPassword(passwordEncoder.encode("studentpassword")); // Parola şifreleniyor
+            studentUser.setPassword(passwordEncoder.encode("studentpassword")); 
             studentUser.setRole("ROLE_STUDENT");
             studentUser.setSchoolName("Default School");
-            studentUser.setEnabled(false); // Varsayılan olarak etkin değil
+            studentUser.setEnabled(false); 
             studentUser.setActive(true);
             studentUser.setCreatedDate(LocalDateTime.now());
             studentUser.setUpdatedDate(LocalDateTime.now());
@@ -121,16 +106,15 @@ public class QuizSystemProjectApplication {
             System.out.println("Kaydedilen Öğrenci: " + studentUser.getUsername());
 
 
-            // Öğretmen Kullanıcısı
             Teacher teacherUser = new Teacher();
             teacherUser.setName("Ogretmen");
             teacherUser.setSurname("Soyadi");
             teacherUser.setAge(35);
             teacherUser.setEmail("teacher@example.com");
             teacherUser.setUsername("teacheruser");
-            teacherUser.setPassword(passwordEncoder.encode("teacherpassword")); // Parola şifreleniyor
+            teacherUser.setPassword(passwordEncoder.encode("teacherpassword")); 
             teacherUser.setRole("ROLE_TEACHER");
-            teacherUser.setEnabled(false); // Varsayılan olarak etkin değil
+            teacherUser.setEnabled(false); 
             teacherUser.setActive(true);
             teacherUser.setCreatedDate(LocalDateTime.now());
             teacherUser.setUpdatedDate(LocalDateTime.now());
@@ -143,16 +127,14 @@ public class QuizSystemProjectApplication {
 
             System.out.println("Varsayılan kullanıcı ekleme tamamlandı.");
 
-            // --- Temel CRUD/Okuma testleri (İsteğe bağlı, burada kalabilir veya silinebilir) ---
 
             System.out.println("\nBaşlangıç Veri Ekleme ve Temel Okuma Testleri:");
 
             System.out.println("\nTüm Kullanıcılar:");
-            List<User> users = userRepository.findAll(); // Tüm kullanıcıları çekme
+            List<User> users = userRepository.findAll(); 
             users.forEach(user -> System.out.println(user.getUsername() + " - " + user.getRole() + " - Enabled: " + user.isEnabled()));
 
             System.out.println("\nKullanıcı adı 'studentuser' olan Kullanıcı:");
-            // Kullanıcı adı 'studentuser' olan kullanıcıyı bulmak için filtreleme
             Optional<User> userById = users.stream()
                                             .filter(u -> u.getUsername().equals("studentuser"))
                                             .findFirst();
