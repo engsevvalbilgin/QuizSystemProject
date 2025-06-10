@@ -15,11 +15,6 @@ public class AIController {
 
     private final AIService aiService;
 
-    /**
-     * Endpoint to evaluate open-ended answers
-     * @param requestBody Contains questionText, studentAnswer, correctAnswerText, and maxPoints
-     * @return Awarded points and explanation
-     */
     @PostMapping("/evaluate")
     public ResponseEntity<Map<String, Object>> evaluateAnswer(
             @RequestBody Map<String, Object> requestBody
@@ -29,10 +24,8 @@ public class AIController {
         String correctAnswerText = (String) requestBody.get("correctAnswerText");
         int maxPoints = Integer.parseInt(requestBody.get("maxPoints").toString());
         
-        // Use the AI service to evaluate the answer
         OpenEndedEvaluationResultDto evaluationResult = aiService.evaluateOpenEndedAnswer(questionText, studentAnswer, correctAnswerText, maxPoints);
         
-        // Return the result
         return ResponseEntity.ok(Map.of(
             "earnedPoints", evaluationResult.getEarnedPoints(),
             "maxPoints", maxPoints,

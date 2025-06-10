@@ -56,7 +56,6 @@ function StudentProfilePage() {
             [name]: value
         }));
         
-        // Clear any errors for this field
         if (formErrors[name]) {
             setFormErrors(prev => ({
                 ...prev,
@@ -72,7 +71,6 @@ function StudentProfilePage() {
             [name]: value
         }));
         
-        // Clear any errors for this field
         if (formErrors[name]) {
             setFormErrors(prev => ({
                 ...prev,
@@ -132,8 +130,6 @@ function StudentProfilePage() {
         try {
             console.log('Şifre değiştirme isteği gönderiliyor:', student.id);
             
-            // Use the correct API endpoint without duplicate /api prefix
-            // axiosInstance already adds the /api prefix in its baseURL configuration
             const response = await axiosInstance.post(`/users/change-password`, {
                 currentPassword: passwordForm.oldPassword,
                 newPassword: passwordForm.newPassword
@@ -168,7 +164,6 @@ function StudentProfilePage() {
         try {
             console.log('E-posta değiştirme isteği gönderiliyor:', student.id);
             
-            // Use the verification endpoint to send verification email
             const response = await axiosInstance.post('/users/change-email', {
                 newEmail: emailForm.newEmail,
                 password: emailForm.password
@@ -217,7 +212,6 @@ function StudentProfilePage() {
     
     return (
         <div style={{ display: 'flex', minHeight: '100vh' }}>
-            {/* Sidebar */}
             <div style={{
                 width: '250px',
                 backgroundColor: '#f8f9fa',
@@ -341,14 +335,13 @@ function StudentProfilePage() {
                                 }}
                             >
                                 <span>📢</span>
-                                <span>Duyurular</span> {/* Added closing span for "Duyurular" */}
+                                <span>Duyurular</span>
                             </button>
                         </li>
                     </ul>
                 </nav>
             </div>
             
-            {/* Main Content */}
             <div style={{ flex: 1, padding: '20px' }}>
                 <h2 style={{ borderBottom: '1px solid #dee2e6', paddingBottom: '10px', marginBottom: '20px' }}>Profil Bilgilerim</h2>
                 
@@ -453,7 +446,6 @@ function StudentProfilePage() {
                         </div>
                     </div>
                     
-                    {/* Şifre Değiştirme Formu */}
                     {showPasswordForm && (
                         <div style={{ marginTop: '30px', padding: '20px', backgroundColor: '#f8f9fa', borderRadius: '5px' }}>
                             <h3 style={{ marginBottom: '15px' }}>Şifre Değiştir</h3>
@@ -537,7 +529,6 @@ function StudentProfilePage() {
                         </div>
                     )}
                     
-                    {/* E-posta Değiştirme Formu */}
                     {showEmailForm && (
                         <div style={{ marginTop: '30px', padding: '20px', backgroundColor: '#f8f9fa', borderRadius: '5px' }}>
                             <h3 style={{ marginBottom: '15px' }}>E-posta Değiştir</h3>

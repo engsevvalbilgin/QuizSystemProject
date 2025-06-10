@@ -5,8 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Data
 @NoArgsConstructor
@@ -27,15 +25,14 @@ public class UserDto {
             return null;
         }
         return new UserDto(
-            user.getId(),
-            user.getName(),
-            user.getSurname(),
-            user.getAge(),
-            user.getEmail(),
-            user.getUsername(),
-            user.getRole(),
-            user.isEnabled(),
-            user.getPendingEmail()
-        );
+                user.getId(),
+                user.getName(),
+                user.getSurname(),
+                user.getAge(),
+                user.getEmail(),
+                user.getUsername(),
+                user.getRole(),
+                user.isEnabled(),
+                user.getPendingEmail());
     }
 }

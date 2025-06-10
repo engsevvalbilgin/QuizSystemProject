@@ -68,7 +68,6 @@ function TeacherAnnouncementsPage() {
 
     return (
         <div style={{ display: 'flex', minHeight: '100vh' }}>
-            {/* Sidebar */}
             <div style={{
                 width: '250px',
                 backgroundColor: '#f8f9fa',
@@ -197,7 +196,6 @@ function TeacherAnnouncementsPage() {
                 </nav>
             </div>
             
-            {/* Main Content */}
             <div style={{ flex: 1, padding: '20px', overflowY: 'auto' }}>
                 <div className="mb-6">
                     <h1 className="text-2xl font-bold text-gray-800">Duyurular</h1>

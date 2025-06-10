@@ -18,7 +18,6 @@ function QuizResultsPage() {
             setError(null);
             console.log('Fetching detailed results for attempt:', attemptId);
             
-            // Use the new detailed endpoint
             const response = await axiosInstance.get(`/student/quiz-attempts/${attemptId}/details`);
             
             console.log('=== API RESPONSE ===');
@@ -32,15 +31,12 @@ function QuizResultsPage() {
             console.log('Question results count:', response.data.questionResults?.length);
             console.log('All questions:', response.data.questionResults);
             
-            // Tüm soru tiplerini kontrol et
             const questionTypes = response.data.questionResults?.map(q => q.questionType) || [];
             console.log('Question types:', [...new Set(questionTypes)]);
             
-            // Bir çoktan seçmeli soru örneği
             const mcqExample = response.data.questionResults?.find(q => q.questionType === 'MULTIPLE_CHOICE');
             console.log('Multiple choice example:', mcqExample);
             
-            // Bir açık uçlu soru örneği
             const openEndedExample = response.data.questionResults?.find(q => q.questionType === 'OPEN_ENDED');
             console.log('Open-ended example:', openEndedExample);
             console.log('==================');
@@ -55,7 +51,6 @@ function QuizResultsPage() {
                 data: err.response?.data
             });
             
-            // Redirect to login if unauthorized
             if (err.response?.status === 401) {
                 console.log('Unauthorized, redirecting to login...');
                 navigate('/login', { replace: true });
@@ -66,7 +61,6 @@ function QuizResultsPage() {
     }, [attemptId, navigate]);
 
     useEffect(() => {
-        // Only fetch if we have an attemptId
         if (attemptId) {
             fetchResults();
         } else {
@@ -120,18 +114,17 @@ function QuizResultsPage() {
     const scorePercentage = Math.round((results.correctAnswers / results.totalQuestions) * 100);
     const isPassed = scorePercentage >= results.passingScore;
 
-    // Çoktan seçmeli soruyu render et
     const renderMultipleChoiceQuestion = (question, index) => {
         const isCorrect = question.isCorrect;
         const options = Array.isArray(question.options) ? question.options : [];
         const selectedOptionIds = Array.isArray(question.selectedOptionIds) ? question.selectedOptionIds : [];
         
-        // Öğrencinin seçtiği şıkları bul
+    
         const selectedOptions = selectedOptionIds
             .map(id => options.find(opt => opt.id === id))
             .filter(Boolean);
 
-        // Doğru cevabı bul
+        
         const correctOption = options.find(opt => opt.correct);
         
         console.log(`Soru ${index + 1} detayları:`, {
@@ -195,7 +188,6 @@ function QuizResultsPage() {
         );
     };
     
-    // Açık uçlu soruyu render et
     const renderOpenEndedQuestion = (question, index) => {
         const isCorrect = question.isCorrect;
         
@@ -263,9 +255,7 @@ function QuizResultsPage() {
         );
     };
     
-    // Soru tipine göre doğru render fonksiyonunu seç
     const renderQuestionResult = (question, index) => {
-        // Genel debug bilgisi
         
         try {
             if (question.questionType === 'MULTIPLE_CHOICE') {
@@ -286,21 +276,17 @@ function QuizResultsPage() {
         }
     };
 
-    // Sort questions by their 'number' property, falling back to 'questionId' if 'number' is not available
     const sortedQuestionResults = results.questionResults ? 
         [...results.questionResults].sort((a, b) => {
-            // Prioritize sorting by 'number' if available
             if (a.number !== undefined && a.number !== null && b.number !== undefined && b.number !== null) {
                 return a.number - b.number;
             }
-            // Fallback to 'questionId' if 'number' is not available
             return a.questionId - b.questionId;
         }) : 
         [];
 
     return (
         <div style={{ display: 'flex', minHeight: '100vh' }}>
-            {/* Sidebar */}
             <div style={{
                 width: '250px',
                 backgroundColor: '#f8f9fa',
@@ -425,14 +411,13 @@ function QuizResultsPage() {
                                 }}
                             >
                                 <span>📢</span>
-                                <span>Duyurular</span> {/* Added closing span for "Duyurular" */}
+                                <span>Duyurular</span> 
                             </button>
                         </li>
                     </ul>
                 </nav>
             </div>
             
-            {/* Main Content */}
             <div style={{ flex: 1, padding: '20px', overflowY: 'auto' }}>
                 <div className="max-w-4xl mx-auto">
                     <div className="bg-white rounded-lg shadow-md p-6 mb-6">
@@ -479,8 +464,6 @@ function QuizResultsPage() {
                                     </p>
                                 </div>
                                 
-                                {/* Removed: Quiz Süresi */}
-                                {/* Removed: Açıklama - moved to general info block */}
                             </div>
                             {results.description && (
                                 <div className="md:col-span-2 mt-4">
@@ -494,27 +477,22 @@ function QuizResultsPage() {
                             )}
                         </div>
                         
-                        {/* Soru Detayları Bölümü */}
                         <div className="mt-8">
                             <h2 className="text-xl font-semibold mb-4">Soru Detayları</h2>
                             
-                            {/* Soru sayısı ve genel bilgiler */}
                             <div className="mb-6 p-4 bg-gray-50 rounded-lg">
                                 <div className="grid grid-cols-2 gap-4">
                                     <div>
                                         <p className="text-sm text-gray-600">Toplam Soru:</p>
                                         <p className="font-medium">{results.questionResults?.length || 0}</p>
                                     </div>
-                                    {/* Removed: Doğru Sayısı */}
                                     <div>
                                         <p className="text-sm text-gray-600">Toplam Puan:</p>
                                         <p className="font-medium">{results.earnedPoints} / {results.totalPoints}</p>
                                     </div>
-                                    {/* Removed: Geçme Notu */}
                                 </div>
                             </div>
                             
-                            {/* Sorular listesi */}
                             <div className="space-y-6">
                                 {sortedQuestionResults.length > 0 ? (
                                     sortedQuestionResults.map((question, index) => renderQuestionResult(question, index))

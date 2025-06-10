@@ -2,11 +2,10 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 
 function MainScreen() {
-  // CSS değişkenlerini JavaScript objeleri olarak tanımlayabiliriz
   const colors = {
-    primary: '#4CAF50', // Yeşil
-    secondary: '#FFC107', // Sarı
-    accent: '#03A9F4', // Açık Mavi
+    primary: '#4CAF50', 
+    secondary: '#FFC107', 
+    accent: '#03A9F4', 
     text: '#333',
     bg: '#f4f7f6',
     white: '#ffffff',
@@ -23,7 +22,7 @@ function MainScreen() {
     cursor: 'pointer',
     transition: 'all 0.3s ease',
     margin: '0 10px',
-    border: 'none', // Inline stillerde varsayılan border'ı kaldırmak için
+    border: 'none', 
   };
 
   return (
@@ -56,8 +55,6 @@ function MainScreen() {
               color: colors.text,
               border: `2px solid ${colors.secondary}`,
             }}
-            // Hover efekti için JavaScript ile event listener eklemek gerekir, bu karmaşıklaşır.
-            // Bu yüzden inline stillerde hover efektleri zorlayıcıdır.
           >
             Giriş Yap
           </Link>
@@ -91,7 +88,6 @@ function MainScreen() {
             borderRadius: '10px',
             boxShadow: '0 4px 10px rgba(0, 0, 0, 0.08)',
             textAlign: 'left',
-            // Hover için JavaScript event listener gerekir
           }}>
             <h3 style={{ fontSize: '1.5em', color: colors.accent, marginBottom: '15px' }}>
               Geniş Kategori Yelpazesi

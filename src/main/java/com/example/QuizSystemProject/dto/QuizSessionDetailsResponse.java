@@ -1,114 +1,144 @@
-package com.example.QuizSystemProject.dto; // Paket adınızın doğru olduğundan emin olun
+package com.example.QuizSystemProject.dto; 
+import com.example.QuizSystemProject.Model.QuizSession; 
+import java.time.Duration; 
+import java.time.LocalDateTime;
+import java.util.List; 
+import java.util.stream.Collectors; 
 
-import com.example.QuizSystemProject.Model.QuizSession; // Entity'den dönüşüm için QuizSession Entity'sini import edin
-
-import java.time.Duration; // Süre hesaplama için
-import java.time.LocalDateTime; // Tarih/saat için
-import java.util.List; // Cevap listesi için
-import java.util.stream.Collectors; // Akış işlemleri için
-
-// Bu DTO, API yanıtlarında bir quiz oturumunun tüm detaylarını (verilen cevaplar dahil) taşır.
 public class QuizSessionDetailsResponse {
 
-    private int id;
-    private int quizId; // Hangi quize ait olduğu
-    private String quizName; // Quizin adı
-    private LocalDateTime startTime; // Başlangıç zamanı
-    private LocalDateTime endTime; // Bitiş zamanı
-    private int score; // Oturumda alınan puan
-    private int durationMinutes; // Oturum süresi (dakika cinsinden)
+     private int id;
+     private int quizId;
+     private String quizName;
+     private LocalDateTime startTime;
+     private LocalDateTime endTime; 
+     private int score; 
+     private int durationMinutes; 
 
-    // Oturumun sahibi olan öğrencinin temel bilgileri de dahil edilebilir
-    private int studentId;
-    private String studentUsername;
+     private int studentId;
+     private String studentUsername;
 
-    private List<AnswerAttemptResponse> answers; // Oturumdaki cevaplar listesi (AnswerAttemptResponse DTO'su)
+     private List<AnswerAttemptResponse> answers; 
+     public QuizSessionDetailsResponse() {
+     }
 
+     public QuizSessionDetailsResponse(QuizSession session) {
+          this.id = session.getId();
 
-    // JPA için argümansız constructor
-    public QuizSessionDetailsResponse() {
-    }
+          if (session.getQuiz() != null) {
+               this.quizId = session.getQuiz().getId();
+               this.quizName = session.getQuiz().getName();
+          } else {
+               this.quizId = -1;
+               this.quizName = "Bilinmeyen Quiz";
+          }
 
-    // QuizSession Entity'sinden bu DTO'ya dönüşüm yapmayı kolaylaştıran constructor
-    public QuizSessionDetailsResponse(QuizSession session) {
-        this.id = session.getId();
+          this.startTime = session.getStartTime();
+          this.endTime = session.getEndTime();
+          this.score = session.getScore();
 
-        // İlişkili Quiz'den bilgileri alalım
-        if (session.getQuiz() != null) {
-            this.quizId = session.getQuiz().getId();
-            this.quizName = session.getQuiz().getName();
-        } else {
-             this.quizId = -1;
-             this.quizName = "Bilinmeyen Quiz";
-        }
+          if (session.getStartTime() != null && session.getEndTime() != null) {
+               Duration duration = Duration.between(session.getStartTime(), session.getEndTime());
+               this.durationMinutes = (int) duration.toMinutes();
+          } else {
+               this.durationMinutes = 0;
+          }
 
-        this.startTime = session.getStartTime();
-        this.endTime = session.getEndTime();
-        this.score = session.getScore();
+          if (session.getStudent() != null) {
+               this.studentId = session.getStudent().getId();
+               this.studentUsername = session.getStudent().getUsername();
+          } else {
+               this.studentId = -1;
+               this.studentUsername = "Bilinmeyen Öğrenci";
+          }
 
-         // Süreyi hesaplayıp DTO alanına set edelim (Null kontrolleri önemli)
-         if (session.getStartTime() != null && session.getEndTime() != null) {
-              Duration duration = Duration.between(session.getStartTime(), session.getEndTime());
-              this.durationMinutes = (int) duration.toMinutes();
-         } else {
-              this.durationMinutes = 0;
-         }
+          if (session.getAnswers() != null && !session.getAnswers().isEmpty()) {
+               this.answers = session.getAnswers().stream()
+                         .map(AnswerAttemptResponse::new)
+                         .collect(Collectors.toList());
+          } else {
+               this.answers = List.of();
+          }
+     }
 
+     public int getId() {
+          return id;
+     }
 
-        // İlişkili Öğrenci'den bilgileri alalım
-        if (session.getStudent() != null) {
-            this.studentId = session.getStudent().getId();
-            this.studentUsername = session.getStudent().getUsername();
-        } else {
-             this.studentId = -1;
-             this.studentUsername = "Bilinmeyen Öğrenci";
-        }
+     public void setId(int id) {
+          this.id = id;
+     }
 
+     public int getQuizId() {
+          return quizId;
+     }
 
-        // Oturumdaki AnswerAttempt Entity'lerini AnswerAttemptResponse DTO'larına dönüştür
-        if (session.getAnswers() != null && !session.getAnswers().isEmpty()) {
-             this.answers = session.getAnswers().stream()
-                                   .map(AnswerAttemptResponse::new) // Her AnswerAttempt Entity'sini AnswerAttemptResponse DTO'suna dönüştür
-                                   .collect(Collectors.toList());
-        } else {
-             this.answers = List.of(); // Cevap yoksa boş liste döndür
-        }
-    }
+     public void setQuizId(int quizId) {
+          this.quizId = quizId;
+     }
 
-    // Getter ve Setterlar
-    // IDE ile otomatik oluşturabilirsiniz.
+     public String getQuizName() {
+          return quizName;
+     }
 
-    public int getId() { return id; }
-    public void setId(int id) { this.id = id; }
+     public void setQuizName(String quizName) {
+          this.quizName = quizName;
+     }
 
-    public int getQuizId() { return quizId; }
-    public void setQuizId(int quizId) { this.quizId = quizId; }
+     public LocalDateTime getStartTime() {
+          return startTime;
+     }
 
-    public String getQuizName() { return quizName; }
-    public void setQuizName(String quizName) { this.quizName = quizName; }
+     public void setStartTime(LocalDateTime startTime) {
+          this.startTime = startTime;
+     }
 
-    public LocalDateTime getStartTime() { return startTime; }
-    public void setStartTime(LocalDateTime startTime) { this.startTime = startTime; }
+     public LocalDateTime getEndTime() {
+          return endTime;
+     }
 
-    public LocalDateTime getEndTime() { return endTime; }
-    public void setEndTime(LocalDateTime endTime) { this.endTime = endTime; }
+     public void setEndTime(LocalDateTime endTime) {
+          this.endTime = endTime;
+     }
 
-    public int getScore() { return score; }
-    public void setScore(int score) { this.score = score; }
+     public int getScore() {
+          return score;
+     }
 
-    public int getDurationMinutes() { return durationMinutes; }
-    public void setDurationMinutes(int durationMinutes) { this.durationMinutes = durationMinutes; }
+     public void setScore(int score) {
+          this.score = score;
+     }
 
-    public int getStudentId() { return studentId; }
-    public void setStudentId(int studentId) { this.studentId = studentId; }
+     public int getDurationMinutes() {
+          return durationMinutes;
+     }
 
-    public String getStudentUsername() { return studentUsername; }
-    public void setStudentUsername(String studentUsername) { this.studentUsername = studentUsername; }
+     public void setDurationMinutes(int durationMinutes) {
+          this.durationMinutes = durationMinutes;
+     }
 
+     public int getStudentId() {
+          return studentId;
+     }
 
-    public List<AnswerAttemptResponse> getAnswers() { return answers; }
-    public void setAnswers(List<AnswerAttemptResponse> answers) { this.answers = answers; }
+     public void setStudentId(int studentId) {
+          this.studentId = studentId;
+     }
 
+     public String getStudentUsername() {
+          return studentUsername;
+     }
 
-    // İsteğe bağlı olarak toString, equals, hashCode metotları eklenebilir.
+     public void setStudentUsername(String studentUsername) {
+          this.studentUsername = studentUsername;
+     }
+
+     public List<AnswerAttemptResponse> getAnswers() {
+          return answers;
+     }
+
+     public void setAnswers(List<AnswerAttemptResponse> answers) {
+          this.answers = answers;
+     }
+
 }

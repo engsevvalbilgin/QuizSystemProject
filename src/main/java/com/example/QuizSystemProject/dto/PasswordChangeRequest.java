@@ -1,21 +1,16 @@
-package com.example.QuizSystemProject.dto; // Paket adınızın doğru olduğundan emin olun
+package com.example.QuizSystemProject.dto;
 
-import jakarta.validation.constraints.NotBlank; // Boş olamaz kontrolü için
-import jakarta.validation.constraints.Size; // Uzunluk kontrolü için
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 
-// Bu DTO, kullanıcı parolasını değiştirmek için kullanılır.
 public class PasswordChangeRequest {
 
-    // Kullanıcı kendi parolasını değiştiriyorsa mevcut parolayı doğrulamak gerekir.
-    // Admin değiştiriyorsa bu alan boş gelebilir veya dikkate alınmaz.
-    // Bu yüzden @NotBlank koymuyoruz, boş veya null olabilir.
     private String currentPassword;
 
-    @NotBlank(message = "Yeni parola boş olamaz") // Yeni parola kesinlikle boş olamaz
-    @Size(min = 6, message = "Yeni parola en az 6 karakter olmalı") // Minimum uzunluk kısıtlaması
+    @NotBlank(message = "Yeni parola boş olamaz")
+    @Size(min = 6, message = "Yeni parola en az 6 karakter olmalı")
     private String newPassword;
 
-    // Getter ve Setterlar
     public PasswordChangeRequest() {}
 
     public String getCurrentPassword() {

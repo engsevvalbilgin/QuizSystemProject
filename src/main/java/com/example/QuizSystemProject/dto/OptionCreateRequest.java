@@ -11,18 +11,28 @@ public class OptionCreateRequest {
     private String text;
 
     @NotNull(message = "Doğru cevap bilgisi boş olamaz")
-    private Boolean isCorrect; // Boolean için @NotNull
+    private Boolean isCorrect;
 
-    // Getter ve Setterlar
-    public OptionCreateRequest() {}
+    public OptionCreateRequest() {
+    }
 
-    public String getText() { return text; }
-    public void setText(String text) { this.text = text; }
+    public String getText() {
+        return text;
+    }
 
-    // Jackson için getter metodu getXxx() formatında olmalı
-    public Boolean getIsCorrect() { return isCorrect; }
-    public void setCorrect(Boolean correct) { isCorrect = correct; }
-    
-    // Boolean özellikler için ek isXxx() yardımcı metodu
-    public Boolean isCorrect() { return isCorrect; }
+    public void setText(String text) {
+        this.text = text;
+    }
+
+    public Boolean getIsCorrect() {
+        return isCorrect;
+    }
+
+    public void setCorrect(Boolean correct) {
+        isCorrect = correct;
+    }
+
+    public Boolean isCorrect() {
+        return isCorrect;
+    }
 }

@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import axiosInstance from '../api/axiosInstance'; // axiosInstance.js dosyanızın doğru olduğundan emin olun
+import axiosInstance from '../api/axiosInstance';
 
 function SolveQuizPage() {
     const { quizId } = useParams();
     const navigate = useNavigate();
-    const token = localStorage.getItem('token'); // Token'ı component mount olduğunda al
+    const token = localStorage.getItem('token');
 
-    // States
+
     const [quiz, setQuiz] = useState(null);
     const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
     const [selectedAnswers, setSelectedAnswers] = useState({});
@@ -17,21 +17,18 @@ function SolveQuizPage() {
     const [isSubmitted, setIsSubmitted] = useState(false);
     const [quizStartTime, setQuizStartTime] = useState(null);
     const [results, setResults] = useState(null);
-    const [sessionId, setSessionId] = useState(null); // Quiz oturum kimliğini tutacak state
-    const [textAnswers, setTextAnswers] = useState({}); // Açık uçlu soru cevapları için state
+    const [sessionId, setSessionId] = useState(null); 
+    const [textAnswers, setTextAnswers] = useState({}); 
 
-    // Check authentication and redirect if not logged in
     useEffect(() => {
         if (!token) {
             setError('Lütfen önce giriş yapın.');
-            // navigate('/login', { state: { from: `/solve-quiz/${quizId}` } }); // Kullanıcıyı geri yönlendirmek için
-            navigate('/login'); // Basitçe login sayfasına yönlendir
+           
+            navigate('/login'); 
         }
-    }, [token, navigate, quizId]); // quizId'yi de ekledik
+    }, [token, navigate, quizId]); 
 
-    // Load quiz data and questions
     useEffect(() => {
-        // Token yoksa quiz yüklemeyi deneme, çünkü yetkisiz olacak.
         if (!token) {
             setLoading(false);
             return;
@@ -42,19 +39,14 @@ function SolveQuizPage() {
                 setLoading(true);
                 setError(null);
 
-                // 1. Start the quiz session and get all data at once
-                // axiosInstance global interceptor sayesinde token'ı otomatik ekleyecek.
                 const response = await axiosInstance.post(`/student/quiz-sessions/start/${quizId}`);
                 
                 const responseData = response.data;
                 
-                // Debug: Log the raw quiz data from the API
                 console.log('Raw response data from API:', responseData);
 
-                // Extract session data from the response
-                // The response has the format: { success: true, message: '...', session: { sessionId: X, quiz: {...} } }
                 const sessionData = responseData.data?.session || responseData.session;
-                // The session ID is in sessionData.sessionId, not sessionData.id
+                
                 const sessionId = sessionData?.sessionId || sessionData?.id;
                 const quizData = sessionData?.quiz;
                 
@@ -73,12 +65,9 @@ function SolveQuizPage() {
                 
                 setSessionId(sessionId);
                 
-                // 2. Show error if quiz is not active
                 if (!quizData.active) {
                     throw new Error('Bu quiz şu anda aktif değil.');
                 }
-
-                // 3. Check if quiz has questions
                 if (!quizData.questions || quizData.questions.length === 0) {
                     setQuiz({
                         ...quizData,
@@ -88,15 +77,12 @@ function SolveQuizPage() {
                     return;
                 }
 
-                // 4. Ensure questions have the correct structure for rendering
                 const processedQuestions = quizData.questions.map(question => {
-                    // Set default points if not provided
                     const questionWithPoints = {
                         ...question,
-                        points: question.points || 1 // Default to 1 point if not provided
+                        points: question.points || 1 
                     };
                     
-                    // Handle backend format differences (options vs answers)
                     if (!questionWithPoints.options && questionWithPoints.answers) {
                         questionWithPoints.options = questionWithPoints.answers;
                     }
@@ -104,7 +90,6 @@ function SolveQuizPage() {
                     return questionWithPoints;
                 });
 
-                // 5. Set the quiz data with processed questions
                 console.log('Processed quiz data:', {
                     ...quizData,
                     questions: processedQuestions
@@ -114,12 +99,11 @@ function SolveQuizPage() {
                     questions: processedQuestions
                 });
 
-                // 6. Set timer if quiz has a duration
                 if (quizData.durationMinutes) {
                     setTimeRemaining(quizData.durationMinutes * 60);
                     setQuizStartTime(new Date());
                 } else {
-                    setTimeRemaining(60 * 60); // Default 60 minutes if no duration
+                    setTimeRemaining(60 * 60); 
                     setQuizStartTime(new Date());
                 }
 
@@ -128,14 +112,8 @@ function SolveQuizPage() {
 
                 if (err.response?.status === 401) {
                     setError('Oturumunuz sona erdi veya yetkiniz yok. Lütfen tekrar giriş yapın.');
-                   /* navigate('/login', {
-                        state: {
-                            from: `/solve-quiz/${quizId}`,
-                            message: 'Oturumunuz sona erdi. Lütfen tekrar giriş yapın.'
-                        }
-                    });*/
+                   
                 } else if (err.response?.data) {
-                    // Handle case where response data might be an object with a message property
                     const errorData = err.response.data;
                     const errorMessage = typeof errorData === 'string' 
                         ? errorData 
@@ -158,21 +136,19 @@ function SolveQuizPage() {
             }
         };
 
-        // Eğer token varsa quiz verilerini yükle
         if (token) {
             loadQuizData();
         }
-    }, [quizId, token, navigate]); // token'ı da bağımlılık olarak ekledik
+    }, [quizId, token, navigate]); 
 
-    // Timer countdown effect
     useEffect(() => {
-        if (!timeRemaining || isSubmitted || !quizStartTime) return; // quizStartTime ekledik
+        if (!timeRemaining || isSubmitted || !quizStartTime) return; 
 
         const timer = setInterval(() => {
             setTimeRemaining(prevTime => {
                 if (prevTime <= 1) {
                     clearInterval(timer);
-                    handleSubmitQuiz(); // Auto-submit when time runs out
+                    handleSubmitQuiz(); 
                     return 0;
                 }
                 return prevTime - 1;
@@ -180,32 +156,28 @@ function SolveQuizPage() {
         }, 1000);
 
         return () => clearInterval(timer);
-    }, [timeRemaining, isSubmitted, quizStartTime]); // quizStartTime'ı da ekledik
+    }, [timeRemaining, isSubmitted, quizStartTime]); 
 
-    // Format time remaining as MM:SS
     const formatTime = (seconds) => {
         const mins = Math.floor(seconds / 60);
         const secs = seconds % 60;
         return `${mins}:${secs.toString().padStart(2, '0')}`;
     };
 
-    // Refresh token before submitting quiz (Güvenlik zafiyetini göz önünde bulundurarak!)
     const refreshToken = async () => {
         try {
-            const response = await axiosInstance.post('/auth/refresh-token'); // Interceptor token'ı ekleyecek
+            const response = await axiosInstance.post('/auth/refresh-token'); 
             localStorage.setItem('token', response.data.token);
             console.log('Token başarıyla yenilendi');
             return true;
         } catch (error) {
             console.error('Token yenileme hatası:', error);
-            // Burada kullanıcıyı login'e yönlendirmek en güvenlisi olabilir.
-            // localStorage'dan username/password alma kısmı SİLİNMELİ.
+           
             setError('Oturum yenileme başarısız. Lütfen tekrar giriş yapın.');
             return false;
         }
     };
 
-    // Handle quiz submission
     const handleSubmitQuiz = async () => {
         console.log('handleSubmitQuiz called');
         if (isSubmitted) {
@@ -223,13 +195,11 @@ function SolveQuizPage() {
             setIsSubmitted(true);
             setLoading(true);
             
-            // Prepare answers array with both multiple choice and open-ended answers
             const answers = [];
             
             console.log('Processing selectedAnswers:', selectedAnswers);
-            // Process multiple choice answers
             Object.entries(selectedAnswers).forEach(([questionId, optionId]) => {
-                if (optionId) { // Only add if there's a selected option
+                if (optionId) { 
                     answers.push({
                         questionId: parseInt(questionId),
                         selectedOptionIds: [parseInt(optionId)],
@@ -239,9 +209,7 @@ function SolveQuizPage() {
             });
             
             console.log('Processing textAnswers:', textAnswers);
-            // Process open-ended answers
             Object.entries(textAnswers).forEach(([questionId, textAnswer]) => {
-                // Only add if there's actual text and not already added as multiple choice
                 if (textAnswer && textAnswer.trim() !== '' && !answers.some(a => a.questionId === parseInt(questionId))) {
                     answers.push({
                         questionId: parseInt(questionId),
@@ -251,7 +219,6 @@ function SolveQuizPage() {
                 }
             });
             
-            // Prepare the request payload according to backend expectations
             const payload = {
                 quizSessionId: parseInt(sessionId),
                 answers: answers.map(answer => {
@@ -280,7 +247,6 @@ function SolveQuizPage() {
                 });
                 console.log('Response from server:', response.data);
                 
-                // If successful, navigate to quiz results list page
                 if (response.data) {
                     console.log('Quiz completed successfully, navigating to results list');
                     navigate('/quiz-results');
@@ -308,16 +274,14 @@ function SolveQuizPage() {
                     setError(errorMessage);
                 }
                 
-                // Eğer bir sonuç veya attemptId dönüyorsa, hata olsa bile sonuç sayfasına yönlendir
                 if (err.response?.data?.attemptId) {
                     console.log('Navigating to results page with attemptId:', err.response.data.attemptId);
                     navigate(`/quiz-results/${err.response.data.attemptId}`);
                 }
                 
-                // Allow retry on error
                 console.log('Allowing retry after error');
                 setIsSubmitted(false);
-                // Don't re-throw as it's already handled
+                
             }
             
         } catch (error) {
@@ -330,8 +294,7 @@ function SolveQuizPage() {
         }
     };
 
-    // Diğer render kısımları aynı kalabilir.
-    // ... (if (loading), if (error), if (isSubmitted && results), if (!quiz), if (quiz.hasNoQuestions) )
+    
 
     if (loading) {
         return (
@@ -416,7 +379,6 @@ function SolveQuizPage() {
         );
     }
 
-    // Quiz verilerini ve mevcut soruyu al
     const currentQuestion = quiz.questions[currentQuestionIndex];
     const totalQuestions = quiz.questions.length;
 
@@ -432,7 +394,6 @@ function SolveQuizPage() {
         }
     };
 
-    // Handle answer selection for multiple choice questions
     const handleAnswerSelect = (questionId, optionId) => {
         setSelectedAnswers(prev => ({
             ...prev,
@@ -440,7 +401,6 @@ function SolveQuizPage() {
         }));
     };
 
-    // Handle text input for open-ended questions
     const handleTextAnswerChange = (questionId, text) => {
         setTextAnswers(prev => ({
             ...prev,
@@ -453,7 +413,6 @@ function SolveQuizPage() {
     return (
         <div className="min-h-screen bg-gray-50 py-8 px-4">
             <div className="flex max-w-6xl mx-auto gap-6">
-                {/* Navigation Menu */}
                 <div className="w-64 flex-shrink-0">
                     <nav style={{ marginTop: '15px' }}>
                         <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
@@ -549,10 +508,8 @@ function SolveQuizPage() {
                     </nav>
                 </div>
     
-                {/* Quiz Content */}
                 <div className="flex-1">
                     <div className="bg-white rounded-xl shadow-md overflow-hidden">
-                        {/* Header */}
                         <div className="p-6 bg-gradient-to-r from-blue-500 to-blue-600 text-white">
                             <div className="flex flex-col space-y-4">
                                 <div className="flex justify-between items-start">
@@ -570,7 +527,6 @@ function SolveQuizPage() {
                                         )}
                                     </div>
     
-                                    {/* Timer Badge */}
                                     <div className="flex flex-col items-end gap-2">
                                         <div className="bg-white bg-opacity-20 backdrop-blur-sm rounded-lg p-3 text-center">
                                             <div className="text-xs text-blue-100 mb-1">KALAN SÜRE</div>
@@ -588,7 +544,6 @@ function SolveQuizPage() {
                                     </div>
                                 </div>
     
-                                {/* Question Progress */}
                                 <div className="flex items-center justify-between bg-white bg-opacity-10 p-3 rounded-lg">
                                     <div className="flex items-center space-x-4 w-full">
                                         <span className="bg-white bg-opacity-20 px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap">
@@ -608,7 +563,6 @@ function SolveQuizPage() {
                             </div>
                         </div>
     
-                        {/* Question */}
                         <div className="p-6">
                             {currentQuestion && (
                                 <>
@@ -637,9 +591,7 @@ function SolveQuizPage() {
                                         )}
                                     </div>
     
-                                    {/* Answer options section */}
                                     <div className="space-y-3 mb-8">
-                                        {/* Multiple choice question - Backend'den gelen soru tipini kontrol et */}
                                         {(currentQuestion.questionTypeId === 1 || currentQuestion.questionType === 'MULTIPLE_CHOICE') && currentQuestion.options && currentQuestion.options.map((option) => (
                                             <div
                                                 key={option.id}
@@ -662,7 +614,6 @@ function SolveQuizPage() {
                                             </div>
                                         ))}
     
-                                        {/* Open-ended question - Backend'den gelen soru tipini kontrol et */}
                                         {(currentQuestion.questionTypeId === 2 || currentQuestion.questionType === 'TEXT' || currentQuestion.questionType === 'OPEN_ENDED') && (
                                             <div className="p-3 border rounded-lg border-gray-200">
                                                 <textarea
@@ -676,7 +627,6 @@ function SolveQuizPage() {
                                         )}
                                     </div>
     
-                                    {/* Navigation buttons - Daha minimal ve modern butonlar */}
                                     <div className="flex justify-between mt-8">
                                         <button
                                             onClick={handlePreviousQuestion}

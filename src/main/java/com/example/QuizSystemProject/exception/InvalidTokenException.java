@@ -1,10 +1,9 @@
-package com.example.QuizSystemProject.exception; // Paket adınızın doğru olduğundan emin olun
+package com.example.QuizSystemProject.exception; 
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
-// Bu exception, geçersiz (veritabanında bulunmayan) bir token kullanıldığında fırlatılır.
-@ResponseStatus(HttpStatus.BAD_REQUEST) // HTTP 400 Bad Request yanıtı döndürür (İsteğin kendisi hatalı)
+@ResponseStatus(HttpStatus.BAD_REQUEST) 
 public class InvalidTokenException extends RuntimeException {
 
     public InvalidTokenException() {

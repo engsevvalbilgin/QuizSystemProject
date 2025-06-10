@@ -23,16 +23,17 @@ public class TeacherRegistrationController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<UserResponse> registerTeacher(@Valid @RequestBody TeacherRegistrationRequest registrationRequest) {
-        System.out.println("TeacherRegistrationController: Öğretmen kayıt isteği alındı - Email: " + registrationRequest.getEmail());
+    public ResponseEntity<UserResponse> registerTeacher(
+            @Valid @RequestBody TeacherRegistrationRequest registrationRequest) {
+        System.out.println("TeacherRegistrationController: Öğretmen kayıt isteği alındı - Email: "
+                + registrationRequest.getEmail());
 
-        // UserService'deki öğretmen kayıt metodunu çağır
         User registeredTeacher = userService.submitTeacherRegistration(registrationRequest);
 
-        // Kayıt başarılıysa 201 Created yanıtı döndür
         UserResponse userResponse = new UserResponse(registeredTeacher);
 
-        System.out.println("TeacherRegistrationController: Öğretmen kayıt başarılı - Kullanıcı ID: " + registeredTeacher.getId());
+        System.out.println(
+                "TeacherRegistrationController: Öğretmen kayıt başarılı - Kullanıcı ID: " + registeredTeacher.getId());
         return ResponseEntity.status(HttpStatus.CREATED).body(userResponse);
     }
 }

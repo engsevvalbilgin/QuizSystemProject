@@ -1,101 +1,85 @@
 package com.example.QuizSystemProject.Model;
 
- // Paket adınızın doğru olduğundan emin olun
+import jakarta.persistence.*; 
+import java.util.HashSet; 
+import java.util.Objects; 
+import java.util.Set; 
 
-import jakarta.persistence.*; // JPA anotasyonları için
-import java.util.HashSet; // Set kullanacağız, çünkü seçilen şıkların sırası veya tekrarı önemli değil
-import java.util.Objects; // equals/hashCode için
-import java.util.Set; // Set kullanacağız
-
-@Entity // Bu sınıfın bir JPA Entity'si olduğunu belirtir
-@Table(name = "answer_attempts") // Veritabanındaki tablonun adı 'answer_attempts' olacak
+@Entity 
+@Table(name = "answer_attempts") 
 public class AnswerAttempt {
 
-    @Id // Birincil anahtar
-    @GeneratedValue(strategy = GenerationType.IDENTITY) // Otomatik artan ID
-    private int id; // int tipinde ID
+    @Id 
+    @GeneratedValue(strategy = GenerationType.IDENTITY) 
+    private int id; 
 
-    // Bu cevap denemesinin hangi Quiz Oturumuna ait olduğunu belirten ilişki
-    // Sizin template'inizdeki 'takeQuizId' alanına karşılık gelir (TakeQuiz -> QuizSession oldu)
-    @ManyToOne // Bir cevap denemesinin SADECE bir oturumu olur, ama bir oturumun birden çok cevap denemesi olabilir (Çoğa-Bir ilişki)
-    @JoinColumn(name = "quiz_session_id", nullable = false) // Veritabanındaki yabancı anahtar sütununun adı 'quiz_session_id' olacak. Boş olamaz.
-    private QuizSession quizSession; // İlişkili QuizSession objesi
+    @ManyToOne 
+    @JoinColumn(name = "quiz_session_id", nullable = false) 
+    private QuizSession quizSession; 
 
-    // Bu cevap denemesinin hangi Soruya ait olduğunu belirten ilişki
-    // Sizin template'inizdeki 'questionId' alanına karşılık gelir
-    @ManyToOne // Bir cevap denemesinin SADECE bir sorusu olur, ama bir sorunun birden çok cevap denemesi olabilir (Çoğa-Bir ilişki)
-    @JoinColumn(name = "question_id", nullable = false) // Veritabanındaki yabancı anahtar sütununun adı 'question_id' olacak. Boş olamaz.
-    private Question question; // İlişkili Question objesi
+    @ManyToOne 
+    @JoinColumn(name = "question_id", nullable = false) 
+    private Question question; 
 
-    @Column(columnDefinition = "TEXT") // Boş olabilir (Çoktan seçmeli sorularda bu alan kullanılmayabilir)
-    private String submittedAnswerText; // Öğrencinin açık uçlu veya kısa cevaplı soruya verdiği metin cevabı (Sizin 'answer' / 'text' alanlarına karşılık gelir)
+    @Column(columnDefinition = "TEXT") 
+    private String submittedAnswerText; 
 
     
     
-    // Çoktan seçmeli sorularda öğrencinin seçtiği şıklar
-    // Sizin 'Answer.java' template'inizdeki 'selectedOptions' listesine karşılık gelir.
-    // Bir cevap denemesi, birden çok şık seçebilir (örn: çoklu doğru şıklı sorular)
-    // Bir şık, birden çok cevap denemesinde seçilebilir.
-    // Bu bir Çoktan-Çoğa (ManyToMany) ilişkisidir ve veritabanında ara bir tablo (join table) gerektirir.
-    @ManyToMany // Çoktan-Çoğa ilişki
-    @JoinTable( // İlişkiyi tutacak ara tabloyu tanımlar
-        name = "answer_attempt_selected_options", // Ara tablonun adı
-        joinColumns = @JoinColumn(name = "answer_attempt_id"), // Bu Entity'den (AnswerAttempt) ara tabloya giden sütun
-        inverseJoinColumns = @JoinColumn(name = "option_id") // Karşı Entity'den (Option) ara tabloya giden sütun
+    @ManyToMany 
+    @JoinTable(
+        name = "answer_attempt_selected_options", 
+        joinColumns = @JoinColumn(name = "answer_attempt_id"), 
+        inverseJoinColumns = @JoinColumn(name = "option_id") 
     )
-    private Set<Option> selectedOptions = new HashSet<>(); // Seçilen şıklar Set'i (Sıra önemli değil, tekrar olamaz)
+    private Set<Option> selectedOptions = new HashSet<>(); 
 
-    @Column(nullable = false) // Boş olamaz, varsayılan false
-    private boolean isCorrect = false; // Bu cevap denemesi doğru muydu? (Puanlama sonrası set edilecek)
+    @Column(nullable = false) 
+    private boolean isCorrect = false; 
     
-    @Column(nullable = false) // Boş olamaz, varsayılan 0
-    private int earnedPoints = 0; // Bu cevap denemesinden kazanılan puan
+    @Column(nullable = false) 
+    private int earnedPoints = 0; 
     
-    @Column(columnDefinition = "TEXT") // AI tarafından verilen açıklama (Açık uçlu sorular için)
-    private String aiExplanation; // AI tarafından yapılan değerlendirme açıklaması
+    @Column(columnDefinition = "TEXT") 
+    private String aiExplanation; 
     
     @Column
-    private Integer aiScore; // AI tarafından verilen puan
+    private Integer aiScore; 
 
-    // JPA için argümansız constructor
     public AnswerAttempt() {
-         this.selectedOptions = new HashSet<>(); // Set boş başlatılmalı
+         this.selectedOptions = new HashSet<>(); 
     }
 
-    // Temel alanları alan constructor (ID otomatik yönetilir)
-    // İlişkili objeler (quizSession, question) ve selectedOptions constructora dahil edilebilir veya sonradan set edilebilir
     public AnswerAttempt(QuizSession quizSession, Question question, String submittedAnswerText) {
-        this.quizSession = quizSession; // İlişki kurulacak
-        this.question = question; // İlişki kurulacak
-        this.submittedAnswerText = submittedAnswerText; // Metin cevabı
-        this.isCorrect = false; // Başlangıçta yanlış kabul edelim, puanlama Service'te yapılacak
-        this.selectedOptions = new HashSet<>(); // Set boş başlatılmalı
+        this.quizSession = quizSession; 
+        this.question = question; 
+        this.submittedAnswerText = submittedAnswerText; 
+        this.isCorrect = false; 
+        this.selectedOptions = new HashSet<>(); 
     }
-     // Çoktan seçmeli için constructor (Metin cevabı olmaz)
+    
     public AnswerAttempt(QuizSession quizSession, Question question, Set<Option> selectedOptions) {
-        this.quizSession = quizSession; // İlişki kurulacak
-        this.question = question; // İlişki kurulacak
-        this.submittedAnswerText = null; // Metin cevabı yok
-        this.isCorrect = false; // Başlangıçta yanlış kabul edelim
-        this.selectedOptions = selectedOptions != null ? selectedOptions : new HashSet<>(); // Set set edilecek
+        this.quizSession = quizSession; 
+        this.submittedAnswerText = null; 
+        this.isCorrect = false; 
+        this.selectedOptions = selectedOptions != null ? selectedOptions : new HashSet<>(); 
     }
 
 
-    // Getter ve Setter Metotları
     public int getId() { return id; }
-    public void setId(int id) { this.id = id; } // ID setter'ı genellikle kullanılmaz
+    public void setId(int id) { this.id = id; } 
 
     public QuizSession getQuizSession() { return quizSession; }
-    public void setQuizSession(QuizSession quizSession) { this.quizSession = quizSession; } // İlişkiyi set etmek için setter
+    public void setQuizSession(QuizSession quizSession) { this.quizSession = quizSession; } 
 
     public Question getQuestion() { return question; }
-    public void setQuestion(Question question) { this.question = question; } // İlişkiyi set etmek için setter
+    public void setQuestion(Question question) { this.question = question; } 
 
     public String getSubmittedAnswerText() { return submittedAnswerText; }
     public void setSubmittedAnswerText(String submittedAnswerText) { this.submittedAnswerText = submittedAnswerText; }
 
     public Set<Option> getSelectedOptions() { return selectedOptions; }
-    public void setSelectedOptions(Set<Option> selectedOptions) { this.selectedOptions = selectedOptions; } // İlişkiyi set etmek için setter
+    public void setSelectedOptions(Set<Option> selectedOptions) { this.selectedOptions = selectedOptions; } 
 
     public boolean isCorrect() { return isCorrect; }
     public void setCorrect(boolean correct) { isCorrect = correct; }
@@ -103,34 +87,28 @@ public class AnswerAttempt {
     public int getEarnedPoints() { return earnedPoints; }
     public void setEarnedPoints(int points) { this.earnedPoints = points; }
     
-    // AI değerlendirmesi için yeni getter ve setter metotları
     public String getAiExplanation() { return aiExplanation; }
     public void setAiExplanation(String aiExplanation) { this.aiExplanation = aiExplanation; }
     
     public Integer getAiScore() { return aiScore; }
     public void setAiScore(Integer aiScore) { this.aiScore = aiScore; }
     
-    // CompatibilityMethod: isCorrect metodu için uyumluluk
     public void setIsCorrect(boolean correct) { isCorrect = correct; }
     
-    // CompatibilityMethod: textAnswer metotları için uyumluluk
     public String getTextAnswer() { return submittedAnswerText; }
     public void setTextAnswer(String text) { this.submittedAnswerText = text; }
 
-    // Seçilen şık eklemek için yardımcı metot (ManyToMany ilişkisi için)
+    
     public void addSelectedOption(Option option) {
         this.selectedOptions.add(option);
-        // Not: ManyToMany ilişkilerde genellikle karşı tarafta (Option Entity'sinde) add metodu çağırmaya gerek yoktur,
-        // ilişki JoinTable tarafından yönetilir.
     }
 
-    // Seçilen şık çıkarmak için yardımcı metot
-     public void removeSelectedOption(Option option) {
+    public void removeSelectedOption(Option option) {
         this.selectedOptions.remove(option);
     }
 
 
-    // equals() ve hashCode() (ID üzerinden)
+    
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -144,7 +122,6 @@ public class AnswerAttempt {
         return Objects.hash(id);
     }
 
-    // toString() (Debugging için)
     @Override
     public String toString() {
         return "AnswerAttempt{" +
@@ -157,6 +134,4 @@ public class AnswerAttempt {
                '}';
     }
 
-    // --- NOT: Template kodlarınızdaki checkAnswer() metodu Entity sınıfına ait değil.
-    // --- Bu metot ve cevabın doğruluğunu kontrol etme/puanlama mantığı QuizSessionService sınıfında yer alacak.
 }

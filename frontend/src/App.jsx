@@ -1,12 +1,12 @@
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 
-// Layouts
+
 import MainLayout from './components/MainLayout';
 import ProtectedRoutes from './components/ProtectedRoutes';
 import AdminLayout from './components/AdminLayout';
 
-// Page Components
+
 import MainScreen from './pages/MainScreen.jsx';
 import LoginPage from './pages/LoginPage.jsx';
 import RegisterPage from './pages/RegisterPage.jsx';
@@ -36,7 +36,7 @@ import AdminAnnouncementsPage from './pages/AdminAnnouncementsPage.jsx';
 import TeacherAnnouncementsPage from './pages/TeacherAnnouncementsPage.jsx';
 import StudentAnnouncementsPage from './pages/StudentAnnouncementsPage.jsx';
 
-// Styles
+
 import './styles/teacher.css';
 import './styles/admin.css';
 
@@ -45,7 +45,7 @@ function App() {
     <div className="App">
       <Routes>
         <Route path="/" element={<MainLayout />}>
-          {/* Public Routes */}
+          
           <Route index element={<MainScreen />} />
           <Route path="login" element={<LoginPage />} />
           <Route path="register" element={<RegisterPage />} />
@@ -56,7 +56,7 @@ function App() {
           <Route path="reset-password" element={<PasswordResetPage />} />
           <Route path="logout" element={<LoginPage />} />
 
-          {/* Admin Routes */}
+          
           <Route element={<ProtectedRoutes requiredRoles={['ROLE_ADMIN']} />}>
             <Route path="admin" element={<AdminLayout />}>
               <Route index element={<AdminDashboardPage />} />
@@ -66,7 +66,7 @@ function App() {
             </Route>
           </Route>
 
-          {/* Student Routes */}
+          
           <Route element={<ProtectedRoutes requiredRoles={['ROLE_STUDENT']} />}>
             <Route path="student" element={<StudentPanel />} />
             <Route path="student/profile" element={<StudentProfilePage />} />
@@ -77,17 +77,17 @@ function App() {
             <Route path="quiz-results/:attemptId" element={<QuizResultsPage />} />
           </Route>
 
-          {/* Shared Routes */}
+          
           <Route element={<ProtectedRoutes requiredRoles={['ROLE_STUDENT', 'ROLE_TEACHER', 'ROLE_ADMIN']} />}>
             <Route path="leadership-table" element={<StudentLeadershipTablePage />} />
           </Route>
 
-          {/* Quiz Solving Route - Accessible at root level */}
+          
           <Route element={<ProtectedRoutes requiredRoles={['ROLE_STUDENT']} />}>
             <Route path="solve-quiz/:quizId" element={<SolveQuizPage />} />
           </Route>
 
-          {/* Teacher Routes */}
+       
           <Route element={<ProtectedRoutes requiredRoles={['ROLE_TEACHER']} />}>
             <Route path="teacher" element={<TeacherPanel />} />
             <Route path="teacher/profile" element={<TeacherProfilePage />} />

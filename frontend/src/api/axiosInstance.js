@@ -1,9 +1,7 @@
-// axiosInstance.js
 import axios from 'axios';
 
 const API_BASE_URL = 'http://localhost:8080';
 
-// Create Axios instance
 const axiosInstance = axios.create({
   baseURL: `${API_BASE_URL}/api`,
   withCredentials: true,
@@ -12,11 +10,9 @@ const axiosInstance = axios.create({
   },
 });
 
-// Token refresh state
 let isRefreshing = false;
 let failedQueue = [];
 
-// Process queued requests
 const processQueue = (error, token = null) => {
   const queue = [...failedQueue];
   failedQueue = [];
@@ -29,7 +25,6 @@ const processQueue = (error, token = null) => {
   });
 };
 
-// Endpoints that don't require authentication
 const NO_TOKEN_ENDPOINTS = [
   '/api/auth/login',
   '/api/auth/register',
@@ -43,7 +38,6 @@ const NO_TOKEN_ENDPOINTS = [
   '/api/auth/refresh-token'
 ];
 
-// Request interceptor
 axiosInstance.interceptors.request.use(
   (config) => {
     const requestUrl = config.url || '';
@@ -51,7 +45,6 @@ axiosInstance.interceptors.request.use(
       requestUrl.includes(endpoint)
     );
     
-    // Add token to request if needed
     if (!shouldSkipToken) {
       const token = localStorage.getItem('token');
       if (token) {
@@ -67,11 +60,9 @@ axiosInstance.interceptors.request.use(
 );
 
 export const setupAxiosInterceptors = (refreshTokenFn, logoutFn) => {
-    // Remove any existing interceptors to prevent duplicates
     axiosInstance.interceptors.response.eject(0);
     axiosInstance.interceptors.request.eject(0);
 
-    // Request interceptor to add auth token to requests
     axiosInstance.interceptors.request.use(
         (config) => {
             const requestUrl = config.url || '';
@@ -93,23 +84,19 @@ export const setupAxiosInterceptors = (refreshTokenFn, logoutFn) => {
         }
     );
 
-    // Response interceptor to handle token refresh
     const interceptor = axiosInstance.interceptors.response.use(
         (response) => response,
         async (error) => {
             const originalRequest = error.config;
             
-            // If error is not 401 or it's a refresh token request, reject
             if (error.response?.status !== 401 || 
                 originalRequest._retry ||
                 NO_TOKEN_ENDPOINTS.some(endpoint => originalRequest.url.includes(endpoint))) {
                 return Promise.reject(error);
             }
 
-            // Mark this request as a retry
             originalRequest._retry = true;
 
-            // If already refreshing, add to queue
             if (isRefreshing) {
                 return new Promise((resolve, reject) => {
                     const unsubscribe = () => {
@@ -130,17 +117,12 @@ export const setupAxiosInterceptors = (refreshTokenFn, logoutFn) => {
             try {
                 const newToken = await refreshTokenFn();
                 if (newToken) {
-                    // Update the original request with the new token
                     originalRequest.headers.Authorization = `Bearer ${newToken}`;
-                    
-                    // Process any queued requests with the new token
                     processQueue(null, newToken);
                     
-                    // Retry the original request
                     return axiosInstance(originalRequest);
                 }
                 
-                // If no new token, logout
                 throw new Error('No new token received');
             } catch (refreshError) {
                 console.error('Token refresh failed:', refreshError);

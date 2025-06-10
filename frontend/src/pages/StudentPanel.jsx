@@ -1,8 +1,7 @@
-// C:\Users\Hakan\Desktop\devam\front\QuizLandFrontend\src\pages\StudentPanel.jsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import axiosInstance from '../api/axiosInstance';
-import StudentLeadershipTablePage from './StudentLeadershipTablePage'; // Assuming this component exists
+import StudentLeadershipTablePage from './StudentLeadershipTablePage';
 
 function StudentPanel() {
     const [student, setStudent] = useState(null);
@@ -12,7 +11,6 @@ function StudentPanel() {
     const navigate = useNavigate();
     const location = useLocation();
 
-    // Check for quiz completion notification from navigation state
     useEffect(() => {
         if (location.state?.quizCompleted) {
             setNotification({
@@ -20,11 +18,9 @@ function StudentPanel() {
                 message: 'Quiz başarıyla tamamlandı!',
                 attemptId: location.state.attemptId
             });
-            // Clear the navigation state to prevent showing notification on refresh
-            // This is a common pattern to ensure notifications appear only once.
             navigate(location.pathname, { replace: true, state: {} });
         }
-    }, [location, navigate]); // Added navigate to dependency array
+    }, [location, navigate]); 
 
     useEffect(() => {
         const fetchStudentProfile = async () => {
@@ -53,7 +49,6 @@ function StudentPanel() {
         fetchStudentProfile();
     }, []);
 
-    // State to control leadership table visibility
     const [showLeadershipTable, setShowLeadershipTable] = useState(false);
 
     if (loading) {
@@ -83,7 +78,6 @@ function StudentPanel() {
     
     return (
         <div style={{ display: 'flex', minHeight: '100vh' }}>
-            {/* Sidebar */}
             <div style={{
                 width: '250px',
                 backgroundColor: '#f8f9fa',
@@ -207,13 +201,12 @@ function StudentPanel() {
                                 }}
                             >
                                 <span>📢</span>
-                                <span>Duyurular</span> {/* Added closing span for "Duyurular" */}
+                                <span>Duyurular</span>
                             </button>
                         </li>
                     </ul>
                 </nav>
             </div>
-            {/* Main Content Area */}
             <div style={{ flexGrow: 1, padding: '20px' }}>
                 {notification && (
                     <div className="mb-4 p-4 rounded" style={{ 
@@ -252,7 +245,6 @@ function StudentPanel() {
                 <h2>Hoş Geldiniz, {student.name} {student.surname}!</h2>
                 <p>Öğrenci panelinize hoş geldiniz. Sol menüden işlemlerinizi gerçekleştirebilirsiniz.</p>
 
-                {/* Leadership Table Container - Conditionally rendered */}
                 {showLeadershipTable && (
                     <div id="leadership-table-container" style={{
                         marginTop: '20px',

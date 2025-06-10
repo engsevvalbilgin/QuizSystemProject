@@ -4,9 +4,9 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import jakarta.validation.constraints.Min;
-import jakarta.validation.Valid; // Nested DTO doğrulama için
+import jakarta.validation.Valid;
 
-import java.util.List; // Liste importu
+import java.util.List;
 
 public class QuestionCreateRequest {
 
@@ -15,41 +15,70 @@ public class QuestionCreateRequest {
     private Integer number;
 
     @NotBlank(message = "Soru metni boş olamaz")
-    @Size(max = 5000, message = "Soru metni çok uzun") // Metin alanları için daha yüksek sınır
+    @Size(max = 5000, message = "Soru metni çok uzun")
     private String questionSentence;
 
-    @Size(max = 1000, message = "Doğru cevap metni çok uzun") // Opsiyonel, açık uçlu için
+    @Size(max = 1000, message = "Doğru cevap metni çok uzun")
     private String correctAnswerText;
 
     @NotNull(message = "Soru tipi ID'si boş olamaz")
-    private int questionTypeId; // İlişkili QuestionType ID'si
-    
+    private int questionTypeId;
+
     @NotNull(message = "Soru puanı boş olamaz")
     @Min(value = 1, message = "Soru puanı en az 1 olmalı")
-    private int points = 1; // Varsayılan puan değeri
+    private int points = 1;
 
-    // Çoktan seçmeli sorular için şık listesi
-    @Valid // Listedeki her OptionCreateRequest objesini de doğrula
-    private List<OptionCreateRequest> options; // İleride tanımlanacak OptionCreateRequest DTO'sunu kullanırız
+    @Valid
+    private List<OptionCreateRequest> options;
 
-    // Getter ve Setterlar
-    public QuestionCreateRequest() {}
+    public QuestionCreateRequest() {
+    }
 
-    public Integer getNumber() { return number; }
-    public void setNumber(Integer number) { this.number = number; }
+    public Integer getNumber() {
+        return number;
+    }
 
-    public String getQuestionSentence() { return questionSentence; }
-    public void setQuestionSentence(String questionSentence) { this.questionSentence = questionSentence; }
+    public void setNumber(Integer number) {
+        this.number = number;
+    }
 
-    public String getCorrectAnswerText() { return correctAnswerText; }
-    public void setCorrectAnswerText(String correctAnswerText) { this.correctAnswerText = correctAnswerText; }
+    public String getQuestionSentence() {
+        return questionSentence;
+    }
 
-    public int getQuestionTypeId() { return questionTypeId; }
-    public void setQuestionTypeId(int questionTypeId) { this.questionTypeId = questionTypeId; }
-    
-    public int getPoints() { return points; }
-    public void setPoints(int points) { this.points = points; }
+    public void setQuestionSentence(String questionSentence) {
+        this.questionSentence = questionSentence;
+    }
 
-    public List<OptionCreateRequest> getOptions() { return options; }
-    public void setOptions(List<OptionCreateRequest> options) { this.options = options; }
+    public String getCorrectAnswerText() {
+        return correctAnswerText;
+    }
+
+    public void setCorrectAnswerText(String correctAnswerText) {
+        this.correctAnswerText = correctAnswerText;
+    }
+
+    public int getQuestionTypeId() {
+        return questionTypeId;
+    }
+
+    public void setQuestionTypeId(int questionTypeId) {
+        this.questionTypeId = questionTypeId;
+    }
+
+    public int getPoints() {
+        return points;
+    }
+
+    public void setPoints(int points) {
+        this.points = points;
+    }
+
+    public List<OptionCreateRequest> getOptions() {
+        return options;
+    }
+
+    public void setOptions(List<OptionCreateRequest> options) {
+        this.options = options;
+    }
 }

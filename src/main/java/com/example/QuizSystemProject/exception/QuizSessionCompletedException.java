@@ -1,8 +1,5 @@
 package com.example.QuizSystemProject.exception;
 
-/**
- * Tamamlanmış bir quiz oturumunda işlem yapılmaya çalışıldığında fırlatılır
- */
 public class QuizSessionCompletedException extends RuntimeException {
     
     public QuizSessionCompletedException(String message) {

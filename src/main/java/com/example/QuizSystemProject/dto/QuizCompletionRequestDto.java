@@ -12,7 +12,6 @@ public class QuizCompletionRequestDto {
     @Data
     public static class StudentAnswerDto {
         private int questionId;
-        private int answerId;     // For multiple choice questions
-        private String textAnswer; // For open-ended questions
-    }
+        private int answerId;     
+        private String textAnswer;    }
 }

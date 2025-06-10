@@ -1,10 +1,9 @@
-package com.example.QuizSystemProject.exception; // Paket adınızın doğru olduğundan emin olun
+package com.example.QuizSystemProject.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
-// Bu exception, süresi dolmuş bir token kullanıldığında fırlatılır.
-@ResponseStatus(HttpStatus.BAD_REQUEST) // HTTP 400 Bad Request yanıtı döndürür
+@ResponseStatus(HttpStatus.BAD_REQUEST)
 public class ExpiredTokenException extends RuntimeException {
 
     public ExpiredTokenException() {
@@ -19,7 +18,7 @@ public class ExpiredTokenException extends RuntimeException {
         super(message, cause);
     }
 
-     public ExpiredTokenException(Throwable cause) {
-         super(cause);
-     }
+    public ExpiredTokenException(Throwable cause) {
+        super(cause);
+    }
 }

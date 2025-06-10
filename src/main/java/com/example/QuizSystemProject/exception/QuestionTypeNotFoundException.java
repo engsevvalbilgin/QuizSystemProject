@@ -3,7 +3,7 @@ package com.example.QuizSystemProject.exception;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
-@ResponseStatus(HttpStatus.NOT_FOUND) // HTTP 404 Not Found
+@ResponseStatus(HttpStatus.NOT_FOUND)
 public class QuestionTypeNotFoundException extends RuntimeException {
 
     public QuestionTypeNotFoundException() {
